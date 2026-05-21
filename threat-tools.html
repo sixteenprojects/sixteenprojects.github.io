@@ -10,187 +10,123 @@
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.10.0/css/all.min.css" rel="stylesheet">
   <link href="assets/dp/css/style.css" rel="stylesheet">
   <link rel="stylesheet" href="assets/brand.css">
-
   <style>
     body { font-family: 'Poppins', sans-serif; background: #f8f9fc; }
 
-    /* ── Page header ── */
     .page-hero {
       background: linear-gradient(135deg, #162447 0%, #0d1b33 100%);
-      color: white;
-      padding: 52px 0 44px;
+      color: white; padding: 52px 0 44px;
     }
     .page-hero h1 { font-size: 1.9rem; font-weight: 700; margin-bottom: 8px; }
     .page-hero p  { color: rgba(255,255,255,.6); font-size: .95rem; margin: 0; }
 
-    /* ── Featured tool (MITRE Mapper) ── */
     .featured-tool {
-      background: white;
-      border-radius: 16px;
+      background: white; border-radius: 16px;
       box-shadow: 0 6px 32px rgba(22,36,71,.1);
       border-top: 5px solid #162447;
-      padding: 32px 36px 28px;
-      margin: 36px 0 20px;
+      padding: 32px 36px 28px; margin: 36px 0 60px;
     }
     .featured-label {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      background: #162447;
-      color: white;
-      font-size: .72rem;
-      font-weight: 600;
-      padding: 4px 12px;
-      border-radius: 20px;
-      text-transform: uppercase;
-      letter-spacing: .5px;
-      margin-bottom: 14px;
+      display: inline-flex; align-items: center; gap: 6px;
+      background: #162447; color: white; font-size: .72rem; font-weight: 600;
+      padding: 4px 12px; border-radius: 20px; text-transform: uppercase;
+      letter-spacing: .5px; margin-bottom: 14px;
     }
     .featured-tool h2 { font-size: 1.3rem; font-weight: 700; color: #162447; margin-bottom: 6px; }
     .featured-tool .tool-desc { font-size: .88rem; color: #6b7280; margin-bottom: 20px; line-height: 1.6; }
-
-    /* status pill */
-    .status-pill {
-      display: inline-flex;
-      align-items: center;
-      gap: 7px;
-      font-size: .82rem;
-      font-weight: 500;
-      padding: 5px 13px;
-      border-radius: 20px;
-      margin-bottom: 18px;
-    }
-    .status-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
-    .status-checking { background: #fef3c7; color: #92400e; }
-    .status-checking .status-dot { background: #f59e0b; animation: blink 1s infinite; }
-    .status-online  { background: #d1fae5; color: #065f46; }
-    .status-online  .status-dot { background: #10b981; }
-    .status-offline { background: #fee2e2; color: #991b1b; }
-    .status-offline .status-dot { background: #ef4444; }
-    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.35} }
-
     .btn-launch {
       display: inline-flex; align-items: center; gap: 8px;
-      background: #162447; color: white;
-      padding: 10px 22px; border-radius: 8px;
-      font-size: .88rem; font-weight: 600;
-      text-decoration: none; border: none; cursor: pointer;
+      background: #162447; color: white; padding: 10px 22px; border-radius: 8px;
+      font-size: .88rem; font-weight: 600; text-decoration: none;
       transition: background .2s; margin-right: 8px;
     }
     .btn-launch:hover { background: #0d1b33; color: white; text-decoration: none; }
     .btn-outline-nav {
       display: inline-flex; align-items: center; gap: 7px;
-      background: transparent; color: #162447;
-      padding: 9px 20px; border-radius: 8px;
-      font-size: .85rem; font-weight: 500;
-      text-decoration: none; border: 2px solid #162447;
+      background: transparent; color: #162447; padding: 9px 20px; border-radius: 8px;
+      font-size: .85rem; font-weight: 500; text-decoration: none; border: 2px solid #162447;
       transition: all .2s;
     }
     .btn-outline-nav:hover { background: #162447; color: white; text-decoration: none; }
-
-    /* iframe embed */
-    .embed-wrap {
-      border-radius: 10px;
-      overflow: hidden;
-      border: 2px solid #1e3a5f;
-      background: #0d1b33;
-      margin-top: 24px;
-    }
-    .embed-wrap iframe { width: 100%; height: 640px; border: none; display: block; }
-    .embed-offline {
-      display: none;
-      padding: 56px 32px;
-      text-align: center;
-      color: rgba(255,255,255,.65);
-    }
-    .embed-offline .offline-icon { font-size: 2.8rem; opacity: .45; margin-bottom: 14px; }
-
-    /* feature tags */
     .tag-row { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 14px; }
     .tag {
-      background: #f0f4ff; border: 1px solid #c7d4f5;
-      color: #162447; font-size: .73rem;
-      padding: 3px 11px; border-radius: 20px; font-weight: 500;
+      background: #f0f4ff; border: 1px solid #c7d4f5; color: #162447;
+      font-size: .73rem; padding: 3px 11px; border-radius: 20px; font-weight: 500;
     }
 
-    /* ── Other tools section ── */
-    .section-label {
-      font-size: .78rem; font-weight: 700; color: #9ca3af;
-      text-transform: uppercase; letter-spacing: 1px;
-      margin-bottom: 18px; margin-top: 36px;
+    /* ── Embedded Tool Styles ── */
+    .tool-input-panel { background: #161b22; border-radius: 10px; padding: 16px; height: 100%; }
+    .field-label-dark {
+      font-size: .72rem; font-weight: 600; color: #7d8590;
+      text-transform: uppercase; letter-spacing: .5px; margin-bottom: 6px;
     }
+    .ttp-textarea {
+      width: 100%; background: #0d1117; border: 1px solid #21262d;
+      color: #e6edf3; padding: 10px; border-radius: 6px;
+      font-family: monospace; font-size: 12px; resize: vertical; min-height: 160px; line-height: 1.6;
+    }
+    .ttp-textarea:focus { outline: none; border-color: #388bfd; }
+    .preset-btn-dark {
+      display: block; width: 100%; text-align: left;
+      background: #21262d; border: none; color: #c9d1d9;
+      padding: 6px 10px; border-radius: 5px; font-size: .75rem;
+      cursor: pointer; margin-bottom: 3px; transition: background .15s;
+    }
+    .preset-btn-dark:hover { background: #30363d; }
+    .run-btn-dark {
+      width: 100%; background: #238636; border: none; color: #fff;
+      padding: 9px; border-radius: 6px; font-size: .88rem; font-weight: 500;
+      cursor: pointer; margin-top: 8px; transition: background .15s;
+    }
+    .run-btn-dark:hover { background: #2ea043; }
+    .run-btn-dark:disabled { background: #21262d; color: #7d8590; cursor: not-allowed; }
 
-    .tool-card {
-      background: white;
-      border-radius: 14px;
-      box-shadow: 0 3px 16px rgba(22,36,71,.08);
-      border-top: 3px solid #162447;
-      overflow: hidden;
-      height: 100%;
-      display: flex;
-      flex-direction: column;
-      transition: transform .2s, box-shadow .2s;
+    .tool-results-wrap {
+      background: #0d1117; border-radius: 10px; border: 2px solid #21262d;
+      padding: 20px; margin-top: 20px; color: #e6edf3;
     }
-    .tool-card:hover { transform: translateY(-4px); box-shadow: 0 8px 28px rgba(22,36,71,.14); }
-    .tool-card-img {
-      background: #f8f9fc;
-      padding: 24px;
-      text-align: center;
-      border-bottom: 1px solid #f0f0f0;
+    .tool-stat-row { display: grid; grid-template-columns: repeat(4,1fr); gap: 10px; margin-bottom: 14px; }
+    .tool-stat { background: #161b22; border: 1px solid #21262d; border-radius: 6px; padding: 10px; text-align: center; }
+    .tool-stat-n { font-size: 20px; font-weight: 600; }
+    .tool-stat-l { font-size: .68rem; color: #7d8590; margin-top: 2px; }
+    .tool-search-row { display: flex; gap: 8px; margin-bottom: 12px; align-items: center; }
+    .tool-search-row input, .tool-search-row select {
+      background: #161b22; border: 1px solid #21262d; color: #e6edf3;
+      padding: 5px 9px; border-radius: 5px; font-size: .78rem;
     }
-    .tool-card-img img { max-height: 110px; max-width: 100%; object-fit: contain; }
-    .tool-card-body { padding: 20px; flex: 1; }
-    .tool-card-body h6 { color: #162447; font-weight: 700; font-size: .92rem; margin-bottom: 6px; }
-    .tool-card-body p  { font-size: .78rem; color: #6b7280; margin: 0; line-height: 1.5; }
-    .tool-card-footer {
-      padding: 14px 20px;
-      background: #f8f9fc;
-      border-top: 1px solid #f0f0f0;
-      display: flex;
-      gap: 10px;
+    .tool-search-row input { flex: 1; }
+    .tool-table { width: 100%; border-collapse: collapse; font-size: .78rem; }
+    .tool-table th {
+      background: #161b22; color: #7d8590; font-weight: 500; font-size: .72rem;
+      padding: 7px 8px; text-align: left; border-bottom: 1px solid #21262d;
+      cursor: pointer; user-select: none; white-space: nowrap; position: sticky; top: 0;
     }
-    .tool-card-footer a {
-      flex: 1; text-align: center;
-      padding: 7px 0;
-      border-radius: 6px;
-      font-size: .8rem; font-weight: 600;
-      text-decoration: none;
-      transition: all .2s;
+    .tool-table th:hover { color: #e6edf3; }
+    .tool-table td { padding: 6px 8px; border-bottom: 1px solid #161b22; vertical-align: top; }
+    .tool-table tr:hover td { background: #161b22; }
+    .t-gid { font-family: monospace; color: #79c0ff; font-size: .75rem; }
+    .t-bar-wrap { display: flex; align-items: center; gap: 6px; }
+    .t-bar { height: 6px; border-radius: 3px; background: #21262d; width: 60px; overflow: hidden; flex-shrink: 0; }
+    .t-bar-fill { height: 100%; border-radius: 3px; }
+    .s-high { background: #238636; } .s-mid { background: #9e6a03; }
+    .s-low  { background: #da3633; } .s-none { background: #21262d; }
+    .t-score { font-size: .8rem; font-weight: 600; color: #c9d1d9; min-width: 36px; }
+    .t-pill {
+      display: inline-block; font-size: .68rem; padding: 1px 4px; border-radius: 3px;
+      margin: 1px; border: 1px solid #30363d; color: #8b949e; font-family: monospace;
     }
-    .btn-card-primary {
-      background: #162447; color: white !important;
+    .t-pill.hit { background: #0d2a0d; border-color: #238636; color: #3fb950; }
+    .tool-empty { text-align: center; padding: 40px 20px; color: #7d8590; }
+    .t-spinner {
+      display: inline-block; width: 14px; height: 14px; border: 2px solid #21262d;
+      border-top-color: #238636; border-radius: 50%;
+      animation: tspin .8s linear infinite; vertical-align: middle; margin-right: 6px;
     }
-    .btn-card-primary:hover { background: #0d1b33; }
-    .btn-card-outline {
-      border: 1.5px solid #162447; color: #162447 !important;
-    }
-    .btn-card-outline:hover { background: #162447; color: white !important; }
-
-    /* right sidebar instructions */
-    .steps-box {
-      background: white;
-      border-radius: 12px;
-      box-shadow: 0 2px 12px rgba(22,36,71,.08);
-      padding: 24px 28px;
-    }
-    .steps-box h6 { color: #162447; font-weight: 700; font-size: .92rem; margin-bottom: 16px; }
-    .step-row { display: flex; gap: 14px; margin-bottom: 12px; align-items: flex-start; }
-    .step-num {
-      width: 26px; height: 26px; border-radius: 50%;
-      background: #162447; color: white;
-      display: flex; align-items: center; justify-content: center;
-      font-size: .74rem; font-weight: 700; flex-shrink: 0;
-    }
-    .step-row p { margin: 0; font-size: .83rem; color: #374151; line-height: 1.55; }
-    .step-row code {
-      background: #f3f4f6; padding: 2px 7px;
-      border-radius: 4px; font-size: .79rem; color: #162447;
-    }
+    @keyframes tspin { to { transform: rotate(360deg); } }
   </style>
 </head>
 <body>
 
-  <!-- Navbar -->
   <header>
     <nav class="navbar navbar-expand-lg navbar-light bg-white sticky" data-offset="500">
       <div class="container">
@@ -215,7 +151,6 @@
     </nav>
   </header>
 
-  <!-- Hero -->
   <div class="page-hero">
     <div class="container">
       <h1><i class="fas fa-tools" style="font-size:1.5rem; margin-right:12px; opacity:.8;"></i>Threat Hunting Tools</h1>
@@ -223,66 +158,57 @@
     </div>
   </div>
 
-  <div class="container" style="padding-bottom: 60px;">
-
-    <!-- ════ FEATURED: MITRE Mapper ════ -->
+  <div class="container" style="padding-bottom:60px;">
     <div class="featured-tool">
       <div class="row">
+
+        <!-- Left: Info -->
         <div class="col-lg-8">
           <span class="featured-label"><i class="fas fa-star" style="font-size:.65rem;"></i> The Sixteen Project Tool</span>
           <h2>MITRE ATT&amp;CK TTP Overlap Mapper</h2>
           <p class="tool-desc">
-            Map your target TTPs against 178+ APT groups in the MITRE ATT&amp;CK framework and instantly identify the most likely threat actors based on TTP overlap scoring. Supports batch input, CSV/Excel/HTML export, and an interactive dashboard.
+            Map your target TTPs against 158 APT groups in the MITRE ATT&amp;CK framework and instantly identify the most likely threat actors based on TTP overlap scoring. Runs entirely in your browser — no installation needed.
           </p>
-
           <a href="https://github.com/sixteenprojects/mitre-ttp-mapper" target="_blank" rel="noopener noreferrer" class="btn-launch">
             <i class="fas fa-download"></i> Download from GitHub
           </a>
           <a href="mitre-mapper.html" class="btn-outline-nav">
-            <i class="fas fa-info-circle"></i> Tool Details
+            <i class="fas fa-expand-arrows-alt"></i> Full Page View
           </a>
-
           <div class="tag-row">
             <span class="tag">ATT&amp;CK Enterprise</span>
-            <span class="tag">178+ APT Groups</span>
+            <span class="tag">158 APT Groups</span>
             <span class="tag">TTP Overlap Scoring</span>
-            <span class="tag">Export CSV / Excel / HTML</span>
-            <span class="tag">CLI Support</span>
+            <span class="tag">Export CSV</span>
+            <span class="tag">Runs in Browser</span>
           </div>
         </div>
 
+        <!-- Right: Input Panel -->
         <div class="col-lg-4 mt-3 mt-lg-0">
-          <div class="steps-box">
-            <h6><i class="fas fa-terminal" style="margin-right:7px;"></i>How to Start</h6>
-            <div class="step-row">
-              <div class="step-num">1</div>
-              <p>Open terminal, navigate to:<br><code>sixteenproject\mitre_ttp_mapper</code></p>
-            </div>
-            <div class="step-row">
-              <div class="step-num">2</div>
-              <p>Run: <code>python app.py</code></p>
-            </div>
-            <div class="step-row">
-              <div class="step-num">3</div>
-              <p>Tool loads automatically, or click <strong>Open Full View</strong>.</p>
-            </div>
-            <div class="step-row">
-              <div class="step-num">4</div>
-              <p>Stop with <code>Ctrl+C</code>.</p>
-            </div>
+          <div class="tool-input-panel">
+            <div class="field-label-dark">Target TTPs</div>
+            <textarea class="ttp-textarea" id="ttp-input" placeholder="T1595.002&#10;T1190&#10;T1059.004&#10;T1505.003&#10;T1078"></textarea>
+            <div style="margin-top:8px; margin-bottom:4px;" class="field-label-dark">Presets</div>
+            <button class="preset-btn-dark" onclick="loadPreset('cve41940')">&#128203; CVE-2026-41940 (cPanel)</button>
+            <button class="preset-btn-dark" onclick="loadPreset('ransomware')">&#128274; Ransomware TTPs</button>
+            <button class="preset-btn-dark" onclick="loadPreset('espionage')">&#128373; Espionage TTPs</button>
+            <button class="preset-btn-dark" onclick="loadPreset('webshell')">&#127760; Web Shell TTPs</button>
+            <button class="run-btn-dark" id="run-btn" onclick="runAnalysis()">&#9654; Run Analysis</button>
           </div>
         </div>
       </div>
 
-      <!-- Download & run locally card -->
-      <div style="background:#f0f4ff; border:1px solid #c7d4f5; border-radius:10px; padding:20px 24px; margin-top:24px;">
-        <p style="margin:0; font-size:.88rem; color:#374151; line-height:1.7;">
-          <i class="fas fa-info-circle" style="color:#162447; margin-right:6px;"></i>
-          This tool runs as a local web server. Download from GitHub, then run <code style="background:#e8edf7; padding:2px 7px; border-radius:4px;">python app.py</code> to launch it on <code style="background:#e8edf7; padding:2px 7px; border-radius:4px;">localhost:5000</code>.
-        </p>
+      <!-- Results area -->
+      <div class="tool-results-wrap">
+        <div class="tool-empty" id="tool-empty">
+          <div style="font-size:2rem; margin-bottom:8px;">&#128269;</div>
+          <div style="font-weight:600; margin-bottom:6px;">Enter TTPs and click Run Analysis</div>
+          <div style="font-size:.8rem;"><span class="t-spinner"></span> Loading MITRE ATT&amp;CK data...</div>
+        </div>
+        <div id="tool-results" style="display:none;"></div>
       </div>
     </div>
-
   </div>
 
   <footer class="page-footer">
@@ -295,6 +221,172 @@
 
   <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
   <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.bundle.min.js"></script>
-  <script src="assets/lp/vendor/wow/wow.min.js"></script>
+  <script>
+    const PRESETS = {
+      cve41940:  `T1595.002\nT1190\nT1059.004\nT1505.003\nT1078\nT1070\nT1539\nT1552\nT1021\nT1005\nT1486\nT1657`,
+      ransomware:`T1486\nT1490\nT1489\nT1485\nT1078\nT1021\nT1047\nT1059.001\nT1562`,
+      espionage: `T1595\nT1190\nT1133\nT1078\nT1059\nT1505\nT1070\nT1027\nT1005\nT1041\nT1071`,
+      webshell:  `T1190\nT1505.003\nT1059.004\nT1059.001\nT1078\nT1070\nT1071\nT1041`,
+    };
+
+    let aptGroups = [], allResults = [], sortState = { col: 3, dir: -1 };
+
+    function normTTP(t) { return t.replace('/', '.').toUpperCase().trim(); }
+    function loadPreset(k) { document.getElementById('ttp-input').value = PRESETS[k]; }
+
+    function computeOverlap(ttps) {
+      const target = new Set(ttps.map(normTTP).filter(Boolean));
+      if (!target.size) return [];
+      const out = aptGroups.map(g => {
+        const gs = new Set(g.ttps);
+        const hits = [...target].filter(t => gs.has(t)).sort();
+        const miss = [...target].filter(t => !gs.has(t)).sort();
+        return {
+          rank: 0, group_id: g.id, group_name: g.name, aliases: g.aliases.join(', '),
+          score: hits.length, total: target.size,
+          pct: Math.round(hits.length / target.size * 1000) / 10,
+          matched_ttps: hits.join(', '), missing_ttps: miss.join(', '),
+        };
+      });
+      out.sort((a, b) => b.score - a.score || a.group_name.localeCompare(b.group_name));
+      out.forEach((r, i) => r.rank = i + 1);
+      return out;
+    }
+
+    function barClass(s, t) {
+      const p = s / t;
+      return p >= .75 ? 's-high' : p >= .4 ? 's-mid' : p > 0 ? 's-low' : 's-none';
+    }
+
+    function getFiltered() {
+      const q  = (document.getElementById('tool-search')?.value || '').toLowerCase();
+      const ms = parseInt(document.getElementById('tool-minscore')?.value || '0');
+      return allResults.filter(r =>
+        r.score >= ms &&
+        (!q || r.group_name.toLowerCase().includes(q) || r.group_id.toLowerCase().includes(q) ||
+         r.aliases.toLowerCase().includes(q) || r.matched_ttps.toLowerCase().includes(q))
+      );
+    }
+
+    function renderRows(rows) {
+      const total = allResults[0]?.total || 1;
+      const tbody = document.getElementById('tool-tbody');
+      if (!tbody) return;
+      tbody.innerHTML = rows.map(r => `
+        <tr>
+          <td style="color:#7d8590;text-align:center;width:36px">${r.rank}</td>
+          <td><span class="t-gid">${r.group_id}</span></td>
+          <td>
+            <div style="font-weight:600;font-size:.82rem;">${r.group_name}</div>
+            <div style="font-size:.7rem;color:#7d8590;">${r.aliases}</div>
+          </td>
+          <td>
+            <div class="t-bar-wrap">
+              <div class="t-bar"><div class="t-bar-fill ${barClass(r.score,total)}" style="width:${Math.round(r.score/total*100)}%"></div></div>
+              <span class="t-score">${r.score}/${total}</span>
+            </div>
+          </td>
+          <td>${r.matched_ttps ? r.matched_ttps.split(', ').map(t=>`<span class="t-pill hit">${t}</span>`).join('') : '<span style="color:#7d8590">—</span>'}</td>
+          <td>${r.missing_ttps ? r.missing_ttps.split(', ').map(t=>`<span class="t-pill">${t}</span>`).join('') : ''}</td>
+        </tr>`).join('');
+    }
+
+    function filterTable() { renderRows(getFiltered()); }
+
+    function sortTable(col) {
+      if (sortState.col === col) sortState.dir *= -1;
+      else { sortState.col = col; sortState.dir = -1; }
+      const keys = ['rank','group_id','group_name','score'];
+      allResults.sort((a,b) => {
+        let av = a[keys[col]], bv = b[keys[col]];
+        return (typeof av === 'number' ? av-bv : String(av).localeCompare(String(bv))) * sortState.dir;
+      });
+      filterTable();
+    }
+
+    function exportCSV() {
+      if (!allResults.length) return;
+      const rows = [['Rank','Group ID','Group Name','Aliases','Score','Pct%','Matched TTPs','Missing TTPs']];
+      allResults.forEach(r => rows.push([r.rank,r.group_id,r.group_name,r.aliases,r.score,r.pct,r.matched_ttps,r.missing_ttps]));
+      const csv = rows.map(r => r.map(v => '"'+String(v).replace(/"/g,'""')+'"').join(',')).join('\n');
+      const a = document.createElement('a');
+      a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv);
+      a.download = 'mitre_ttp_overlap.csv'; a.click();
+    }
+
+    function runAnalysis() {
+      const raw  = document.getElementById('ttp-input').value;
+      const ttps = raw.split('\n').map(l => l.split('#')[0].trim()).filter(Boolean);
+      if (!ttps.length) { alert('Enter at least one TTP!'); return; }
+      if (!aptGroups.length) { alert('Data is still loading, please wait.'); return; }
+      const btn = document.getElementById('run-btn');
+      btn.disabled = true; btn.textContent = 'Analyzing...';
+      setTimeout(() => {
+        allResults = computeOverlap(ttps);
+        sortState = { col: 3, dir: -1 };
+        renderResultsSection(ttps);
+        btn.disabled = false; btn.innerHTML = '&#9654; Run Analysis';
+      }, 10);
+    }
+
+    function renderResultsSection(targetTTPs) {
+      const total = targetTTPs.length;
+      const pct50 = allResults.filter(r => r.pct >= 50).length;
+      const pct75 = allResults.filter(r => r.pct >= 75).length;
+      const tags  = targetTTPs.map(normTTP).map(t =>
+        `<span style="display:inline-block;background:#1f2d3d;color:#79c0ff;font-size:.72rem;padding:1px 7px;border-radius:3px;margin:2px;font-family:monospace;">${t}</span>`
+      ).join('');
+
+      document.getElementById('tool-empty').style.display = 'none';
+      const res = document.getElementById('tool-results');
+      res.style.display = 'block';
+      res.innerHTML = `
+        <div style="margin-bottom:12px;">${tags}</div>
+        <div class="tool-stat-row">
+          <div class="tool-stat"><div class="tool-stat-n">${total}</div><div class="tool-stat-l">Target TTPs</div></div>
+          <div class="tool-stat"><div class="tool-stat-n">${aptGroups.length}</div><div class="tool-stat-l">Groups Analyzed</div></div>
+          <div class="tool-stat"><div class="tool-stat-n" style="color:#fbbf24">${pct50}</div><div class="tool-stat-l">≥ 50% Overlap</div></div>
+          <div class="tool-stat"><div class="tool-stat-n" style="color:#f87171">${pct75}</div><div class="tool-stat-l">≥ 75% Overlap</div></div>
+        </div>
+        <div class="tool-search-row">
+          <input type="text" id="tool-search" placeholder="Search group / ID / TTP..." oninput="filterTable()">
+          <select id="tool-minscore" onchange="filterTable()">
+            <option value="0">All scores</option>
+            <option value="1">≥ 1</option><option value="3">≥ 3</option>
+            <option value="5">≥ 5</option><option value="7">≥ 7</option>
+          </select>
+          <button onclick="exportCSV()" style="background:#21262d;border:none;color:#c9d1d9;padding:5px 12px;border-radius:5px;font-size:.78rem;cursor:pointer;">Export CSV</button>
+        </div>
+        <div style="overflow-x:auto; max-height:500px; overflow-y:auto;">
+          <table class="tool-table">
+            <thead><tr>
+              <th onclick="sortTable(0)"># ↕</th>
+              <th onclick="sortTable(1)">ID ↕</th>
+              <th onclick="sortTable(2)">Group ↕</th>
+              <th onclick="sortTable(3)">Score ↕</th>
+              <th>Matched TTPs</th>
+              <th>Missing TTPs</th>
+            </tr></thead>
+            <tbody id="tool-tbody"></tbody>
+          </table>
+        </div>`;
+      filterTable();
+    }
+
+    fetch('data/apt_groups.json')
+      .then(r => r.json())
+      .then(data => {
+        aptGroups = data;
+        aptGroups.forEach(g => g.ttps = g.ttps.map(normTTP));
+        document.getElementById('tool-empty').innerHTML = `
+          <div style="font-size:2rem;margin-bottom:8px;">&#128269;</div>
+          <div style="font-weight:600;margin-bottom:4px;">Enter TTPs and click Run Analysis</div>
+          <div style="font-size:.8rem;">Data loaded: ${aptGroups.length} APT groups from MITRE ATT&amp;CK. Runs entirely in your browser.</div>`;
+      })
+      .catch(() => {
+        document.getElementById('tool-empty').innerHTML =
+          '<div style="color:#f87171;padding:20px;">Failed to load MITRE data. Please refresh.</div>';
+      });
+  </script>
 </body>
 </html>

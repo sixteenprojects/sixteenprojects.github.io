@@ -10,116 +10,154 @@
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.10.0/css/all.min.css" rel="stylesheet">
   <link href="assets/dp/css/style.css" rel="stylesheet">
   <link rel="stylesheet" href="assets/brand.css">
-
   <style>
-    body { font-family: 'Poppins', sans-serif; background: #f8f9fc; }
+    * { box-sizing: border-box; }
+    body { font-family: 'Poppins', sans-serif; background: #0d1117; color: #e6edf3; margin: 0; }
 
-    .tool-header {
-      background: linear-gradient(135deg, #162447 0%, #0d1b33 100%);
-      color: white;
-      padding: 40px 0 32px;
-    }
-    .tool-header h1 { font-size: 1.6rem; font-weight: 700; margin-bottom: 6px; }
-    .tool-header p { color: rgba(255,255,255,.65); font-size: .92rem; margin: 0; }
-    .tool-header .badge-tag {
-      display: inline-block;
-      background: rgba(255,255,255,.12);
-      border: 1px solid rgba(255,255,255,.2);
-      color: rgba(255,255,255,.85);
-      font-size: .72rem;
-      padding: 3px 10px;
-      border-radius: 20px;
-      margin-bottom: 14px;
-      text-transform: uppercase;
-      letter-spacing: .5px;
-    }
+    /* ── Navbar override for dark page ── */
+    nav.navbar { background: #161b22 !important; border-bottom: 1px solid #21262d; }
+    nav.navbar .navbar-brand span { color: #e6edf3 !important; }
+    nav.navbar .nav-link { color: rgba(255,255,255,.65) !important; }
+    nav.navbar .nav-link:hover,
+    nav.navbar .nav-link.active-page { color: #fff !important; }
 
-    .launch-section {
-      background: white;
-      border-radius: 14px;
-      box-shadow: 0 4px 24px rgba(22,36,71,.1);
-      padding: 36px;
-      margin: 28px 0;
-      border-top: 4px solid #162447;
-    }
-
-    .btn-launch {
-      display: inline-flex;
-      align-items: center;
-      gap: 10px;
-      background: #162447;
-      color: white;
-      padding: 12px 28px;
-      border-radius: 8px;
-      font-size: .95rem;
-      font-weight: 600;
-      text-decoration: none;
-      border: none;
-      cursor: pointer;
-      transition: background .2s;
-      margin-right: 10px;
-    }
-    .btn-launch:hover { background: #0d1b33; color: white; text-decoration: none; }
-    .btn-secondary-outline {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      background: transparent;
-      color: #162447;
-      padding: 11px 24px;
-      border-radius: 8px;
-      font-size: .9rem;
-      font-weight: 500;
-      text-decoration: none;
-      border: 2px solid #162447;
-      transition: all .2s;
-    }
-    .btn-secondary-outline:hover { background: #162447; color: white; text-decoration: none; }
-
-    /* How to start steps */
-    .steps-card {
-      background: white;
-      border-radius: 12px;
-      box-shadow: 0 2px 12px rgba(22,36,71,.08);
-      padding: 28px 32px;
-      margin-top: 20px;
-    }
-    .steps-card h5 { color: #162447; font-weight: 700; margin-bottom: 18px; font-size: 1rem; }
-    .step-item {
+    /* ── Tool header bar ── */
+    .tool-topbar {
+      background: #161b22;
+      border-bottom: 1px solid #21262d;
+      padding: 10px 24px;
       display: flex;
-      gap: 16px;
-      margin-bottom: 14px;
-      align-items: flex-start;
+      align-items: center;
+      gap: 14px;
+      flex-wrap: wrap;
     }
-    .step-num {
-      width: 28px; height: 28px;
-      border-radius: 50%;
-      background: #162447;
-      color: white;
-      display: flex; align-items: center; justify-content: center;
-      font-size: .78rem; font-weight: 700;
-      flex-shrink: 0;
+    .tool-topbar a.back-link {
+      color: rgba(255,255,255,.45); font-size: .82rem; text-decoration: none;
     }
-    .step-item p { margin: 0; font-size: .88rem; color: #374151; line-height: 1.6; }
-    .step-item code {
-      background: #f3f4f6;
-      padding: 2px 8px;
-      border-radius: 4px;
-      font-size: .82rem;
-      color: #162447;
-      font-family: monospace;
+    .tool-topbar a.back-link:hover { color: rgba(255,255,255,.8); }
+    .tool-topbar h1 { font-size: .95rem; font-weight: 600; margin: 0; }
+    .ver-badge {
+      background: #21262d; color: #7d8590; font-size: .7rem;
+      padding: 2px 8px; border-radius: 4px;
+    }
+    .gh-link {
+      margin-left: auto;
+      display: inline-flex; align-items: center; gap: 6px;
+      background: #21262d; border: 1px solid #30363d; color: #c9d1d9;
+      padding: 5px 12px; border-radius: 6px; font-size: .78rem; text-decoration: none;
+      transition: background .15s;
+    }
+    .gh-link:hover { background: #30363d; color: #e6edf3; text-decoration: none; }
+
+    /* ── Two-panel layout ── */
+    .tool-layout {
+      display: grid;
+      grid-template-columns: 300px 1fr;
+      height: calc(100vh - 114px); /* minus navbar + topbar */
     }
 
-    /* Feature tags -->*/
-    .feature-tags { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 20px; }
-    .feature-tag {
-      background: #f0f4ff;
-      border: 1px solid #c7d4f5;
-      color: #162447;
-      font-size: .75rem;
-      padding: 4px 12px;
-      border-radius: 20px;
-      font-weight: 500;
+    /* ── Sidebar ── */
+    .sidebar {
+      background: #161b22;
+      border-right: 1px solid #21262d;
+      padding: 16px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+    .field-label {
+      font-size: .7rem; font-weight: 600; color: #7d8590;
+      text-transform: uppercase; letter-spacing: .5px; margin-bottom: 6px;
+    }
+    .ttp-textarea {
+      width: 100%; background: #0d1117; border: 1px solid #21262d;
+      color: #e6edf3; padding: 10px; border-radius: 6px;
+      font-family: monospace; font-size: 12px; resize: vertical;
+      min-height: 200px; line-height: 1.7;
+    }
+    .ttp-textarea:focus { outline: none; border-color: #388bfd; }
+    .presets-wrap { margin: 10px 0; }
+    .preset-btn {
+      display: block; width: 100%; text-align: left;
+      background: #21262d; border: none; color: #c9d1d9;
+      padding: 7px 10px; border-radius: 5px; font-size: .75rem;
+      cursor: pointer; margin-bottom: 4px; transition: background .15s;
+    }
+    .preset-btn:hover { background: #30363d; }
+    .run-btn {
+      width: 100%; background: #238636; border: none; color: #fff;
+      padding: 10px; border-radius: 6px; font-size: .9rem; font-weight: 500;
+      cursor: pointer; transition: background .15s; margin-top: 4px;
+    }
+    .run-btn:hover { background: #2ea043; }
+    .run-btn:disabled { background: #21262d; color: #7d8590; cursor: not-allowed; }
+    .divider { height: 1px; background: #21262d; margin: 14px 0; }
+    .export-row { display: flex; gap: 6px; }
+    .exp-btn {
+      flex: 1; background: #21262d; border: none; color: #c9d1d9;
+      padding: 7px; border-radius: 5px; font-size: .75rem; cursor: pointer; transition: background .15s;
+    }
+    .exp-btn:hover { background: #30363d; color: #e6edf3; }
+    .status-box {
+      margin-top: 10px; background: #1a2332; border: 1px solid #1d4b8a;
+      border-radius: 6px; padding: 8px 10px; font-size: .78rem; color: #7db8f7;
+    }
+
+    /* ── Main content ── */
+    .main-content { padding: 20px; overflow-y: auto; }
+    .empty-state { text-align: center; padding: 80px 40px; color: #7d8590; }
+    .empty-state .icon { font-size: 3rem; margin-bottom: 12px; opacity: .4; }
+
+    .stat-row { display: grid; grid-template-columns: repeat(4,1fr); gap: 10px; margin-bottom: 16px; }
+    .stat { background: #161b22; border: 1px solid #21262d; border-radius: 8px; padding: 12px; text-align: center; }
+    .stat-n { font-size: 24px; font-weight: 600; }
+    .stat-l { font-size: .68rem; color: #7d8590; margin-top: 3px; }
+
+    .search-row { display: flex; gap: 8px; margin-bottom: 12px; align-items: center; flex-wrap: wrap; }
+    .search-row input, .search-row select {
+      background: #161b22; border: 1px solid #21262d; color: #e6edf3;
+      padding: 6px 10px; border-radius: 5px; font-size: .8rem;
+    }
+    .search-row input { flex: 1; min-width: 200px; }
+
+    table { width: 100%; border-collapse: collapse; font-size: .8rem; }
+    th {
+      background: #161b22; color: #7d8590; font-weight: 500; font-size: .72rem;
+      padding: 8px 10px; text-align: left; border-bottom: 1px solid #21262d;
+      cursor: pointer; user-select: none; white-space: nowrap; position: sticky; top: 0;
+    }
+    th:hover { color: #e6edf3; }
+    td { padding: 7px 10px; border-bottom: 1px solid #161b22; vertical-align: top; }
+    tr:hover td { background: #161b22; }
+    .gid { font-family: monospace; color: #79c0ff; font-size: .76rem; }
+    .bar-wrap { display: flex; align-items: center; gap: 8px; }
+    .bar { height: 8px; border-radius: 4px; background: #21262d; width: 72px; overflow: hidden; flex-shrink: 0; }
+    .bar-fill { height: 100%; border-radius: 4px; }
+    .s-high { background: #238636; } .s-mid { background: #9e6a03; }
+    .s-low  { background: #da3633; } .s-none { background: #21262d; }
+    .score-num { font-size: .82rem; font-weight: 600; color: #c9d1d9; min-width: 40px; }
+    .pill {
+      display: inline-block; font-size: .7rem; padding: 1px 5px; border-radius: 3px;
+      margin: 1px; border: 1px solid #30363d; color: #8b949e; font-family: monospace;
+    }
+    .pill.hit { background: #0d2a0d; border-color: #238636; color: #3fb950; }
+    .ttp-tag {
+      display: inline-block; background: #1f2d3d; color: #79c0ff;
+      font-size: .72rem; padding: 1px 7px; border-radius: 3px; margin: 2px; font-family: monospace;
+    }
+    .spinner {
+      display: inline-block; width: 14px; height: 14px; border: 2px solid #21262d;
+      border-top-color: #238636; border-radius: 50%;
+      animation: spin .8s linear infinite; vertical-align: middle; margin-right: 6px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .tool-layout { grid-template-columns: 1fr; height: auto; }
+      .sidebar { max-height: 50vh; }
+      .stat-row { grid-template-columns: repeat(2, 1fr); }
     }
   </style>
 </head>
@@ -127,13 +165,13 @@
 
   <!-- Navbar -->
   <header>
-    <nav class="navbar navbar-expand-lg navbar-light bg-white sticky" data-offset="500">
+    <nav class="navbar navbar-expand-lg sticky" data-offset="0">
       <div class="container">
         <a href="index.html" class="navbar-brand d-flex align-items-center gap-2">
-          <img src="assets/lp/img/logo_main.jpg" alt="The Sixteen Project Logo" style="height:44px; border-radius:6px;">
-          <span style="color:#162447; font-weight:700; font-size:15px; letter-spacing:.5px;">THE SIXTEEN PROJECT</span>
+          <img src="assets/lp/img/logo_main.jpg" alt="The Sixteen Project Logo" style="height:40px; border-radius:6px;">
+          <span style="font-weight:700; font-size:14px; letter-spacing:.5px;">THE SIXTEEN PROJECT</span>
         </a>
-        <button class="navbar-toggler" data-toggle="collapse" data-target="#navbarContent" aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
+        <button class="navbar-toggler" data-toggle="collapse" data-target="#navbarContent">
           <span class="navbar-toggler-icon"></span>
         </button>
         <div class="navbar-collapse collapse" id="navbarContent">
@@ -150,105 +188,252 @@
     </nav>
   </header>
 
-  <!-- Tool Header -->
-  <div class="tool-header">
-    <div class="container">
-      <a href="threat-tools.html" style="color:rgba(255,255,255,.55); font-size:.85rem; text-decoration:none;">
-        &#8592; Back to Threat Hunting Tools
-      </a>
-      <div style="margin-top:16px;">
-        <span class="badge-tag">The Sixteen Project Tool</span>
-        <h1>MITRE ATT&amp;CK TTP Overlap Mapper</h1>
-        <p>Map your target TTPs against 178+ APT groups in the MITRE ATT&amp;CK framework and identify the most likely threat actors.</p>
-        <div class="feature-tags">
-          <span class="feature-tag">ATT&amp;CK Enterprise</span>
-          <span class="feature-tag">178+ APT Groups</span>
-          <span class="feature-tag">TTP Overlap Scoring</span>
-          <span class="feature-tag">Export CSV / Excel / HTML</span>
-          <span class="feature-tag">Interactive Dashboard</span>
-        </div>
-      </div>
-    </div>
+  <!-- Top bar -->
+  <div class="tool-topbar">
+    <a href="threat-tools.html" class="back-link"><i class="fas fa-arrow-left" style="margin-right:5px;"></i>Back</a>
+    <h1>&#128737; MITRE ATT&amp;CK TTP Overlap Mapper</h1>
+    <span class="ver-badge">v2.0 — Browser</span>
+    <span class="ver-badge" id="data-badge"><span class="spinner"></span> Loading data...</span>
+    <a href="https://github.com/sixteenprojects/mitre-ttp-mapper" target="_blank" rel="noopener noreferrer" class="gh-link">
+      <i class="fab fa-github"></i> Download CLI Version
+    </a>
   </div>
 
-  <div class="container" style="padding-top:32px; padding-bottom:40px;">
-    <div class="row">
-      <div class="col-lg-8">
+  <!-- Tool layout -->
+  <div class="tool-layout">
 
-        <!-- Launch section -->
-        <div class="launch-section">
-          <div style="margin-bottom:24px;">
-            <a href="https://github.com/sixteenprojects/mitre-ttp-mapper" target="_blank" rel="noopener noreferrer" class="btn-launch">
-              <i class="fas fa-download"></i> Download from GitHub
-            </a>
-          </div>
+    <!-- Sidebar -->
+    <div class="sidebar">
+      <div class="field-label">Target TTPs</div>
+      <textarea class="ttp-textarea" id="ttp-input"
+        placeholder="T1595.002&#10;T1190&#10;T1059.004&#10;T1505.003&#10;T1078&#10;T1070&#10;T1539&#10;T1552&#10;T1021&#10;T1005&#10;T1486&#10;T1657"></textarea>
 
-          <div style="background:#f0f4ff; border:1px solid #c7d4f5; border-radius:10px; padding:18px 22px;">
-            <p style="margin:0; font-size:.88rem; color:#374151; line-height:1.7;">
-              <i class="fas fa-info-circle" style="color:#162447; margin-right:6px;"></i>
-              This tool runs as a local web server. After downloading, install the dependencies and run <code style="background:#e8edf7; padding:2px 7px; border-radius:4px;">python app.py</code> to launch it on <code style="background:#e8edf7; padding:2px 7px; border-radius:4px;">localhost:5000</code>.
-            </p>
-          </div>
-        </div>
-
+      <div class="presets-wrap">
+        <div class="field-label" style="margin-bottom:6px;">Presets</div>
+        <button class="preset-btn" onclick="loadPreset('cve41940')">&#128203; CVE-2026-41940 (cPanel)</button>
+        <button class="preset-btn" onclick="loadPreset('ransomware')">&#128274; Ransomware TTPs</button>
+        <button class="preset-btn" onclick="loadPreset('espionage')">&#128373; Espionage TTPs</button>
+        <button class="preset-btn" onclick="loadPreset('webshell')">&#127760; Web Shell TTPs</button>
       </div>
 
-      <div class="col-lg-4">
+      <button class="run-btn" id="run-btn" onclick="runAnalysis()">&#9654; Run Analysis</button>
 
-        <!-- How to start -->
-        <div class="steps-card">
-          <h5><i class="fas fa-terminal" style="color:#162447; margin-right:8px;"></i>How to Start the Tool</h5>
-
-          <div class="step-item">
-            <div class="step-num">1</div>
-            <p>Open a terminal and navigate to the tool folder:<br>
-            <code>cd sixteenproject\mitre_ttp_mapper</code></p>
-          </div>
-          <div class="step-item">
-            <div class="step-num">2</div>
-            <p>Run the web server:<br>
-            <code>python app.py</code></p>
-          </div>
-          <div class="step-item">
-            <div class="step-num">3</div>
-            <p>The browser will open automatically at <code>localhost:5000</code>, or click <strong>Launch Tool</strong> above.</p>
-          </div>
-          <div class="step-item">
-            <div class="step-num">4</div>
-            <p>To stop the server, press <code>Ctrl+C</code> in the terminal.</p>
-          </div>
-        </div>
-
-        <!-- CLI usage -->
-        <div class="steps-card" style="margin-top:16px;">
-          <h5><i class="fas fa-code" style="color:#162447; margin-right:8px;"></i>CLI Usage</h5>
-          <p style="font-size:.83rem; color:#6b7280; margin-bottom:12px;">Run directly from command line for batch analysis:</p>
-          <pre style="background:#0d1b33; color:#90cdf4; padding:14px; border-radius:8px; font-size:.78rem; overflow-x:auto; margin:0; line-height:1.7;">python mitre_ttp_mapper.py \
-  --ttps-file ttps_cve-2026-41940.txt
-
-python mitre_ttp_mapper.py \
-  --ttps T1190 T1059.004 T1505.003 \
-  --top 20
-
-python mitre_ttp_mapper.py \
-  --ttps-file ttps.txt \
-  --force-update</pre>
-        </div>
-
+      <div class="divider"></div>
+      <div class="field-label">Export</div>
+      <div class="export-row">
+        <button class="exp-btn" onclick="exportCSV()">&#128196; CSV</button>
+        <button class="exp-btn" onclick="exportHTML()">&#127760; HTML</button>
       </div>
+
+      <div class="status-box" id="status-box">
+        <span class="spinner"></span> Loading MITRE ATT&CK data...
+      </div>
+    </div>
+
+    <!-- Main -->
+    <div class="main-content">
+      <div class="empty-state" id="empty-state">
+        <div class="icon">&#128269;</div>
+        <div style="font-size:1rem;font-weight:600;margin-bottom:8px;">Enter TTPs and click Run Analysis</div>
+        <div style="font-size:.85rem;">Data will be analyzed against all 158 APT groups in MITRE ATT&CK.<br>Everything runs in your browser — no server needed.</div>
+      </div>
+      <div id="results-area" style="display:none;"></div>
     </div>
   </div>
-
-  <footer class="page-footer">
-    <div class="container" style="max-height:50px;">
-      <p class="text-center" style="color:white; margin:0; padding:14px 0;">
-        Copyright &copy; 2025. The Sixteen Project
-      </p>
-    </div>
-  </footer>
 
   <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
   <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.bundle.min.js"></script>
+  <script>
+    const PRESETS = {
+      cve41940:  `T1595.002\nT1190\nT1059.004\nT1505.003\nT1078\nT1070\nT1539\nT1552\nT1021\nT1005\nT1486\nT1657`,
+      ransomware:`T1486\nT1490\nT1489\nT1485\nT1078\nT1021\nT1047\nT1059.001\nT1562`,
+      espionage: `T1595\nT1190\nT1133\nT1078\nT1059\nT1505\nT1070\nT1027\nT1005\nT1041\nT1071`,
+      webshell:  `T1190\nT1505.003\nT1059.004\nT1059.001\nT1078\nT1070\nT1071\nT1041`,
+    };
 
+    let aptGroups = [], allResults = [], curTargetTTPs = [], sortState = { col: 3, dir: -1 };
+
+    function normTTP(t) { return t.replace('/', '.').toUpperCase().trim(); }
+    function loadPreset(k) { document.getElementById('ttp-input').value = PRESETS[k]; }
+
+    function computeOverlap(ttps) {
+      const target = new Set(ttps.map(normTTP).filter(Boolean));
+      if (!target.size) return [];
+      const out = aptGroups.map(g => {
+        const gs = new Set(g.ttps);
+        const hits = [...target].filter(t => gs.has(t)).sort();
+        const miss = [...target].filter(t => !gs.has(t)).sort();
+        return {
+          rank: 0, group_id: g.id, group_name: g.name, aliases: g.aliases.join(', '),
+          score: hits.length, total: target.size,
+          pct: Math.round(hits.length / target.size * 1000) / 10,
+          matched_ttps: hits.join(', '), missing_ttps: miss.join(', '),
+        };
+      });
+      out.sort((a, b) => b.score - a.score || a.group_name.localeCompare(b.group_name));
+      out.forEach((r, i) => r.rank = i + 1);
+      return out;
+    }
+
+    function barClass(s, t) {
+      const p = s / t;
+      return p >= .75 ? 's-high' : p >= .4 ? 's-mid' : p > 0 ? 's-low' : 's-none';
+    }
+
+    function getFiltered() {
+      const q  = (document.getElementById('srch')?.value || '').toLowerCase();
+      const ms = parseInt(document.getElementById('mscore')?.value || '0');
+      return allResults.filter(r =>
+        r.score >= ms &&
+        (!q || r.group_name.toLowerCase().includes(q) || r.group_id.toLowerCase().includes(q) ||
+         r.aliases.toLowerCase().includes(q) || r.matched_ttps.toLowerCase().includes(q))
+      );
+    }
+
+    function renderRows(rows) {
+      const total = allResults[0]?.total || 1;
+      const tbody = document.getElementById('main-tbody');
+      if (!tbody) return;
+      tbody.innerHTML = rows.map(r => `
+        <tr>
+          <td style="color:#7d8590;text-align:center;width:40px">${r.rank}</td>
+          <td><span class="gid">${r.group_id}</span></td>
+          <td>
+            <div style="font-weight:600">${r.group_name}</div>
+            <div style="font-size:.72rem;color:#7d8590;">${r.aliases}</div>
+          </td>
+          <td>
+            <div class="bar-wrap">
+              <div class="bar"><div class="bar-fill ${barClass(r.score,total)}" style="width:${Math.round(r.score/total*100)}%"></div></div>
+              <span class="score-num">${r.score}/${total}</span>
+            </div>
+          </td>
+          <td>${r.matched_ttps ? r.matched_ttps.split(', ').map(t=>`<span class="pill hit">${t}</span>`).join('') : '<span style="color:#7d8590">—</span>'}</td>
+          <td>${r.missing_ttps ? r.missing_ttps.split(', ').map(t=>`<span class="pill">${t}</span>`).join('') : ''}</td>
+        </tr>`).join('');
+    }
+
+    function filterTable() { renderRows(getFiltered()); }
+
+    function sortTable(col) {
+      if (sortState.col === col) sortState.dir *= -1;
+      else { sortState.col = col; sortState.dir = -1; }
+      const keys = ['rank','group_id','group_name','score'];
+      allResults.sort((a,b) => {
+        let av = a[keys[col]], bv = b[keys[col]];
+        return (typeof av === 'number' ? av-bv : String(av).localeCompare(String(bv))) * sortState.dir;
+      });
+      filterTable();
+    }
+
+    function exportCSV() {
+      if (!allResults.length) { alert('Run analysis first!'); return; }
+      const rows = [['Rank','Group ID','Group Name','Aliases','Score','Pct%','Matched TTPs','Missing TTPs']];
+      allResults.forEach(r => rows.push([r.rank,r.group_id,r.group_name,r.aliases,r.score,r.pct,r.matched_ttps,r.missing_ttps]));
+      const csv = rows.map(r => r.map(v => '"'+String(v).replace(/"/g,'""')+'"').join(',')).join('\n');
+      const a = document.createElement('a');
+      a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv);
+      a.download = 'mitre_ttp_overlap.csv'; a.click();
+    }
+
+    function exportHTML() {
+      if (!allResults.length) { alert('Run analysis first!'); return; }
+      const total = allResults[0].total;
+      const tags  = curTargetTTPs.map(t => `<span class="ttp-tag">${t}</span>`).join('');
+      const rows  = allResults.map(r => `
+        <tr>
+          <td>${r.rank}</td><td>${r.group_id}</td><td>${r.group_name}<br><small>${r.aliases}</small></td>
+          <td>${r.score}/${total} (${r.pct}%)</td>
+          <td>${r.matched_ttps}</td><td>${r.missing_ttps}</td>
+        </tr>`).join('');
+      const html = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>MITRE TTP Overlap</title>
+        <style>body{font-family:sans-serif;padding:20px}table{border-collapse:collapse;width:100%}
+        th,td{border:1px solid #ddd;padding:6px 10px;font-size:13px}th{background:#162447;color:#fff}
+        tr:nth-child(even){background:#f5f5f5}.ttp-tag{display:inline-block;background:#e8f0fe;color:#1a56db;
+        font-size:11px;padding:2px 6px;border-radius:3px;margin:2px;font-family:monospace}</style></head>
+        <body><h2>MITRE ATT&CK TTP Overlap Results</h2><p>Target TTPs: ${tags}</p>
+        <table><thead><tr><th>#</th><th>ID</th><th>Group</th><th>Score</th><th>Matched TTPs</th><th>Missing TTPs</th></tr></thead>
+        <tbody>${rows}</tbody></table></body></html>`;
+      const a = document.createElement('a');
+      a.href = 'data:text/html;charset=utf-8,' + encodeURIComponent(html);
+      a.download = 'mitre_ttp_overlap.html'; a.click();
+    }
+
+    function runAnalysis() {
+      const raw  = document.getElementById('ttp-input').value;
+      const ttps = raw.split('\n').map(l => l.split('#')[0].trim()).filter(Boolean);
+      if (!ttps.length) { alert('Enter at least one TTP!'); return; }
+      if (!aptGroups.length) { alert('Data is still loading, please wait.'); return; }
+      const btn = document.getElementById('run-btn');
+      btn.disabled = true; btn.textContent = 'Analyzing...';
+      document.getElementById('status-box').textContent = `Analyzing ${ttps.length} TTPs against ${aptGroups.length} groups...`;
+      setTimeout(() => {
+        curTargetTTPs = ttps.map(normTTP).filter(Boolean);
+        allResults = computeOverlap(ttps);
+        sortState = { col: 3, dir: -1 };
+        renderResults();
+        btn.disabled = false; btn.innerHTML = '&#9654; Run Analysis';
+        document.getElementById('status-box').textContent = `Done. ${aptGroups.length} groups analyzed.`;
+      }, 10);
+    }
+
+    function renderResults() {
+      const total = curTargetTTPs.length;
+      const pct50 = allResults.filter(r => r.pct >= 50).length;
+      const pct75 = allResults.filter(r => r.pct >= 75).length;
+      const tags  = curTargetTTPs.map(t => `<span class="ttp-tag">${t}</span>`).join('');
+
+      document.getElementById('empty-state').style.display = 'none';
+      const area = document.getElementById('results-area');
+      area.style.display = 'block';
+      area.innerHTML = `
+        <div style="margin-bottom:14px;">${tags}</div>
+        <div class="stat-row">
+          <div class="stat"><div class="stat-n">${total}</div><div class="stat-l">Target TTPs</div></div>
+          <div class="stat"><div class="stat-n">${aptGroups.length}</div><div class="stat-l">Groups Analyzed</div></div>
+          <div class="stat"><div class="stat-n" style="color:#fbbf24">${pct50}</div><div class="stat-l">≥ 50% Overlap</div></div>
+          <div class="stat"><div class="stat-n" style="color:#f87171">${pct75}</div><div class="stat-l">≥ 75% Overlap</div></div>
+        </div>
+        <div class="search-row">
+          <input type="text" id="srch" placeholder="Search group / ID / alias / TTP..." oninput="filterTable()">
+          <select id="mscore" onchange="filterTable()">
+            <option value="0">All scores</option>
+            <option value="1">≥ 1</option><option value="3">≥ 3</option>
+            <option value="5">≥ 5</option><option value="7">≥ 7</option>
+            <option value="9">≥ 9</option>
+          </select>
+        </div>
+        <div style="overflow-x:auto;">
+          <table>
+            <thead><tr>
+              <th onclick="sortTable(0)"># ↕</th>
+              <th onclick="sortTable(1)">ID ↕</th>
+              <th onclick="sortTable(2)">Group ↕</th>
+              <th onclick="sortTable(3)">Score ↕</th>
+              <th>Matched TTPs</th>
+              <th>Missing TTPs</th>
+            </tr></thead>
+            <tbody id="main-tbody"></tbody>
+          </table>
+        </div>`;
+      filterTable();
+    }
+
+    // Load data
+    fetch('data/apt_groups.json')
+      .then(r => r.json())
+      .then(data => {
+        aptGroups = data;
+        aptGroups.forEach(g => g.ttps = g.ttps.map(normTTP));
+        document.getElementById('data-badge').textContent = `ATT&CK — ${aptGroups.length} groups`;
+        document.getElementById('status-box').textContent = `${aptGroups.length} groups loaded. Ready.`;
+        // Load default preset
+        loadPreset('cve41940');
+      })
+      .catch(() => {
+        document.getElementById('status-box').textContent = 'Failed to load data. Please refresh.';
+        document.getElementById('status-box').style.borderColor = '#8b2020';
+      });
+  </script>
 </body>
 </html>
