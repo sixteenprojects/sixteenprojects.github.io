@@ -1,5 +1,13 @@
 var threatReport = [
     {
+        date: '20 May 2026',
+        title: 'THE KEV CLOCK',
+        category: 'Threat Hunting',
+        analyst: 'M. Daffi Alhafizh',
+        checksum: 'e56653e316033efe40add46617957aa58fccd0d87b976b93588010ee01497d35',
+        action: '<a href="data/file-threat-report/The Kev Clock .pdf">Download</a>'
+    },
+    {
         date: '13 May 2026',
         title: '64 DAYS OF SILENCE: THE 0 DAY THAT EXPOSED 70 MILLION DOMAINS (CVE-2026-41940 CPANEL & WHM AUTHENTICATION BYPASS)',
         category: 'Common Vulnerability Exposure',
