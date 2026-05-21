@@ -235,13 +235,8 @@
             Map your target TTPs against 178+ APT groups in the MITRE ATT&amp;CK framework and instantly identify the most likely threat actors based on TTP overlap scoring. Supports batch input, CSV/Excel/HTML export, and an interactive dashboard.
           </p>
 
-          <div id="statusPill" class="status-pill status-checking">
-            <span class="status-dot"></span>
-            <span id="statusText">Checking tool status...</span>
-          </div>
-          <br>
-          <a href="http://localhost:5000" target="_blank" class="btn-launch" id="launchBtn">
-            <i class="fas fa-external-link-alt"></i> Open Full View
+          <a href="https://github.com/sixteenprojects/mitre-ttp-mapper" target="_blank" rel="noopener noreferrer" class="btn-launch">
+            <i class="fas fa-download"></i> Download from GitHub
           </a>
           <a href="mitre-mapper.html" class="btn-outline-nav">
             <i class="fas fa-info-circle"></i> Tool Details
@@ -279,20 +274,14 @@
         </div>
       </div>
 
-      <!-- Embedded tool iframe -->
-      <div class="embed-wrap" id="embedWrap">
-        <iframe src="http://localhost:5000" id="toolFrame" title="MITRE TTP Mapper"></iframe>
-        <div class="embed-offline" id="embedOffline">
-          <div class="offline-icon"><i class="fas fa-plug"></i></div>
-          <p style="font-size:.92rem; font-weight:600; color:rgba(255,255,255,.8); margin-bottom:6px;">Tool server is not running</p>
-          <p style="font-size:.82rem;">Start the server using the instructions above, then refresh this page.</p>
-        </div>
+      <!-- Download & run locally card -->
+      <div style="background:#f0f4ff; border:1px solid #c7d4f5; border-radius:10px; padding:20px 24px; margin-top:24px;">
+        <p style="margin:0; font-size:.88rem; color:#374151; line-height:1.7;">
+          <i class="fas fa-info-circle" style="color:#162447; margin-right:6px;"></i>
+          This tool runs as a local web server. Download from GitHub, then run <code style="background:#e8edf7; padding:2px 7px; border-radius:4px;">python app.py</code> to launch it on <code style="background:#e8edf7; padding:2px 7px; border-radius:4px;">localhost:5000</code>.
+        </p>
       </div>
     </div>
-
-    <!-- ════ Other Tools ════ -->
-    <div class="section-label"><i class="fas fa-cube" style="margin-right:6px;"></i>Community Tools</div>
-    <div class="row" id="otherTools"></div>
 
   </div>
 
@@ -307,53 +296,5 @@
   <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
   <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.bundle.min.js"></script>
   <script src="assets/lp/vendor/wow/wow.min.js"></script>
-  <script src="data/threat-tools.js"></script>
-  <script>
-    // ── Status checker ──
-    function checkStatus() {
-      fetch('http://localhost:5000', { mode: 'no-cors', cache: 'no-store' })
-        .then(() => {
-          document.getElementById('statusPill').className = 'status-pill status-online';
-          document.getElementById('statusText').textContent = 'Tool is running — localhost:5000';
-          document.getElementById('toolFrame').style.display = 'block';
-          document.getElementById('embedOffline').style.display = 'none';
-        })
-        .catch(() => {
-          document.getElementById('statusPill').className = 'status-pill status-offline';
-          document.getElementById('statusText').textContent = 'Tool is not running — start with python app.py';
-          document.getElementById('toolFrame').style.display = 'none';
-          document.getElementById('embedOffline').style.display = 'block';
-        });
-    }
-    checkStatus();
-    setInterval(checkStatus, 10000);
-
-    // ── Render community tools (skip first entry = MITRE Mapper) ──
-    const container = document.getElementById('otherTools');
-    const others = threatTools.slice(1);
-    others.forEach(item => {
-      const col = document.createElement('div');
-      col.className = 'col-lg-4 col-md-6 mb-4';
-      col.innerHTML = `
-        <div class="tool-card">
-          <div class="tool-card-img">
-            <img src="${item.imageSrc}" alt="${item.title}">
-          </div>
-          <div class="tool-card-body">
-            <h6>${item.title}</h6>
-            ${item.description ? `<p>${item.description}</p>` : ''}
-          </div>
-          <div class="tool-card-footer">
-            <a href="${item.downloadLink}" target="_blank" class="btn-card-primary">
-              <i class="fas fa-download" style="margin-right:5px;"></i>Download
-            </a>
-            <a href="${item.manualLink}" target="_blank" class="btn-card-outline">
-              <i class="fas fa-book" style="margin-right:5px;"></i>Docs
-            </a>
-          </div>
-        </div>`;
-      container.appendChild(col);
-    });
-  </script>
 </body>
 </html>
