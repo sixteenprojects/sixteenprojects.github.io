@@ -1,0 +1,93 @@
+var threatdata = {
+    "name": "BreachRAT",
+    "alias": "BreachRAT",
+    "category": "Malware",
+    "type": "Backdoor",
+    "modified": "2020-04-23",
+    "all_data": {
+        "tool": "BreachRAT",
+        "names": [
+            {
+                "name": "BreachRAT"
+            }
+        ],
+        "description": "(FireEye) The payload is a backdoor that we call the Breach Remote Administration Tool (BreachRAT) written in C++. We had not previously observed this payload used by these threat actors. The malware name is derived from the hardcoded PDB path found in the RAT: C:\\Work\\Breach Remote Administration Tool\\Release\\Client.pdb. This RAT communicates with 5.189.145.248, a command and control (C2) IP address that this group has used previously with other malware, including {{DarkComet}} and {{njRAT}}.",
+        "category": "Malware",
+        "type": [
+            "Backdoor"
+        ],
+        "information": [
+            "https://www.fireeye.com/blog/threat-research/2016/06/apt_group_sends_spea.html"
+        ],
+        "malpedia": [
+            "https://malpedia.caad.fkie.fraunhofer.de/details/win.breach_rat"
+        ],
+        "uuid": "807e9d0d-79f0-4da5-91c7-c8c073fc6782",
+        "last-card-change": "2020-04-23",
+        "source": "https://apt.etda.or.th/cgi-bin/listtools.cgi"
+    },
+    "ioc_data": [],
+    "last_ioc_update": null,
+    "file_name": "breachrat",
+    "analysis": null,
+    "articles": [
+        {
+            "data_url": "https://www.fireeye.com/blog/threat-research/2016/06/apt_group_sends_spea.html",
+            "date": "2016-06-03",
+            "organization": "FireEye",
+            "author": "Yin Hong Chang",
+            "title": "APT Group Sends Spear Phishing Emails to Indian Government Officials",
+            "categories": [
+                "BreachRAT",
+                "DarkComet",
+                "Operation C-Major"
+            ]
+        }
+    ],
+    "mitre": [
+        {
+            "procedure_name": "at",
+            "procedure_code": "s0110",
+            "procedure_type": "software",
+            "procedure_link": "https://attack.mitre.org/software/S0110",
+            "techniques": [
+                {
+                    "tactic_code": "ta0002",
+                    "tactic_link": "https://attack.mitre.org/tactics/TA0002",
+                    "tactic_name": "execution",
+                    "tactic_alias": "execution",
+                    "tactic_description": "The adversary is trying to run malicious code.",
+                    "technique_code": "t1053.002",
+                    "technique_link": "https://attack.mitre.org/techniques/T1053/002",
+                    "technique_name": "scheduled task/job : at",
+                    "technique_description": "adversaries may abuse the at utility to perform task scheduling for initial or recurring execution of malicious code. the at utility exists as an executable within windows, linux, and macos for scheduling tasks at a specified time and date. although deprecated in favor of scheduled task's schtasks in windows environments, using at requires that the task scheduler service be running, and the user to be logged on as a member of the local administrators group.",
+                    "procedure_description": "at can be used to schedule a task on a system to be executed at a specific date or time.[4][1]"
+                },
+                {
+                    "tactic_code": "ta0003",
+                    "tactic_link": "https://attack.mitre.org/tactics/TA0003",
+                    "tactic_name": "persistence",
+                    "tactic_alias": "persistence",
+                    "tactic_description": "The adversary is trying to maintain their foothold.",
+                    "technique_code": "t1053.002",
+                    "technique_link": "https://attack.mitre.org/techniques/T1053/002",
+                    "technique_name": "scheduled task/job : at",
+                    "technique_description": "adversaries may abuse the at utility to perform task scheduling for initial or recurring execution of malicious code. the at utility exists as an executable within windows, linux, and macos for scheduling tasks at a specified time and date. although deprecated in favor of scheduled task's schtasks in windows environments, using at requires that the task scheduler service be running, and the user to be logged on as a member of the local administrators group.",
+                    "procedure_description": "at can be used to schedule a task on a system to be executed at a specific date or time.[4][1]"
+                },
+                {
+                    "tactic_code": "ta0004",
+                    "tactic_link": "https://attack.mitre.org/tactics/TA0004",
+                    "tactic_name": "privilege escalation",
+                    "tactic_alias": "privilege_escalation",
+                    "tactic_description": "The adversary is trying to gain higher-level permissions.",
+                    "technique_code": "t1053.002",
+                    "technique_link": "https://attack.mitre.org/techniques/T1053/002",
+                    "technique_name": "scheduled task/job : at",
+                    "technique_description": "adversaries may abuse the at utility to perform task scheduling for initial or recurring execution of malicious code. the at utility exists as an executable within windows, linux, and macos for scheduling tasks at a specified time and date. although deprecated in favor of scheduled task's schtasks in windows environments, using at requires that the task scheduler service be running, and the user to be logged on as a member of the local administrators group.",
+                    "procedure_description": "at can be used to schedule a task on a system to be executed at a specific date or time.[4][1]"
+                }
+            ]
+        }
+    ]
+};

@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>The Sixteen Project - About</title>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+  <link rel="shortcut icon" type="image/jpg" href="assets/lp/img/logo_main.jpg"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.10.0/css/all.min.css" rel="stylesheet">
+  <link href="assets/dp/lib/owlcarousel/assets/owl.carousel.min.css" rel="stylesheet">
+  <link href="assets/dp/css/style.css" rel="stylesheet">
+  <link rel="stylesheet" href="assets/brand.css">
+  <style>
+    .about-logo-wrap { text-align: center; margin-bottom: 40px; }
+    .about-logo-wrap img { max-width: 280px; border-radius: 12px; box-shadow: 0 8px 32px rgba(22,36,71,.15); }
+    .about-section h3 { color: #162447; border-left: 4px solid #162447; padding-left: 12px; margin-bottom: 16px; }
+    .about-section p, .about-section li { color: #374151; line-height: 1.8; }
+    .about-section a { color: #1d4ed8; }
+  </style>
+</head>
+<body>
+<div class="content-wrapper">
+  <header>
+    <nav class="navbar navbar-expand-lg navbar-light bg-white sticky" data-offset="500">
+      <div class="container">
+        <a href="index.html" class="navbar-brand d-flex align-items-center gap-2">
+          <img src="assets/lp/img/logo_main.jpg" alt="The Sixteen Project Logo">
+          <span style="color:#162447; font-weight:700; font-size:15px; letter-spacing:.5px;">THE SIXTEEN PROJECT</span>
+        </a>
+        <button class="navbar-toggler" data-toggle="collapse" data-target="#navbarContent" aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="navbar-collapse collapse" id="navbarContent">
+          <ul class="navbar-nav ml-auto">
+            <li class="nav-item"><a class="nav-link" href="index.html">Home</a></li>
+            <li class="nav-item"><a class="nav-link" href="threat-library.html">Threat Library</a></li>
+            <li class="nav-item"><a class="nav-link" href="threat-report.html">Threat Report</a></li>
+            <li class="nav-item"><a class="nav-link" href="threat-tools.html">Threat Hunting Tools</a></li>
+            <li class="nav-item active"><a class="nav-link active-page" href="about.html">About</a></li>
+            <li class="nav-item"><a class="nav-link" href="credits.html">Credits</a></li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+  </header>
+
+  <div class="page-section" style="color:black;">
+    <div class="container">
+
+      <div class="about-logo-wrap">
+        <img src="assets/lp/img/logo_main.jpg" alt="The Sixteen Project">
+        <h1 class="mt-4" style="color:#162447; font-weight:700;">The Sixteen Project</h1>
+        <p style="color:#6b7280;">Threat Hunting & Intelligence Platform</p>
+        <hr style="border-color:#162447; width:60px; border-width:3px; margin:10px auto;">
+      </div>
+
+      <div class="row">
+        <div class="col-lg-8 offset-lg-2">
+          <div class="about-section">
+            <h3>What is The Sixteen Project?</h3>
+            <p>The Sixteen Project is an internal threat intelligence and threat hunting platform built to centralize and share knowledge about threats, techniques, and tools relevant to our security operations.</p>
+
+            <h3 class="mt-4">What's inside?</h3>
+            <ul>
+              <li><strong>Threat Library</strong> — 2,300+ malware families, APT groups, and offensive tools, enriched with IOC data and MITRE ATT&amp;CK mappings.</li>
+              <li><strong>Threat Reports</strong> — in-depth investigation and analysis reports produced by the team.</li>
+              <li><strong>Threat Hunting Tools</strong> — tools and scripts developed to support threat hunting and incident response.</li>
+            </ul>
+
+            <h3 class="mt-4">Data Sources</h3>
+            <p>Threat library data is sourced from open-source intelligence (OSINT) repositories:</p>
+            <ul>
+              <li><a href="https://apt.etda.or.th/" target="_blank">ETDA APT Groups & Tools</a></li>
+              <li><a href="https://malpedia.caad.fkie.fraunhofer.de/" target="_blank">Malpedia (Fraunhofer FKIE)</a></li>
+              <li><a href="https://threatfox.abuse.ch/" target="_blank">ThreatFox (abuse.ch)</a></li>
+              <li><a href="https://attack.mitre.org/" target="_blank">MITRE ATT&amp;CK</a></li>
+            </ul>
+
+            <h3 class="mt-4">Credits</h3>
+            <p>Threat data adapted from <a href="https://openhunting.io" target="_blank">OpenHunting.io</a> by Rizqy Rionaldy. Maintained and extended by The Sixteen Project team.</p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <footer class="page-footer">
+    <div class="container" style="max-height:50px;">
+      <p class="text-center" style="color:white; margin:0; padding:14px 0;">Copyright &copy; 2025. The Sixteen Project</p>
+    </div>
+  </footer>
+
+  <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.bundle.min.js"></script>
+  <script src="assets/dp/lib/easing/easing.min.js"></script>
+  <script src="assets/dp/lib/owlcarousel/owl.carousel.min.js"></script>
+  <script src="assets/dp/js/main.js"></script>
+</body>
+</html>

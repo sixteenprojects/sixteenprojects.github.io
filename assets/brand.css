@@ -1,0 +1,88 @@
+/* ═══════════════════════════════════════
+   THE SIXTEEN PROJECT — Brand Stylesheet
+   Primary: #162447 (dark navy)
+   Accent:  #1d4ed8 (blue)
+   Gray:    #6b7280
+   ═══════════════════════════════════════ */
+
+:root {
+  --brand-navy:  #162447;
+  --brand-blue:  #1d4ed8;
+  --brand-gray:  #6b7280;
+  --brand-light: #f4f6fb;
+}
+
+/* --- Global overrides --- */
+.text-primary  { color: var(--brand-blue)  !important; }
+.text-brand    { color: var(--brand-navy)  !important; }
+
+.btn-primary {
+  background-color: var(--brand-navy) !important;
+  border-color:     var(--brand-navy) !important;
+  color: white !important;
+}
+.btn-primary:hover {
+  background-color: #0d1b33 !important;
+  border-color:     #0d1b33 !important;
+}
+
+/* --- Navbar --- */
+.navbar-brand img {
+  height: 44px;
+  border-radius: 6px;
+  object-fit: cover;
+}
+
+.nav-link:hover,
+.nav-link.active-page {
+  color: var(--brand-blue) !important;
+}
+
+/* --- Footer --- */
+.page-footer,
+footer.page-footer {
+  background: var(--brand-navy) !important;
+}
+.page-footer .container {
+  background: var(--brand-navy) !important;
+}
+
+/* --- Accent headings --- */
+.accent { color: var(--brand-blue); }
+
+/* --- Hero banner section --- */
+.hero-section {
+  background: var(--brand-light);
+  padding: 60px 0 40px;
+}
+.hero-section h1 { font-size: 2rem; font-weight: 700; color: #1a1a2e; }
+.hero-section p  { color: var(--brand-gray); font-size: 1rem; }
+.hero-img {
+  width: 100%;
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(22,36,71,0.18);
+}
+
+/* --- Card service brand --- */
+.card-service .body { border-left: 4px solid var(--brand-navy); }
+
+/* --- Tables --- */
+thead th { background: var(--brand-navy) !important; color: white !important; }
+
+/* --- MITRE matrix --- */
+.ttp-table-head-Analyzed th,
+.ttp-table-head th {
+  background: var(--brand-navy) !important;
+  color: white !important;
+}
+
+/* --- IOC table headers --- */
+.unique-th { background: var(--brand-navy) !important; color: white !important; }
+
+/* --- Active nav highlight --- */
+.nav-item.active .nav-link { color: var(--brand-blue) !important; }
+
+/* --- Section divider --- */
+.divider { background: var(--brand-navy) !important; }
+
+/* --- D3 / chart color override via CSS variable (used in JS) --- */

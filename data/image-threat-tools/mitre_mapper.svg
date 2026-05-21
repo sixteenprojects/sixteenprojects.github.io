@@ -1,0 +1,95 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 280" width="400" height="280">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0d1b33"/>
+      <stop offset="100%" stop-color="#162447"/>
+    </linearGradient>
+    <linearGradient id="bar1" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#1d4ed8"/>
+      <stop offset="100%" stop-color="#3b82f6"/>
+    </linearGradient>
+    <linearGradient id="bar2" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#1d4ed8" stop-opacity="0.85"/>
+      <stop offset="100%" stop-color="#60a5fa"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="400" height="280" fill="url(#bg)" rx="12"/>
+
+  <!-- Grid dots -->
+  <g opacity="0.08">
+    <circle cx="20" cy="20" r="1.5" fill="white"/>
+    <circle cx="40" cy="20" r="1.5" fill="white"/>
+    <circle cx="60" cy="20" r="1.5" fill="white"/>
+    <circle cx="80" cy="20" r="1.5" fill="white"/>
+    <circle cx="100" cy="20" r="1.5" fill="white"/>
+    <circle cx="380" cy="20" r="1.5" fill="white"/>
+    <circle cx="360" cy="20" r="1.5" fill="white"/>
+    <circle cx="20" cy="260" r="1.5" fill="white"/>
+    <circle cx="380" cy="260" r="1.5" fill="white"/>
+  </g>
+
+  <!-- Title -->
+  <text x="200" y="34" text-anchor="middle" fill="white" font-family="'Segoe UI',Arial,sans-serif" font-size="13" font-weight="700" letter-spacing="1">MITRE ATT&amp;CK TTP OVERLAP MAPPER</text>
+  <line x1="40" y1="42" x2="360" y2="42" stroke="rgba(255,255,255,0.15)" stroke-width="1"/>
+
+  <!-- Labels (APT groups) -->
+  <g font-family="'Segoe UI',Arial,sans-serif" font-size="9.5" fill="rgba(255,255,255,0.65)">
+    <text x="36" y="72">APT29</text>
+    <text x="36" y="102">APT41</text>
+    <text x="36" y="132">Lazarus</text>
+    <text x="36" y="162">FIN7</text>
+    <text x="36" y="192">APT28</text>
+    <text x="36" y="222">Turla</text>
+  </g>
+
+  <!-- Bars -->
+  <!-- APT29: 11/12 -->
+  <rect x="88" y="58" width="232" height="16" rx="3" fill="rgba(255,255,255,0.07)"/>
+  <rect x="88" y="58" width="213" height="16" rx="3" fill="url(#bar1)"/>
+  <text x="308" y="70" font-family="'Segoe UI',Arial,sans-serif" font-size="9" fill="white" font-weight="600">11/12</text>
+
+  <!-- APT41: 9/12 -->
+  <rect x="88" y="88" width="232" height="16" rx="3" fill="rgba(255,255,255,0.07)"/>
+  <rect x="88" y="88" width="174" height="16" rx="3" fill="url(#bar1)"/>
+  <text x="270" y="100" font-family="'Segoe UI',Arial,sans-serif" font-size="9" fill="white" font-weight="600">9/12</text>
+
+  <!-- Lazarus: 8/12 -->
+  <rect x="88" y="118" width="232" height="16" rx="3" fill="rgba(255,255,255,0.07)"/>
+  <rect x="88" y="118" width="155" height="16" rx="3" fill="url(#bar2)"/>
+  <text x="251" y="130" font-family="'Segoe UI',Arial,sans-serif" font-size="9" fill="white" font-weight="600">8/12</text>
+
+  <!-- FIN7: 7/12 -->
+  <rect x="88" y="148" width="232" height="16" rx="3" fill="rgba(255,255,255,0.07)"/>
+  <rect x="88" y="148" width="135" height="16" rx="3" fill="url(#bar2)"/>
+  <text x="231" y="160" font-family="'Segoe UI',Arial,sans-serif" font-size="9" fill="white" font-weight="600">7/12</text>
+
+  <!-- APT28: 6/12 -->
+  <rect x="88" y="178" width="232" height="16" rx="3" fill="rgba(255,255,255,0.07)"/>
+  <rect x="88" y="178" width="116" height="16" rx="3" fill="rgba(29,78,216,0.7)"/>
+  <text x="212" y="190" font-family="'Segoe UI',Arial,sans-serif" font-size="9" fill="white" font-weight="600">6/12</text>
+
+  <!-- Turla: 5/12 -->
+  <rect x="88" y="208" width="232" height="16" rx="3" fill="rgba(255,255,255,0.07)"/>
+  <rect x="88" y="208" width="97" height="16" rx="3" fill="rgba(29,78,216,0.55)"/>
+  <text x="193" y="220" font-family="'Segoe UI',Arial,sans-serif" font-size="9" fill="white" font-weight="600">5/12</text>
+
+  <!-- TTP pills at bottom -->
+  <g font-family="'Segoe UI',Arial,sans-serif" font-size="8.5">
+    <rect x="40" y="240" width="48" height="16" rx="8" fill="rgba(29,78,216,0.4)"/>
+    <text x="64" y="251" text-anchor="middle" fill="rgba(255,255,255,0.85)">T1190</text>
+
+    <rect x="96" y="240" width="54" height="16" rx="8" fill="rgba(29,78,216,0.4)"/>
+    <text x="123" y="251" text-anchor="middle" fill="rgba(255,255,255,0.85)">T1059.004</text>
+
+    <rect x="158" y="240" width="54" height="16" rx="8" fill="rgba(29,78,216,0.4)"/>
+    <text x="185" y="251" text-anchor="middle" fill="rgba(255,255,255,0.85)">T1505.003</text>
+
+    <rect x="220" y="240" width="44" height="16" rx="8" fill="rgba(29,78,216,0.4)"/>
+    <text x="242" y="251" text-anchor="middle" fill="rgba(255,255,255,0.85)">T1078</text>
+
+    <rect x="272" y="240" width="44" height="16" rx="8" fill="rgba(29,78,216,0.3)"/>
+    <text x="294" y="251" text-anchor="middle" fill="rgba(255,255,255,0.7)">+8 more</text>
+  </g>
+</svg>

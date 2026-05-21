@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>The Sixteen Project - Threat Report</title>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+  <link rel="shortcut icon" type="image/jpg" href="assets/lp/img/logo_main.jpg"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.10.0/css/all.min.css" rel="stylesheet">
+  <link href="assets/dp/lib/owlcarousel/assets/owl.carousel.min.css" rel="stylesheet">
+  <link href="assets/dp/css/style.css" rel="stylesheet">
+  <link href="https://cdn.datatables.net/1.10.19/css/dataTables.bootstrap4.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="assets/brand.css">
+  <style>
+    .dataTables_info { display: none; }
+  </style>
+</head>
+<body>
+<div class="content-wrapper">
+  <header>
+    <nav class="navbar navbar-expand-lg navbar-light bg-white sticky" data-offset="500">
+      <div class="container">
+        <a href="index.html" class="navbar-brand d-flex align-items-center gap-2">
+          <img src="assets/lp/img/logo_main.jpg" alt="The Sixteen Project Logo">
+          <span style="color:#162447; font-weight:700; font-size:15px; letter-spacing:.5px;">THE SIXTEEN PROJECT</span>
+        </a>
+        <button class="navbar-toggler" data-toggle="collapse" data-target="#navbarContent" aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="navbar-collapse collapse" id="navbarContent">
+          <ul class="navbar-nav ml-auto">
+            <li class="nav-item"><a class="nav-link" href="index.html">Home</a></li>
+            <li class="nav-item"><a class="nav-link" href="threat-library.html">Threat Library</a></li>
+            <li class="nav-item active"><a class="nav-link active-page" href="threat-report.html">Threat Report</a></li>
+            <li class="nav-item"><a class="nav-link" href="threat-tools.html">Threat Hunting Tools</a></li>
+            <li class="nav-item"><a class="nav-link" href="about.html">About</a></li>
+            <li class="nav-item"><a class="nav-link" href="credits.html">Credits</a></li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+  </header>
+
+  <div class="page-section" style="color:black;">
+    <div class="container">
+      <div class="row justify-content-center">
+        <div class="col-md-12 text-center">
+          <h1><span style="color:#162447;">Threat Report</span></h1>
+          <p style="color:#6b7280;">The Sixteen Project — Investigation & Analysis Reports</p>
+          <hr style="border-color:#162447; width:60px; border-width:3px; margin:10px auto 30px;">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="page-section pt-0" style="color:black;">
+    <div class="container-fluid">
+      <div class="row px-xl-5">
+        <div class="col-lg-12">
+          <div class="customPage" style="min-height:500px;">
+            <table id="reportTable" class="table table-striped table-bordered" style="width:100%; font-size:small;">
+              <thead>
+                <tr>
+                  <th style="width:10%;">Date</th>
+                  <th style="width:30%;">Title</th>
+                  <th style="width:12%;">Category</th>
+                  <th style="width:15%;">Analyst</th>
+                  <th style="width:25%;">Checksum</th>
+                  <th style="width:8%;">Download</th>
+                </tr>
+              </thead>
+              <tbody id="reportBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer class="page-footer">
+    <div class="container" style="max-height:50px;">
+      <p class="text-center" style="color:white; margin:0; padding:14px 0;">Copyright &copy; 2025. The Sixteen Project</p>
+    </div>
+  </footer>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.10.19/js/dataTables.bootstrap4.min.js"></script>
+<script src="data/threat-report.js"></script>
+<script>
+  const tbody = document.getElementById('reportBody');
+  threatReport.forEach(r => {
+    tbody.innerHTML += `<tr><td>${r.date}</td><td>${r.title}</td><td>${r.category}</td><td>${r.analyst}</td><td style="font-family:monospace;word-break:break-all;">${r.checksum}</td><td>${r.action}</td></tr>`;
+  });
+  $(document).ready(function() { $('#reportTable').DataTable({ order: [], pageLength: 25 }); });
+</script>
+</body>
+</html>

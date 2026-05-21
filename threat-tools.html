@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The Sixteen Project - Threat Hunting Tools</title>
+  <link rel="shortcut icon" type="image/jpg" href="assets/lp/img/logo_main.jpg"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.10.0/css/all.min.css" rel="stylesheet">
+  <link href="assets/dp/css/style.css" rel="stylesheet">
+  <link rel="stylesheet" href="assets/brand.css">
+
+  <style>
+    body { font-family: 'Poppins', sans-serif; background: #f8f9fc; }
+
+    /* ── Page header ── */
+    .page-hero {
+      background: linear-gradient(135deg, #162447 0%, #0d1b33 100%);
+      color: white;
+      padding: 52px 0 44px;
+    }
+    .page-hero h1 { font-size: 1.9rem; font-weight: 700; margin-bottom: 8px; }
+    .page-hero p  { color: rgba(255,255,255,.6); font-size: .95rem; margin: 0; }
+
+    /* ── Featured tool (MITRE Mapper) ── */
+    .featured-tool {
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 6px 32px rgba(22,36,71,.1);
+      border-top: 5px solid #162447;
+      padding: 32px 36px 28px;
+      margin: 36px 0 20px;
+    }
+    .featured-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #162447;
+      color: white;
+      font-size: .72rem;
+      font-weight: 600;
+      padding: 4px 12px;
+      border-radius: 20px;
+      text-transform: uppercase;
+      letter-spacing: .5px;
+      margin-bottom: 14px;
+    }
+    .featured-tool h2 { font-size: 1.3rem; font-weight: 700; color: #162447; margin-bottom: 6px; }
+    .featured-tool .tool-desc { font-size: .88rem; color: #6b7280; margin-bottom: 20px; line-height: 1.6; }
+
+    /* status pill */
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      font-size: .82rem;
+      font-weight: 500;
+      padding: 5px 13px;
+      border-radius: 20px;
+      margin-bottom: 18px;
+    }
+    .status-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+    .status-checking { background: #fef3c7; color: #92400e; }
+    .status-checking .status-dot { background: #f59e0b; animation: blink 1s infinite; }
+    .status-online  { background: #d1fae5; color: #065f46; }
+    .status-online  .status-dot { background: #10b981; }
+    .status-offline { background: #fee2e2; color: #991b1b; }
+    .status-offline .status-dot { background: #ef4444; }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.35} }
+
+    .btn-launch {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: #162447; color: white;
+      padding: 10px 22px; border-radius: 8px;
+      font-size: .88rem; font-weight: 600;
+      text-decoration: none; border: none; cursor: pointer;
+      transition: background .2s; margin-right: 8px;
+    }
+    .btn-launch:hover { background: #0d1b33; color: white; text-decoration: none; }
+    .btn-outline-nav {
+      display: inline-flex; align-items: center; gap: 7px;
+      background: transparent; color: #162447;
+      padding: 9px 20px; border-radius: 8px;
+      font-size: .85rem; font-weight: 500;
+      text-decoration: none; border: 2px solid #162447;
+      transition: all .2s;
+    }
+    .btn-outline-nav:hover { background: #162447; color: white; text-decoration: none; }
+
+    /* iframe embed */
+    .embed-wrap {
+      border-radius: 10px;
+      overflow: hidden;
+      border: 2px solid #1e3a5f;
+      background: #0d1b33;
+      margin-top: 24px;
+    }
+    .embed-wrap iframe { width: 100%; height: 640px; border: none; display: block; }
+    .embed-offline {
+      display: none;
+      padding: 56px 32px;
+      text-align: center;
+      color: rgba(255,255,255,.65);
+    }
+    .embed-offline .offline-icon { font-size: 2.8rem; opacity: .45; margin-bottom: 14px; }
+
+    /* feature tags */
+    .tag-row { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 14px; }
+    .tag {
+      background: #f0f4ff; border: 1px solid #c7d4f5;
+      color: #162447; font-size: .73rem;
+      padding: 3px 11px; border-radius: 20px; font-weight: 500;
+    }
+
+    /* ── Other tools section ── */
+    .section-label {
+      font-size: .78rem; font-weight: 700; color: #9ca3af;
+      text-transform: uppercase; letter-spacing: 1px;
+      margin-bottom: 18px; margin-top: 36px;
+    }
+
+    .tool-card {
+      background: white;
+      border-radius: 14px;
+      box-shadow: 0 3px 16px rgba(22,36,71,.08);
+      border-top: 3px solid #162447;
+      overflow: hidden;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      transition: transform .2s, box-shadow .2s;
+    }
+    .tool-card:hover { transform: translateY(-4px); box-shadow: 0 8px 28px rgba(22,36,71,.14); }
+    .tool-card-img {
+      background: #f8f9fc;
+      padding: 24px;
+      text-align: center;
+      border-bottom: 1px solid #f0f0f0;
+    }
+    .tool-card-img img { max-height: 110px; max-width: 100%; object-fit: contain; }
+    .tool-card-body { padding: 20px; flex: 1; }
+    .tool-card-body h6 { color: #162447; font-weight: 700; font-size: .92rem; margin-bottom: 6px; }
+    .tool-card-body p  { font-size: .78rem; color: #6b7280; margin: 0; line-height: 1.5; }
+    .tool-card-footer {
+      padding: 14px 20px;
+      background: #f8f9fc;
+      border-top: 1px solid #f0f0f0;
+      display: flex;
+      gap: 10px;
+    }
+    .tool-card-footer a {
+      flex: 1; text-align: center;
+      padding: 7px 0;
+      border-radius: 6px;
+      font-size: .8rem; font-weight: 600;
+      text-decoration: none;
+      transition: all .2s;
+    }
+    .btn-card-primary {
+      background: #162447; color: white !important;
+    }
+    .btn-card-primary:hover { background: #0d1b33; }
+    .btn-card-outline {
+      border: 1.5px solid #162447; color: #162447 !important;
+    }
+    .btn-card-outline:hover { background: #162447; color: white !important; }
+
+    /* right sidebar instructions */
+    .steps-box {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 2px 12px rgba(22,36,71,.08);
+      padding: 24px 28px;
+    }
+    .steps-box h6 { color: #162447; font-weight: 700; font-size: .92rem; margin-bottom: 16px; }
+    .step-row { display: flex; gap: 14px; margin-bottom: 12px; align-items: flex-start; }
+    .step-num {
+      width: 26px; height: 26px; border-radius: 50%;
+      background: #162447; color: white;
+      display: flex; align-items: center; justify-content: center;
+      font-size: .74rem; font-weight: 700; flex-shrink: 0;
+    }
+    .step-row p { margin: 0; font-size: .83rem; color: #374151; line-height: 1.55; }
+    .step-row code {
+      background: #f3f4f6; padding: 2px 7px;
+      border-radius: 4px; font-size: .79rem; color: #162447;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navbar -->
+  <header>
+    <nav class="navbar navbar-expand-lg navbar-light bg-white sticky" data-offset="500">
+      <div class="container">
+        <a href="index.html" class="navbar-brand d-flex align-items-center gap-2">
+          <img src="assets/lp/img/logo_main.jpg" alt="The Sixteen Project Logo" style="height:44px; border-radius:6px;">
+          <span style="color:#162447; font-weight:700; font-size:15px; letter-spacing:.5px;">THE SIXTEEN PROJECT</span>
+        </a>
+        <button class="navbar-toggler" data-toggle="collapse" data-target="#navbarContent" aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="navbar-collapse collapse" id="navbarContent">
+          <ul class="navbar-nav ml-auto">
+            <li class="nav-item"><a class="nav-link" href="index.html">Home</a></li>
+            <li class="nav-item"><a class="nav-link" href="threat-library.html">Threat Library</a></li>
+            <li class="nav-item"><a class="nav-link" href="threat-report.html">Threat Report</a></li>
+            <li class="nav-item active"><a class="nav-link active-page" href="threat-tools.html">Threat Hunting Tools</a></li>
+            <li class="nav-item"><a class="nav-link" href="about.html">About</a></li>
+            <li class="nav-item"><a class="nav-link" href="credits.html">Credits</a></li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+  </header>
+
+  <!-- Hero -->
+  <div class="page-hero">
+    <div class="container">
+      <h1><i class="fas fa-tools" style="font-size:1.5rem; margin-right:12px; opacity:.8;"></i>Threat Hunting Tools</h1>
+      <p>Open-source tools developed to support threat hunting, CTI analysis, and incident response.</p>
+    </div>
+  </div>
+
+  <div class="container" style="padding-bottom: 60px;">
+
+    <!-- ════ FEATURED: MITRE Mapper ════ -->
+    <div class="featured-tool">
+      <div class="row">
+        <div class="col-lg-8">
+          <span class="featured-label"><i class="fas fa-star" style="font-size:.65rem;"></i> The Sixteen Project Tool</span>
+          <h2>MITRE ATT&amp;CK TTP Overlap Mapper</h2>
+          <p class="tool-desc">
+            Map your target TTPs against 178+ APT groups in the MITRE ATT&amp;CK framework and instantly identify the most likely threat actors based on TTP overlap scoring. Supports batch input, CSV/Excel/HTML export, and an interactive dashboard.
+          </p>
+
+          <div id="statusPill" class="status-pill status-checking">
+            <span class="status-dot"></span>
+            <span id="statusText">Checking tool status...</span>
+          </div>
+          <br>
+          <a href="http://localhost:5000" target="_blank" class="btn-launch" id="launchBtn">
+            <i class="fas fa-external-link-alt"></i> Open Full View
+          </a>
+          <a href="mitre-mapper.html" class="btn-outline-nav">
+            <i class="fas fa-info-circle"></i> Tool Details
+          </a>
+
+          <div class="tag-row">
+            <span class="tag">ATT&amp;CK Enterprise</span>
+            <span class="tag">178+ APT Groups</span>
+            <span class="tag">TTP Overlap Scoring</span>
+            <span class="tag">Export CSV / Excel / HTML</span>
+            <span class="tag">CLI Support</span>
+          </div>
+        </div>
+
+        <div class="col-lg-4 mt-3 mt-lg-0">
+          <div class="steps-box">
+            <h6><i class="fas fa-terminal" style="margin-right:7px;"></i>How to Start</h6>
+            <div class="step-row">
+              <div class="step-num">1</div>
+              <p>Open terminal, navigate to:<br><code>sixteenproject\mitre_ttp_mapper</code></p>
+            </div>
+            <div class="step-row">
+              <div class="step-num">2</div>
+              <p>Run: <code>python app.py</code></p>
+            </div>
+            <div class="step-row">
+              <div class="step-num">3</div>
+              <p>Tool loads automatically, or click <strong>Open Full View</strong>.</p>
+            </div>
+            <div class="step-row">
+              <div class="step-num">4</div>
+              <p>Stop with <code>Ctrl+C</code>.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Embedded tool iframe -->
+      <div class="embed-wrap" id="embedWrap">
+        <iframe src="http://localhost:5000" id="toolFrame" title="MITRE TTP Mapper"></iframe>
+        <div class="embed-offline" id="embedOffline">
+          <div class="offline-icon"><i class="fas fa-plug"></i></div>
+          <p style="font-size:.92rem; font-weight:600; color:rgba(255,255,255,.8); margin-bottom:6px;">Tool server is not running</p>
+          <p style="font-size:.82rem;">Start the server using the instructions above, then refresh this page.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════ Other Tools ════ -->
+    <div class="section-label"><i class="fas fa-cube" style="margin-right:6px;"></i>Community Tools</div>
+    <div class="row" id="otherTools"></div>
+
+  </div>
+
+  <footer class="page-footer">
+    <div class="container" style="max-height:50px;">
+      <p class="text-center" style="color:white; margin:0; padding:14px 0;">
+        Copyright &copy; 2025. The Sixteen Project
+      </p>
+    </div>
+  </footer>
+
+  <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.bundle.min.js"></script>
+  <script src="assets/lp/vendor/wow/wow.min.js"></script>
+  <script src="data/threat-tools.js"></script>
+  <script>
+    // ── Status checker ──
+    function checkStatus() {
+      fetch('http://localhost:5000', { mode: 'no-cors', cache: 'no-store' })
+        .then(() => {
+          document.getElementById('statusPill').className = 'status-pill status-online';
+          document.getElementById('statusText').textContent = 'Tool is running — localhost:5000';
+          document.getElementById('toolFrame').style.display = 'block';
+          document.getElementById('embedOffline').style.display = 'none';
+        })
+        .catch(() => {
+          document.getElementById('statusPill').className = 'status-pill status-offline';
+          document.getElementById('statusText').textContent = 'Tool is not running — start with python app.py';
+          document.getElementById('toolFrame').style.display = 'none';
+          document.getElementById('embedOffline').style.display = 'block';
+        });
+    }
+    checkStatus();
+    setInterval(checkStatus, 10000);
+
+    // ── Render community tools (skip first entry = MITRE Mapper) ──
+    const container = document.getElementById('otherTools');
+    const others = threatTools.slice(1);
+    others.forEach(item => {
+      const col = document.createElement('div');
+      col.className = 'col-lg-4 col-md-6 mb-4';
+      col.innerHTML = `
+        <div class="tool-card">
+          <div class="tool-card-img">
+            <img src="${item.imageSrc}" alt="${item.title}">
+          </div>
+          <div class="tool-card-body">
+            <h6>${item.title}</h6>
+            ${item.description ? `<p>${item.description}</p>` : ''}
+          </div>
+          <div class="tool-card-footer">
+            <a href="${item.downloadLink}" target="_blank" class="btn-card-primary">
+              <i class="fas fa-download" style="margin-right:5px;"></i>Download
+            </a>
+            <a href="${item.manualLink}" target="_blank" class="btn-card-outline">
+              <i class="fas fa-book" style="margin-right:5px;"></i>Docs
+            </a>
+          </div>
+        </div>`;
+      container.appendChild(col);
+    });
+  </script>
+</body>
+</html>

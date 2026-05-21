@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The Sixteen Project - MITRE TTP Overlap Mapper</title>
+  <link rel="shortcut icon" type="image/jpg" href="assets/lp/img/logo_main.jpg"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.10.0/css/all.min.css" rel="stylesheet">
+  <link href="assets/dp/css/style.css" rel="stylesheet">
+  <link rel="stylesheet" href="assets/brand.css">
+
+  <style>
+    body { font-family: 'Poppins', sans-serif; background: #f8f9fc; }
+
+    .tool-header {
+      background: linear-gradient(135deg, #162447 0%, #0d1b33 100%);
+      color: white;
+      padding: 40px 0 32px;
+    }
+    .tool-header h1 { font-size: 1.6rem; font-weight: 700; margin-bottom: 6px; }
+    .tool-header p { color: rgba(255,255,255,.65); font-size: .92rem; margin: 0; }
+    .tool-header .badge-tag {
+      display: inline-block;
+      background: rgba(255,255,255,.12);
+      border: 1px solid rgba(255,255,255,.2);
+      color: rgba(255,255,255,.85);
+      font-size: .72rem;
+      padding: 3px 10px;
+      border-radius: 20px;
+      margin-bottom: 14px;
+      text-transform: uppercase;
+      letter-spacing: .5px;
+    }
+
+    .launch-section {
+      background: white;
+      border-radius: 14px;
+      box-shadow: 0 4px 24px rgba(22,36,71,.1);
+      padding: 36px;
+      margin: 28px 0;
+      border-top: 4px solid #162447;
+    }
+
+    .status-indicator {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: .85rem;
+      padding: 6px 14px;
+      border-radius: 20px;
+      margin-bottom: 20px;
+      font-weight: 500;
+    }
+    .status-dot { width: 8px; height: 8px; border-radius: 50%; }
+    .status-checking { background: #fef3c7; color: #92400e; }
+    .status-checking .status-dot { background: #f59e0b; animation: pulse 1s infinite; }
+    .status-online  { background: #d1fae5; color: #065f46; }
+    .status-online  .status-dot { background: #10b981; }
+    .status-offline { background: #fee2e2; color: #991b1b; }
+    .status-offline .status-dot { background: #ef4444; }
+
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+
+    .btn-launch {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      background: #162447;
+      color: white;
+      padding: 12px 28px;
+      border-radius: 8px;
+      font-size: .95rem;
+      font-weight: 600;
+      text-decoration: none;
+      border: none;
+      cursor: pointer;
+      transition: background .2s;
+      margin-right: 10px;
+    }
+    .btn-launch:hover { background: #0d1b33; color: white; text-decoration: none; }
+    .btn-secondary-outline {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: transparent;
+      color: #162447;
+      padding: 11px 24px;
+      border-radius: 8px;
+      font-size: .9rem;
+      font-weight: 500;
+      text-decoration: none;
+      border: 2px solid #162447;
+      transition: all .2s;
+    }
+    .btn-secondary-outline:hover { background: #162447; color: white; text-decoration: none; }
+
+    /* Embed frame */
+    .iframe-wrap {
+      background: #0d1b33;
+      border-radius: 10px;
+      overflow: hidden;
+      border: 2px solid #1e3a5f;
+      margin-top: 28px;
+      position: relative;
+    }
+    .iframe-wrap iframe {
+      width: 100%;
+      height: 680px;
+      border: none;
+      display: block;
+    }
+    .iframe-offline {
+      display: none;
+      padding: 60px 40px;
+      text-align: center;
+      color: rgba(255,255,255,.7);
+    }
+    .iframe-offline .offline-icon { font-size: 3rem; margin-bottom: 16px; opacity: .5; }
+
+    /* How to start steps */
+    .steps-card {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 2px 12px rgba(22,36,71,.08);
+      padding: 28px 32px;
+      margin-top: 20px;
+    }
+    .steps-card h5 { color: #162447; font-weight: 700; margin-bottom: 18px; font-size: 1rem; }
+    .step-item {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 14px;
+      align-items: flex-start;
+    }
+    .step-num {
+      width: 28px; height: 28px;
+      border-radius: 50%;
+      background: #162447;
+      color: white;
+      display: flex; align-items: center; justify-content: center;
+      font-size: .78rem; font-weight: 700;
+      flex-shrink: 0;
+    }
+    .step-item p { margin: 0; font-size: .88rem; color: #374151; line-height: 1.6; }
+    .step-item code {
+      background: #f3f4f6;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: .82rem;
+      color: #162447;
+      font-family: monospace;
+    }
+
+    /* Feature tags -->*/
+    .feature-tags { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 20px; }
+    .feature-tag {
+      background: #f0f4ff;
+      border: 1px solid #c7d4f5;
+      color: #162447;
+      font-size: .75rem;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-weight: 500;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navbar -->
+  <header>
+    <nav class="navbar navbar-expand-lg navbar-light bg-white sticky" data-offset="500">
+      <div class="container">
+        <a href="index.html" class="navbar-brand d-flex align-items-center gap-2">
+          <img src="assets/lp/img/logo_main.jpg" alt="The Sixteen Project Logo" style="height:44px; border-radius:6px;">
+          <span style="color:#162447; font-weight:700; font-size:15px; letter-spacing:.5px;">THE SIXTEEN PROJECT</span>
+        </a>
+        <button class="navbar-toggler" data-toggle="collapse" data-target="#navbarContent" aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="navbar-collapse collapse" id="navbarContent">
+          <ul class="navbar-nav ml-auto">
+            <li class="nav-item"><a class="nav-link" href="index.html">Home</a></li>
+            <li class="nav-item"><a class="nav-link" href="threat-library.html">Threat Library</a></li>
+            <li class="nav-item"><a class="nav-link" href="threat-report.html">Threat Report</a></li>
+            <li class="nav-item active"><a class="nav-link active-page" href="threat-tools.html">Threat Hunting Tools</a></li>
+            <li class="nav-item"><a class="nav-link" href="about.html">About</a></li>
+            <li class="nav-item"><a class="nav-link" href="credits.html">Credits</a></li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+  </header>
+
+  <!-- Tool Header -->
+  <div class="tool-header">
+    <div class="container">
+      <a href="threat-tools.html" style="color:rgba(255,255,255,.55); font-size:.85rem; text-decoration:none;">
+        &#8592; Back to Threat Hunting Tools
+      </a>
+      <div style="margin-top:16px;">
+        <span class="badge-tag">The Sixteen Project Tool</span>
+        <h1>MITRE ATT&amp;CK TTP Overlap Mapper</h1>
+        <p>Map your target TTPs against 178+ APT groups in the MITRE ATT&amp;CK framework and identify the most likely threat actors.</p>
+        <div class="feature-tags">
+          <span class="feature-tag">ATT&amp;CK Enterprise</span>
+          <span class="feature-tag">178+ APT Groups</span>
+          <span class="feature-tag">TTP Overlap Scoring</span>
+          <span class="feature-tag">Export CSV / Excel / HTML</span>
+          <span class="feature-tag">Interactive Dashboard</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="container" style="padding-top:32px; padding-bottom:40px;">
+    <div class="row">
+      <div class="col-lg-8">
+
+        <!-- Launch section -->
+        <div class="launch-section">
+          <div class="status-indicator status-checking" id="statusBadge">
+            <span class="status-dot"></span>
+            <span id="statusText">Checking tool status...</span>
+          </div>
+
+          <div style="margin-bottom:24px;">
+            <a href="http://localhost:5000" target="_blank" class="btn-launch" id="launchBtn">
+              <i class="fas fa-external-link-alt"></i> Launch Tool
+            </a>
+            <a href="../mitre_ttp_mapper/README.md" class="btn-secondary-outline">
+              <i class="fas fa-book"></i> README
+            </a>
+          </div>
+
+          <p style="font-size:.85rem; color:#6b7280; margin:0;">
+            The tool runs as a local web server on <code style="background:#f3f4f6; padding:2px 6px; border-radius:4px; font-size:.82rem;">http://localhost:5000</code>.
+            Click <strong>Launch Tool</strong> to open it. If the page doesn't load, start the server first using the steps on the right.
+          </p>
+
+          <!-- Embedded iframe -->
+          <div class="iframe-wrap" id="iframeWrap">
+            <iframe src="http://localhost:5000" id="toolFrame" title="MITRE TTP Mapper"></iframe>
+            <div class="iframe-offline" id="iframeOffline">
+              <div class="offline-icon">&#128269;</div>
+              <p style="font-size:.95rem; font-weight:600; color:rgba(255,255,255,.85);">Tool server is not running</p>
+              <p style="font-size:.83rem;">Start the server using the instructions on the right, then refresh this page.</p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="col-lg-4">
+
+        <!-- How to start -->
+        <div class="steps-card">
+          <h5><i class="fas fa-terminal" style="color:#162447; margin-right:8px;"></i>How to Start the Tool</h5>
+
+          <div class="step-item">
+            <div class="step-num">1</div>
+            <p>Open a terminal and navigate to the tool folder:<br>
+            <code>cd sixteenproject\mitre_ttp_mapper</code></p>
+          </div>
+          <div class="step-item">
+            <div class="step-num">2</div>
+            <p>Run the web server:<br>
+            <code>python app.py</code></p>
+          </div>
+          <div class="step-item">
+            <div class="step-num">3</div>
+            <p>The browser will open automatically at <code>localhost:5000</code>, or click <strong>Launch Tool</strong> above.</p>
+          </div>
+          <div class="step-item">
+            <div class="step-num">4</div>
+            <p>To stop the server, press <code>Ctrl+C</code> in the terminal.</p>
+          </div>
+        </div>
+
+        <!-- CLI usage -->
+        <div class="steps-card" style="margin-top:16px;">
+          <h5><i class="fas fa-code" style="color:#162447; margin-right:8px;"></i>CLI Usage</h5>
+          <p style="font-size:.83rem; color:#6b7280; margin-bottom:12px;">Run directly from command line for batch analysis:</p>
+          <pre style="background:#0d1b33; color:#90cdf4; padding:14px; border-radius:8px; font-size:.78rem; overflow-x:auto; margin:0; line-height:1.7;">python mitre_ttp_mapper.py \
+  --ttps-file ttps_cve-2026-41940.txt
+
+python mitre_ttp_mapper.py \
+  --ttps T1190 T1059.004 T1505.003 \
+  --top 20
+
+python mitre_ttp_mapper.py \
+  --ttps-file ttps.txt \
+  --force-update</pre>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <footer class="page-footer">
+    <div class="container" style="max-height:50px;">
+      <p class="text-center" style="color:white; margin:0; padding:14px 0;">
+        Copyright &copy; 2025. The Sixteen Project
+      </p>
+    </div>
+  </footer>
+
+  <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.bundle.min.js"></script>
+  <script>
+    // Check if the tool server is running
+    function checkStatus() {
+      fetch('http://localhost:5000', { mode: 'no-cors', cache: 'no-store' })
+        .then(() => {
+          document.getElementById('statusBadge').className = 'status-indicator status-online';
+          document.getElementById('statusText').textContent = 'Tool is running on localhost:5000';
+          document.getElementById('toolFrame').style.display = 'block';
+          document.getElementById('iframeOffline').style.display = 'none';
+        })
+        .catch(() => {
+          document.getElementById('statusBadge').className = 'status-indicator status-offline';
+          document.getElementById('statusText').textContent = 'Tool is not running — start with python app.py';
+          document.getElementById('toolFrame').style.display = 'none';
+          document.getElementById('iframeOffline').style.display = 'block';
+        });
+    }
+
+    checkStatus();
+    // Re-check every 10 seconds
+    setInterval(checkStatus, 10000);
+  </script>
+
+</body>
+</html>

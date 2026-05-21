@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>The Sixteen Project - Threat Library Detail</title>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+  <meta content="Threat Hunting & Intelligence" name="keywords">
+
+  <link rel="preconnect" href="https://fonts.gstatic.com">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.10.0/css/all.min.css" rel="stylesheet">
+  <link href="assets/dp/lib/owlcarousel/assets/owl.carousel.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.7.2/styles/default.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.7.2/highlight.min.js"></script>
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <link href="assets/dp/css/style.css" rel="stylesheet">
+  <link rel="stylesheet" href="assets/brand.css">
+  <link rel="shortcut icon" type="image/jpg" href="assets/lp/img/logo_main.jpg"/>
+
+  <style>
+    a { color: #1d4ed8; }
+    .nav-tabs .nav-link.active { color: #162447; border-bottom-color: #162447; }
+
+    /* MITRE Matrix table */
+    .ttp-table-Analyzed, .ttp-table {
+      width: 100%; border-collapse: collapse; font-size: 11px; table-layout: fixed;
+    }
+    .ttp-table-head-Analyzed th, .ttp-table-head th {
+      background: #1a6fff; color: white; padding: 4px; text-align: center; border: 1px solid #ccc;
+    }
+    .ttp-table-Analyzed td, .ttp-table td {
+      border: 1px solid #ddd; padding: 3px; text-align: center; vertical-align: top; font-size: 10px;
+    }
+    .table-container-ttp { overflow-x: auto; }
+
+    /* IOC tables */
+    .unique-table-div { max-height: 300px; overflow-y: auto; margin-bottom: 20px; }
+    .unique-data-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+    .unique-th { background: #1a6fff; color: white; padding: 6px; border: 1px solid #ccc; }
+    .unique-data-table td { padding: 4px 6px; border: 1px solid #eee; font-family: monospace; font-size: 11px; word-break: break-all; }
+
+    /* Charts */
+    .citation-chart svg, .citation-chart-year svg { font-size: 11px; }
+    .attack-tech-bar { fill: #1a6fff; }
+    .targetanalysis svg text { font-size: 11px; }
+
+    /* Loader */
+    #loader { text-align: center; padding: 40px; color: #888; }
+    #loader::after { content: "Loading threat data..."; }
+  </style>
+</head>
+<body>
+<div class="content-wrapper">
+  <header>
+    <nav class="navbar navbar-expand-lg navbar-light bg-white sticky" data-offset="500">
+      <div class="container">
+        <a href="index.html" class="navbar-brand d-flex align-items-center gap-2">
+          <img src="assets/lp/img/logo_main.jpg" alt="The Sixteen Project Logo">
+          <span style="color:#162447; font-weight:700; font-size:15px; letter-spacing:.5px;">THE SIXTEEN PROJECT</span>
+        </a>
+        <button class="navbar-toggler" data-toggle="collapse" data-target="#navbarContent" aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="navbar-collapse collapse" id="navbarContent">
+          <ul class="navbar-nav ml-auto">
+            <li class="nav-item"><a class="nav-link" href="index.html">Home</a></li>
+            <li class="nav-item active"><a class="nav-link" style="color:#1a6fff;" href="threat-library.html">Threat Library</a></li>
+            <li class="nav-item"><a class="nav-link" href="threat-report.html">Threat Report</a></li>
+            <li class="nav-item"><a class="nav-link" href="threat-tools.html">Threat Hunting Tools</a></li>
+            <li class="nav-item"><a class="nav-link" href="about.html">About</a></li>
+            <li class="nav-item"><a class="nav-link" href="credits.html">Credits</a></li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+  </header>
+
+  <div class="container-fluid pt-5">
+    <div class="row px-xl-5">
+      <div class="col-lg-12 col-md-12" style="margin-bottom:20px;">
+        <div class="customPage">
+          <center><a href="threat-library.html" style="color:#1a6fff;">&#8592; Back to Threat Library</a></center>
+          <div id="customSearchContainer" style="text-align:center; margin-top:10px; margin-bottom:20px;">
+            <input type="text" id="customSearchBox" placeholder="Search threats..." style="width:60%; padding:10px; border-radius:20px; border:1px solid #ccc;"><br>
+            <ul id="suggestionList" style="display:none; width:60%; margin:0 auto; list-style-type:none; padding:0;"></ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-lg-12 col-md-12">
+        <div id="loader"></div>
+        <div class="container-fluid" id="threatdatapage" style="display:none;">
+
+          <!-- Basic Info -->
+          <div class="row">
+            <div class="col-lg-12">
+              <div class="row px-xl-5">
+                <div class="col-lg-12 pb-5">
+                  <h3 class="font-weight-semi-bold" id="threatdataName"></h3>
+                  <div class="d-flex mb-3">
+                    <span class="text-dark font-weight-medium mb-0 mr-3" id="infoAlias"></span>
+                  </div>
+                  <div class="d-flex mb-3">
+                    <span id="informationType" style="color:black; font-size:0.8rem;"></span>
+                  </div>
+                  <div class="d-flex mb-3">
+                    <p class="mb-4" id="informationDescription" style="text-align:justify;"></p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- News Trend -->
+          <div class="row px-xl-5">
+            <div class="col-lg-12">
+              <h3>[News Analysis] Trends:</h3>
+              <h4 id="barYearTotal">Total Trend: </h4>
+              <h5>Trend Per Year</h5>
+              <div class="citation-chart-year"></div>
+              <br><br>
+              <h5>Trend Per Month</h5>
+              <div class="citation-chart"></div>
+            </div>
+          </div><br><br><br>
+
+          <!-- Co-occurrence Graph -->
+          <div class="row px-xl-5">
+            <h3>[News Analysis] News Mention Another Threat Name:</h3>
+            <div class="col-lg-12">
+              <svg id="graphSvg" style="border:2px solid #ddd;" width="90%" height="600" viewBox="0 0 800 600" preserveAspectRatio="xMidYMid meet"></svg>
+            </div>
+          </div>
+          <br><br>
+
+          <!-- TTP Technique Performance -->
+          <div class="row px-xl-5">
+            <h3>[TTP Analysis] Technique Performance:</h3>
+            <div class="col-lg-12">
+              <div class="container-fluid">
+                <div class="d-flex justify-content-center mb-3">
+                  <div id="attack-techniques-detail"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <br><br>
+
+          <!-- MITRE Matrix -->
+          <div class="row px-xl-5">
+            <h3>[TTP Analysis] MITRE ATT&amp;CK Matrix:</h3>
+            <div class="col-lg-12">
+              <div style="overflow-x:auto;">
+                <table class="ttp-table-Analyzed" id="ttpTableAnalyzed">
+                  <thead>
+                    <tr class="ttp-table-head-Analyzed">
+                      <th>TA0043<br>Recon</th>
+                      <th>TA0042<br>Resource Dev</th>
+                      <th>TA0001<br>Initial Access</th>
+                      <th>TA0002<br>Execution</th>
+                      <th>TA0003<br>Persistence</th>
+                      <th>TA0004<br>Priv Esc</th>
+                      <th>TA0005<br>Defense Evasion</th>
+                      <th>TA0006<br>Cred Access</th>
+                      <th>TA0007<br>Discovery</th>
+                      <th>TA0008<br>Lateral Mvmt</th>
+                      <th>TA0009<br>Collection</th>
+                      <th>TA0011<br>C2</th>
+                      <th>TA0010<br>Exfiltration</th>
+                      <th>TA0040<br>Impact</th>
+                    </tr>
+                  </thead>
+                  <tbody id="mitreMatrixBody" style="text-align:center;"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+          <br><br>
+
+          <!-- IOC Tables -->
+          <div class="row px-xl-5">
+            <h3 class="text-center">[Infrastructure Analysis] Based on Related IOC:</h3>
+            <div class="container-fluid">
+              <div class="d-flex justify-content-center mb-3">
+                <select id="filterType" class="mx-1">
+                  <option value="top">Top</option>
+                  <option value="day">Day</option>
+                  <option value="month">Month</option>
+                  <option value="year">Year</option>
+                </select>
+                <input type="number" id="filterValue" placeholder="Value" class="mx-1" />
+                <button onclick="applyFilter()" class="mx-1" style="background:#1a6fff; color:white; border:none; padding:4px 12px; border-radius:4px;">Apply</button>
+              </div>
+              <div class="row">
+                <div class="col-lg-4 col-md-6 col-sm-12">
+                  <div class="unique-table-div" id="ipPortDiv">
+                    <table class="unique-data-table">
+                      <thead><tr><th class="unique-th">IP:Port</th><th class="unique-th">Timestamp</th></tr></thead>
+                      <tbody id="ipPortTable"></tbody>
+                    </table>
+                  </div>
+                </div>
+                <div class="col-lg-4 col-md-6 col-sm-12">
+                  <div class="unique-table-div" id="domainDiv">
+                    <table class="unique-data-table">
+                      <thead><tr><th class="unique-th">Domain</th><th class="unique-th">Timestamp</th></tr></thead>
+                      <tbody id="domainTable"></tbody>
+                    </table>
+                  </div>
+                </div>
+                <div class="col-lg-4 col-md-6 col-sm-12">
+                  <div class="unique-table-div" id="urlDiv">
+                    <table class="unique-data-table">
+                      <thead><tr><th class="unique-th">URL</th><th class="unique-th">Timestamp</th></tr></thead>
+                      <tbody id="urlTable"></tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div><br><br>
+
+          <!-- Target Analysis -->
+          <div class="row px-xl-5">
+            <h3 class="text-center">[Target Analysis] Region/Sector:</h3>
+            <div class="container-fluid">
+              <div class="targetanalysis"></div>
+            </div>
+          </div><br><br>
+
+          <!-- References Tabs -->
+          <div class="row px-xl-5 py-5">
+            <h3>References:</h3>
+            <div class="col">
+              <div class="nav nav-tabs justify-content-center border-secondary mb-4">
+                <a class="nav-item nav-link active" data-toggle="tab" href="#tab-pane-1">News</a>
+                <a class="nav-item nav-link" data-toggle="tab" href="#tab-pane-2">Basic Information</a>
+                <a class="nav-item nav-link" data-toggle="tab" href="#tab-pane-3">Indicator of Compromise</a>
+                <a class="nav-item nav-link" data-toggle="tab" href="#tab-pane-4">MITRE ATT&amp;CK</a>
+              </div>
+              <div class="tab-content">
+                <div class="tab-pane fade show active" id="tab-pane-1">
+                  <h4 class="mb-3" id="title_newsarticle"></h4>
+                  <div id="articlesContainer"></div>
+                </div>
+                <div class="tab-pane fade" id="tab-pane-2">
+                  <h4 class="mb-3" id="title_etda"></h4>
+                  <div id="basicInformation"></div>
+                </div>
+                <div class="tab-pane fade" id="tab-pane-3">
+                  <h4 class="mb-3" id="title_ioc"></h4>
+                  <div id="iocContainer"></div>
+                </div>
+                <div class="tab-pane fade" id="tab-pane-4">
+                  <h4 class="mb-3" id="title_mitre"></h4>
+                  <div class="table-container-ttp">
+                    <table class="ttp-table" id="ttpTable">
+                      <thead>
+                        <tr class="ttp-table-head">
+                          <th>TA0043<br>Recon</th>
+                          <th>TA0042<br>Resource Dev</th>
+                          <th>TA0001<br>Initial Access</th>
+                          <th>TA0002<br>Execution</th>
+                          <th>TA0003<br>Persistence</th>
+                          <th>TA0004<br>Priv Esc</th>
+                          <th>TA0005<br>Defense Evasion</th>
+                          <th>TA0006<br>Cred Access</th>
+                          <th>TA0007<br>Discovery</th>
+                          <th>TA0008<br>Lateral Mvmt</th>
+                          <th>TA0009<br>Collection</th>
+                          <th>TA0011<br>C2</th>
+                          <th>TA0010<br>Exfiltration</th>
+                          <th>TA0040<br>Impact</th>
+                        </tr>
+                      </thead>
+                      <tbody id="ttpTableBody" style="text-align:center;"></tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div><!-- /#threatdatapage -->
+      </div>
+    </div>
+  </div>
+
+  <footer class="page-footer">
+    <div class="container" style="max-height:50px;">
+      <p class="text-center" style="color:white; margin:0; padding:14px 0;">Copyright &copy; 2025. The Sixteen Project</p>
+    </div>
+  </footer>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.bundle.min.js"></script>
+<script src="assets/dp/lib/easing/easing.min.js"></script>
+<script src="assets/dp/lib/owlcarousel/owl.carousel.min.js"></script>
+<script src="assets/dp/mail/jqBootstrapValidation.min.js"></script>
+<script src="assets/dp/mail/contact.js"></script>
+<script src="searchbox.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/js-yaml@4/dist/js-yaml.min.js"></script>
+
+<script>
+  // ── URL param helper ──────────────────────────────────────────────────────
+  function getURLParameter(name) {
+    return decodeURIComponent(
+      (new RegExp('[?|&]' + name + '=([^&;]+?)(&|#|;|$)').exec(location.search) || [, ""])[1]
+        .replace(/\+/g, '%20')
+    ) || null;
+  }
+
+  // ── Search box ────────────────────────────────────────────────────────────
+  const searchBox = document.getElementById('customSearchBox');
+  const suggestionList = document.getElementById('suggestionList');
+
+  searchBox.addEventListener('input', function () {
+    const q = this.value.toLowerCase();
+    suggestionList.innerHTML = '';
+    if (!q) { suggestionList.style.display = 'none'; return; }
+    const matches = suggestions.filter(s => s.text.toLowerCase().includes(q)).slice(0, 10);
+    if (!matches.length) { suggestionList.style.display = 'none'; return; }
+    matches.forEach(s => {
+      const li = document.createElement('li');
+      li.style.cssText = 'padding:6px 12px; cursor:pointer; border:1px solid #eee; background:white;';
+      li.textContent = s.text;
+      li.onclick = () => { window.location.href = s.url; };
+      suggestionList.appendChild(li);
+    });
+    suggestionList.style.display = 'block';
+  });
+
+  document.addEventListener('click', e => {
+    if (!e.target.closest('#customSearchContainer')) suggestionList.style.display = 'none';
+  });
+
+  // ── Tactic code → column index map ───────────────────────────────────────
+  const TACTIC_COL = {
+    'ta0043': 0, 'ta0042': 1, 'ta0001': 2, 'ta0002': 3, 'ta0003': 4,
+    'ta0004': 5, 'ta0005': 6, 'ta0006': 7, 'ta0007': 8, 'ta0008': 9,
+    'ta0009': 10, 'ta0011': 11, 'ta0010': 12, 'ta0040': 13
+  };
+
+  // ── Build MITRE matrix row ─────────────────────────────────────────────
+  function buildMitreMatrix(mitreData, tbodyId) {
+    const tbody = document.getElementById(tbodyId);
+    if (!tbody || !mitreData || !mitreData.length) return;
+
+    const cols = new Array(14).fill(null).map(() => []);
+
+    mitreData.forEach(proc => {
+      if (!proc.techniques) return;
+      proc.techniques.forEach(t => {
+        const col = TACTIC_COL[t.tactic_code];
+        if (col !== undefined) {
+          const link = `<a href="${t.technique_link}" target="_blank" style="font-size:10px; color:#1a6fff;">${t.technique_code.toUpperCase()}<br><small>${t.technique_name}</small></a>`;
+          if (!cols[col].includes(link)) cols[col].push(link);
+        }
+      });
+    });
+
+    const maxRows = Math.max(...cols.map(c => c.length), 1);
+    tbody.innerHTML = '';
+    for (let i = 0; i < maxRows; i++) {
+      const tr = document.createElement('tr');
+      cols.forEach(col => {
+        const td = document.createElement('td');
+        td.innerHTML = col[i] || '';
+        tr.appendChild(td);
+      });
+      tbody.appendChild(tr);
+    }
+  }
+
+  // ── IOC helpers ───────────────────────────────────────────────────────────
+  let allIOC = [];
+
+  function renderIOC(data) {
+    const ipTbl = document.getElementById('ipPortTable');
+    const domTbl = document.getElementById('domainTable');
+    const urlTbl = document.getElementById('urlTable');
+    ipTbl.innerHTML = domTbl.innerHTML = urlTbl.innerHTML = '';
+
+    data.forEach(entry => {
+      const ioc = entry.ioc || {};
+      (ioc['ip:port'] || []).forEach(i => {
+        ipTbl.innerHTML += `<tr><td>${i.value}</td><td>${entry.timestamp || ''}</td></tr>`;
+      });
+      (ioc['domain'] || []).forEach(d => {
+        domTbl.innerHTML += `<tr><td>${d.value}</td><td>${entry.timestamp || ''}</td></tr>`;
+      });
+      (ioc['url'] || []).forEach(u => {
+        urlTbl.innerHTML += `<tr><td style="word-break:break-all">${u.value}</td><td>${entry.timestamp || ''}</td></tr>`;
+      });
+    });
+  }
+
+  function applyFilter() {
+    const type = document.getElementById('filterType').value;
+    const val = parseInt(document.getElementById('filterValue').value) || 10;
+    let filtered = [...allIOC];
+
+    if (type === 'top') {
+      filtered = filtered.slice(0, val);
+    } else if (type === 'day' || type === 'month' || type === 'year') {
+      const now = new Date();
+      filtered = filtered.filter(e => {
+        if (!e.timestamp) return false;
+        const d = new Date(e.timestamp);
+        const diff = (now - d) / 1000;
+        if (type === 'day')   return diff <= val * 86400;
+        if (type === 'month') return diff <= val * 86400 * 30;
+        if (type === 'year')  return diff <= val * 86400 * 365;
+      });
+    }
+    renderIOC(filtered);
+  }
+
+  // ── D3 Bar chart helper ───────────────────────────────────────────────────
+  function drawBarChart(container, data, xKey, yKey, color) {
+    d3.select(container).selectAll('*').remove();
+    if (!data || !data.length) { d3.select(container).append('p').text('No data available.'); return; }
+
+    const margin = {top: 20, right: 20, bottom: 80, left: 50};
+    const w = Math.min(900, data.length * 40 + margin.left + margin.right);
+    const h = 250;
+
+    const svg = d3.select(container).append('svg')
+      .attr('width', w).attr('height', h);
+
+    const x = d3.scaleBand().domain(data.map(d => d[xKey])).range([margin.left, w - margin.right]).padding(0.2);
+    const y = d3.scaleLinear().domain([0, d3.max(data, d => d[yKey])]).nice().range([h - margin.bottom, margin.top]);
+
+    svg.append('g').attr('transform', `translate(0,${h - margin.bottom})`).call(d3.axisBottom(x))
+      .selectAll('text').attr('transform', 'rotate(-45)').style('text-anchor', 'end').style('font-size', '10px');
+
+    svg.append('g').attr('transform', `translate(${margin.left},0)`).call(d3.axisLeft(y).ticks(5));
+
+    svg.selectAll('rect').data(data).join('rect')
+      .attr('x', d => x(d[xKey])).attr('y', d => y(d[yKey]))
+      .attr('width', x.bandwidth()).attr('height', d => y(0) - y(d[yKey]))
+      .attr('fill', color || '#1a6fff');
+  }
+
+  // ── Main: load threat data ─────────────────────────────────────────────────
+  var dataFile = getURLParameter('data');
+
+  if (dataFile) {
+    var script = document.createElement('script');
+    script.src = 'threat/' + dataFile + '.js';
+    script.onload = function () {
+      document.getElementById('loader').style.display = 'none';
+      document.getElementById('threatdatapage').style.display = 'block';
+
+      // Basic info
+      document.getElementById('threatdataName').textContent = threatdata['name'] || '';
+      document.getElementById('infoAlias').textContent = threatdata['alias'] || '';
+      document.getElementById('informationType').textContent = threatdata['type'] ? '(Type: ' + threatdata['type'] + ')' : '';
+      document.getElementById('informationDescription').textContent = (threatdata['all_data'] && threatdata['all_data']['description']) || 'No description available.';
+
+      // Articles
+      const articlesContainer = document.getElementById('articlesContainer');
+      if (threatdata['articles'] && threatdata['articles'].length) {
+        document.getElementById('title_newsarticle').innerHTML = 'News Articles (Credit @<a href="https://malpedia.caad.fkie.fraunhofer.de/" target="_blank">Malpedia</a>)';
+        threatdata['articles'].forEach(a => {
+          const div = document.createElement('div');
+          div.style.marginBottom = '10px';
+          div.innerHTML = `<a href="${a.data_url}" target="_blank">${a.title}</a><p style="font-size:12px; color:#888;">${a.date || ''} by ${a.author || ''} from ${a.organization || ''}</p>`;
+          articlesContainer.appendChild(div);
+        });
+
+        // Trend charts from articles
+        const byYear = {}, byMonth = {};
+        threatdata['articles'].forEach(a => {
+          if (!a.date) return;
+          const d = new Date(a.date);
+          if (isNaN(d)) return;
+          const y = d.getFullYear().toString();
+          const m = d.toISOString().slice(0, 7);
+          byYear[y] = (byYear[y] || 0) + 1;
+          byMonth[m] = (byMonth[m] || 0) + 1;
+        });
+        const yearData = Object.entries(byYear).sort().map(([k, v]) => ({year: k, count: v}));
+        const monthData = Object.entries(byMonth).sort().map(([k, v]) => ({month: k, count: v}));
+        document.getElementById('barYearTotal').textContent = 'Total Trend: ' + threatdata['articles'].length + ' articles';
+        drawBarChart('.citation-chart-year', yearData, 'year', 'count', '#1a6fff');
+        drawBarChart('.citation-chart', monthData, 'month', 'count', '#5ba4ff');
+      }
+
+      // Basic info tab (etda references)
+      if (threatdata['all_data'] && threatdata['all_data']['information']) {
+        document.getElementById('title_etda').innerHTML = 'Basic Information (Credit @<a href="https://apt.etda.or.th/" target="_blank">ETDA</a>)';
+        const biDiv = document.getElementById('basicInformation');
+        threatdata['all_data']['information'].forEach(url => {
+          biDiv.innerHTML += `<p><a href="${url}" target="_blank">${url}</a></p>`;
+        });
+      }
+
+      // IOC data
+      if (threatdata['ioc_data'] && threatdata['ioc_data'].length) {
+        document.getElementById('title_ioc').innerHTML = 'Indicators of Compromise (Credit @<a href="https://threatfox.abuse.ch" target="_blank">ThreatFox</a>)';
+        allIOC = threatdata['ioc_data'];
+        renderIOC(allIOC.slice(0, 50));
+      }
+
+      // MITRE data
+      if (threatdata['mitre'] && threatdata['mitre'].length) {
+        document.getElementById('title_mitre').textContent = 'MITRE ATT&CK Techniques';
+        buildMitreMatrix(threatdata['mitre'], 'mitreMatrixBody');
+        buildMitreMatrix(threatdata['mitre'], 'ttpTableBody');
+
+        // Technique performance bar chart
+        const techCount = {};
+        threatdata['mitre'].forEach(proc => {
+          (proc.techniques || []).forEach(t => {
+            const k = t.technique_code.toUpperCase();
+            techCount[k] = (techCount[k] || 0) + 1;
+          });
+        });
+        const techData = Object.entries(techCount).sort((a,b) => b[1]-a[1]).slice(0, 20).map(([k, v]) => ({tech: k, count: v}));
+        drawBarChart('#attack-techniques-detail', techData, 'tech', 'count', '#1a6fff');
+      }
+
+      // Co-occurrence graph (simple D3 force)
+      if (threatdata['articles'] && threatdata['articles'].length) {
+        const threatName = threatdata['name'];
+        const mentions = {};
+        threatdata['articles'].forEach(a => {
+          if (a.title) {
+            const words = a.title.match(/\b[A-Z][A-Za-z0-9]{2,}\b/g) || [];
+            words.forEach(w => {
+              if (w !== threatName) mentions[w] = (mentions[w] || 0) + 1;
+            });
+          }
+        });
+        const nodes = [{id: threatName, r: 16}];
+        const links = [];
+        Object.entries(mentions).sort((a,b) => b[1]-a[1]).slice(0, 15).forEach(([k, v]) => {
+          nodes.push({id: k, r: Math.min(4 + v * 2, 14)});
+          links.push({source: threatName, target: k, value: v});
+        });
+
+        const svg = d3.select('#graphSvg');
+        const W = parseInt(svg.attr('width')) || 800, H = parseInt(svg.attr('height')) || 600;
+        svg.selectAll('*').remove();
+
+        const sim = d3.forceSimulation(nodes)
+          .force('link', d3.forceLink(links).id(d => d.id).distance(120))
+          .force('charge', d3.forceManyBody().strength(-200))
+          .force('center', d3.forceCenter(W / 2, H / 2));
+
+        const link = svg.append('g').selectAll('line').data(links).join('line')
+          .attr('stroke', '#ccc').attr('stroke-width', d => Math.sqrt(d.value));
+
+        const node = svg.append('g').selectAll('g').data(nodes).join('g')
+          .call(d3.drag()
+            .on('start', (ev, d) => { if (!ev.active) sim.alphaTarget(0.3).restart(); d.fx = d.x; d.fy = d.y; })
+            .on('drag', (ev, d) => { d.fx = ev.x; d.fy = ev.y; })
+            .on('end', (ev, d) => { if (!ev.active) sim.alphaTarget(0); d.fx = null; d.fy = null; })
+          );
+
+        node.append('circle').attr('r', d => d.r).attr('fill', d => d.id === threatName ? '#1a6fff' : '#90b8ff').attr('stroke', '#fff').attr('stroke-width', 1.5);
+        node.append('text').text(d => d.id).attr('x', d => d.r + 3).attr('y', '0.31em').style('font-size', '10px');
+
+        sim.on('tick', () => {
+          link.attr('x1', d => d.source.x).attr('y1', d => d.source.y).attr('x2', d => d.target.x).attr('y2', d => d.target.y);
+          node.attr('transform', d => `translate(${d.x},${d.y})`);
+        });
+      }
+    };
+
+    script.onerror = function () {
+      document.getElementById('loader').innerHTML = '<p style="color:red;">Threat data not found: <code>' + dataFile + '</code></p>';
+    };
+
+    document.head.appendChild(script);
+  } else {
+    document.getElementById('loader').innerHTML = '<p>No threat specified. <a href="threat-library.html">Go to Threat Library</a></p>';
+  }
+</script>
+</body>
+</html>

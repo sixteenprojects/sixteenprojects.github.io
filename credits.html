@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The Sixteen Project - Credits & Team</title>
+  <link rel="shortcut icon" type="image/jpg" href="assets/lp/img/logo_main.jpg"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.10.0/css/all.min.css" rel="stylesheet">
+  <link href="assets/dp/css/style.css" rel="stylesheet">
+  <link rel="stylesheet" href="assets/brand.css">
+
+  <style>
+    * { box-sizing: border-box; }
+    body { font-family: 'Poppins', sans-serif; background: #f8f9fc; color: #1a1a2e; }
+
+    /* ── Hero ── */
+    .credits-hero {
+      background: linear-gradient(135deg, #162447 0%, #0d1b33 60%, #1a2f6b 100%);
+      color: white;
+      padding: 80px 0 64px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .credits-hero::before {
+      content: 'XVI';
+      position: absolute;
+      font-size: 300px;
+      font-weight: 800;
+      color: rgba(255,255,255,.04);
+      right: -30px;
+      top: -70px;
+      letter-spacing: -10px;
+      pointer-events: none;
+    }
+    .credits-hero h1 {
+      font-size: 2.4rem;
+      font-weight: 700;
+      margin-bottom: 14px;
+      letter-spacing: .5px;
+    }
+    .credits-hero .tagline {
+      font-size: 1.05rem;
+      color: rgba(255,255,255,.72);
+      max-width: 620px;
+      margin: 0 auto 28px;
+      line-height: 1.75;
+    }
+    .credits-hero .quote-block {
+      background: rgba(255,255,255,.08);
+      border-left: 4px solid rgba(255,255,255,.35);
+      display: inline-block;
+      padding: 16px 28px;
+      border-radius: 0 8px 8px 0;
+      font-style: italic;
+      max-width: 700px;
+      font-size: .95rem;
+      color: rgba(255,255,255,.85);
+      text-align: left;
+      line-height: 1.7;
+    }
+    .credits-hero .quote-block .attrib {
+      display: block;
+      margin-top: 10px;
+      font-style: normal;
+      font-weight: 600;
+      font-size: .82rem;
+      color: rgba(255,255,255,.6);
+    }
+
+    /* ── Section titles ── */
+    .section-title {
+      text-align: center;
+      margin-bottom: 44px;
+    }
+    .section-title h2 {
+      font-size: 1.7rem;
+      font-weight: 700;
+      color: #162447;
+      margin-bottom: 6px;
+    }
+    .section-title p { color: #6b7280; font-size: .93rem; }
+    .section-title .bar {
+      width: 52px; height: 4px;
+      background: #162447;
+      margin: 10px auto 0;
+      border-radius: 2px;
+    }
+
+    /* ── Founding story card ── */
+    .founding-card {
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 8px 40px rgba(22,36,71,.11);
+      border-top: 5px solid #162447;
+      margin-bottom: 28px;
+      overflow: hidden;
+    }
+    .founding-narrative {
+      padding: 44px 48px 36px;
+      border-bottom: 1px solid #f0f2f8;
+    }
+    .founding-narrative p {
+      font-size: .95rem;
+      color: #374151;
+      line-height: 1.9;
+      margin-bottom: 16px;
+    }
+    .founding-narrative p:last-child { margin-bottom: 0; }
+    .founding-narrative strong { color: #162447; }
+
+    /* ── Founder cards row ── */
+    .founders-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0;
+    }
+    .founder-card {
+      padding: 32px 28px;
+      text-align: center;
+      border-right: 1px solid #f0f2f8;
+      transition: background .2s;
+    }
+    .founder-card:last-child { border-right: none; }
+    .founder-card:hover { background: #f8f9fc; }
+    .founder-avatar {
+      width: 72px; height: 72px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #162447, #1d4ed8);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 14px;
+      font-size: 1.4rem;
+      color: white;
+      font-weight: 700;
+      letter-spacing: -1px;
+    }
+    .founder-card h4 {
+      font-size: .95rem;
+      font-weight: 700;
+      color: #162447;
+      margin-bottom: 6px;
+      line-height: 1.4;
+    }
+    .founder-card .role-pill {
+      display: inline-block;
+      background: #f0f4ff;
+      color: #162447;
+      border: 1px solid #c7d4f5;
+      font-size: .7rem;
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: .4px;
+    }
+
+    /* ── Philosophy strip ── */
+    .philosophy-strip {
+      background: linear-gradient(90deg, #0d1b33, #162447);
+      color: white;
+      padding: 44px 48px;
+      border-radius: 14px;
+      margin-bottom: 60px;
+      display: flex;
+      gap: 40px;
+      align-items: center;
+    }
+    .philosophy-strip .ps-icon {
+      font-size: 3rem;
+      flex-shrink: 0;
+      opacity: .8;
+    }
+    .philosophy-strip h3 {
+      font-size: 1.15rem;
+      font-weight: 700;
+      margin-bottom: 10px;
+      color: rgba(255,255,255,.95);
+    }
+    .philosophy-strip p {
+      font-size: .92rem;
+      color: rgba(255,255,255,.68);
+      line-height: 1.8;
+      margin: 0;
+    }
+
+    /* ── Contributors ── */
+    .contributors-section {
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 4px 24px rgba(22,36,71,.08);
+      padding: 40px;
+      margin-bottom: 60px;
+    }
+    .contributors-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 14px;
+      margin-top: 28px;
+    }
+    .contributor-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: #f4f6fb;
+      border-radius: 10px;
+      padding: 13px 16px;
+      border-left: 3px solid #162447;
+      transition: background .15s;
+    }
+    .contributor-item:hover { background: #e8edf7; }
+    .ci-avatar {
+      width: 40px; height: 40px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #162447, #1d4ed8);
+      display: flex; align-items: center; justify-content: center;
+      color: white; font-weight: 700; font-size: .82rem; flex-shrink: 0;
+    }
+    .ci-info h6 { font-size: .87rem; font-weight: 600; color: #162447; margin: 0 0 2px; }
+    .ci-info span { font-size: .74rem; color: #6b7280; }
+    .add-contributor {
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      background: #f4f6fb; border-radius: 10px; padding: 13px 16px;
+      border: 2px dashed #cbd5e1; color: #9ca3af; font-size: .82rem;
+    }
+
+    /* ── Data credits ── */
+    .data-credit-card {
+      background: white;
+      border-radius: 12px;
+      padding: 22px 18px;
+      text-align: center;
+      box-shadow: 0 2px 12px rgba(22,36,71,.08);
+      border-top: 3px solid #162447;
+      height: 100%;
+    }
+    .data-credit-card .dc-icon { font-size: 1.6rem; margin-bottom: 10px; }
+    .data-credit-card h6 { color: #162447; font-weight: 700; margin-bottom: 4px; font-size: .9rem; }
+    .data-credit-card p { font-size: .78rem; color: #6b7280; margin: 0; }
+
+    /* ── Responsive ── */
+    @media (max-width: 768px) {
+      .founders-row { grid-template-columns: 1fr; }
+      .founder-card { border-right: none; border-bottom: 1px solid #f0f2f8; }
+      .founder-card:last-child { border-bottom: none; }
+      .founding-narrative { padding: 28px 24px; }
+      .philosophy-strip { flex-direction: column; padding: 32px 28px; gap: 16px; }
+      .credits-hero h1 { font-size: 1.7rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navbar -->
+  <header>
+    <nav class="navbar navbar-expand-lg navbar-light bg-white sticky" data-offset="500">
+      <div class="container">
+        <a href="index.html" class="navbar-brand d-flex align-items-center gap-2">
+          <img src="assets/lp/img/logo_main.jpg" alt="The Sixteen Project Logo" style="height:44px; border-radius:6px;">
+          <span style="color:#162447; font-weight:700; font-size:15px; letter-spacing:.5px;">THE SIXTEEN PROJECT</span>
+        </a>
+        <button class="navbar-toggler" data-toggle="collapse" data-target="#navbarContent" aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="navbar-collapse collapse" id="navbarContent">
+          <ul class="navbar-nav ml-auto">
+            <li class="nav-item"><a class="nav-link" href="index.html">Home</a></li>
+            <li class="nav-item"><a class="nav-link" href="threat-library.html">Threat Library</a></li>
+            <li class="nav-item"><a class="nav-link" href="threat-report.html">Threat Report</a></li>
+            <li class="nav-item"><a class="nav-link" href="threat-tools.html">Threat Hunting Tools</a></li>
+            <li class="nav-item"><a class="nav-link" href="about.html">About</a></li>
+            <li class="nav-item active"><a class="nav-link" style="color:#1d4ed8; font-weight:600;" href="credits.html">Credits</a></li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+  </header>
+
+  <!-- Hero -->
+  <div class="credits-hero">
+    <div class="container">
+      <h1>The People Behind The Sixteen Project</h1>
+      <p class="tagline">
+        Cybersecurity is too great a responsibility to carry alone.<br>
+        Collaboration is the foundation of lasting <strong style="color:white;">cyber resilience</strong>.
+      </p>
+      <div class="quote-block">
+        "Sharing knowledge with the community is not merely altruism — it is a collective defense strategy.
+        When we open what we know, we make every defender around us stronger. The adversary thrives in
+        the dark; we take that away by shining light together."
+        <span class="attrib">— M. Daffi Alhafizh, Initiator of The Sixteen Project</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="container" style="padding-top:60px; padding-bottom:20px;">
+
+    <!-- Founding Team -->
+    <div class="section-title">
+      <h2>Founding Team</h2>
+      <p>The people who started it and why they did</p>
+      <div class="bar"></div>
+    </div>
+
+    <div class="founding-card">
+
+      <!-- Unified narrative -->
+      <div class="founding-narrative">
+        <p>
+          The Sixteen Project began with a conviction: <strong>the weight of cybersecurity cannot rest on
+          a single pair of shoulders</strong>. It was initiated by <strong>M. Daffi Alhafizh</strong>, whose
+          journey through the security domain shaped everything this project stands for. He started his career
+          as a Security Analyst — learning the discipline of detecting, triaging, and responding to threats
+          at the frontline. That experience laid the groundwork for a deeper calling: understanding not just
+          what an attack looks like, but <em>who</em> is behind it and <em>why</em>. He evolved into a
+          Cyber Threat Hunter, spending time in the trenches of proactive detection, developing hypotheses,
+          and chasing adversarial patterns buried deep in telemetry. That relentless curiosity eventually
+          carried him into his current role as a Threat Researcher and Intelligence Analyst — where the
+          focus shifts from finding threats to truly <em>understanding</em> them: their infrastructure,
+          their motivations, and their tradecraft.
+        </p>
+        <p>
+          It was through this journey that the idea of The Sixteen Project took shape. Daffi recognized
+          that the knowledge accumulated across each stage of his career — and the knowledge held by
+          practitioners across the community — was too valuable to stay siloed. He reached out to two
+          colleagues who shared the same spirit. <strong>Rahmadini Farha Hayatunnufus</strong>, a
+          Cyber Threat Intelligence and Dark Web Analyst, brought the ability to surface intelligence
+          from the murkiest corners of the internet, contextualizing threat actors and their operations
+          beyond what surface-level data reveals. <strong>Muhammad Fadillah Fajari</strong>, a Malware
+          Analyst and Honeypot Researcher, contributed the technical depth to dissect adversarial tooling
+          and understand how malware behaves in the wild — from honeypot-captured samples to full reverse
+          engineering.
+        </p>
+        <p>
+          Together, the three of them built The Sixteen Project — not as a product, but as a
+          <strong>shared commitment</strong>: to make threat intelligence accessible, to document what
+          they learn, and to give back to the community that made them better practitioners. Every entry
+          in the threat library, every report, every tool is a piece of that commitment made tangible.
+        </p>
+      </div>
+
+      <!-- Three founder cards -->
+      <div class="founders-row">
+        <div class="founder-card">
+          <div class="founder-avatar">MD</div>
+          <h4>M. Daffi Alhafizh</h4>
+          <span class="role-pill">Initiator &amp; Threat Researcher</span>
+        </div>
+        <div class="founder-card">
+          <div class="founder-avatar">RF</div>
+          <h4>Rahmadini Farha Hayatunnufus</h4>
+          <span class="role-pill">CTI &amp; Dark Web Analyst</span>
+        </div>
+        <div class="founder-card">
+          <div class="founder-avatar">MF</div>
+          <h4>Muhammad Fadillah Fajari</h4>
+          <span class="role-pill">Malware Analyst &amp; Honeypot Researcher</span>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Philosophy strip -->
+    <div class="philosophy-strip">
+      <div class="ps-icon">&#128274;</div>
+      <div>
+        <h3>Why Collaboration?</h3>
+        <p>
+          Cyber resilience is not achieved by one person or one team — it is built by an ecosystem
+          that shares, warns, and strengthens one another. The Sixteen Project believes that open
+          knowledge is an active form of defense: the more people who understand the threat landscape,
+          the harder it becomes for adversaries to operate in the shadows. Every analyst who shares
+          a finding, every researcher who documents a technique, every practitioner who contributes
+          to the community is performing an act of collective defense.
+        </p>
+      </div>
+    </div>
+
+    <!-- Contributors -->
+    <div class="section-title">
+      <h2>Contributors</h2>
+      <p>Those who have contributed to the growth of The Sixteen Project</p>
+      <div class="bar"></div>
+    </div>
+
+    <div class="contributors-section">
+      <p style="color:#6b7280; font-size:.88rem; text-align:center; margin-bottom:4px;">
+        This list will grow as the community grows. Every contribution — no matter how small — is
+        recognized and appreciated here.
+      </p>
+
+      <div class="contributors-grid" id="contributorsGrid">
+
+        <!--
+          To add a contributor, copy this block:
+
+          <div class="contributor-item">
+            <div class="ci-avatar">AB</div>
+            <div class="ci-info">
+              <h6>Full Name</h6>
+              <span>Role / Area</span>
+            </div>
+          </div>
+        -->
+
+        <div class="add-contributor">
+          <i class="fas fa-plus-circle"></i>
+          <span>Contributor name will appear here</span>
+        </div>
+        <div class="add-contributor">
+          <i class="fas fa-plus-circle"></i>
+          <span>Contributor name will appear here</span>
+        </div>
+        <div class="add-contributor">
+          <i class="fas fa-plus-circle"></i>
+          <span>Contributor name will appear here</span>
+        </div>
+        <div class="add-contributor">
+          <i class="fas fa-plus-circle"></i>
+          <span>Contributor name will appear here</span>
+        </div>
+
+      </div>
+
+      <p style="text-align:center; margin-top:28px; font-size:.8rem; color:#9ca3af;">
+        Want to contribute? Reach out to the team through internal channels.
+      </p>
+    </div>
+
+    <!-- Data & Tool Credits -->
+    <div class="section-title">
+      <h2>Data & Tool Credits</h2>
+      <p>Open-source data sources and references powering this platform</p>
+      <div class="bar"></div>
+    </div>
+
+    <div class="row mb-5">
+      <div class="col-md-3 col-sm-6 mb-3">
+        <div class="data-credit-card">
+          <div class="dc-icon">&#128220;</div>
+          <h6>OpenHunting.io</h6>
+          <p>Base threat library data by Rizqy Rionaldy</p>
+        </div>
+      </div>
+      <div class="col-md-3 col-sm-6 mb-3">
+        <div class="data-credit-card">
+          <div class="dc-icon">&#128272;</div>
+          <h6>Malpedia</h6>
+          <p>Fraunhofer FKIE — malware knowledge base &amp; family references</p>
+        </div>
+      </div>
+      <div class="col-md-3 col-sm-6 mb-3">
+        <div class="data-credit-card">
+          <div class="dc-icon">&#128270;</div>
+          <h6>ThreatFox</h6>
+          <p>abuse.ch — IOC intelligence feed for malware infrastructure</p>
+        </div>
+      </div>
+      <div class="col-md-3 col-sm-6 mb-3">
+        <div class="data-credit-card">
+          <div class="dc-icon">&#127919;</div>
+          <h6>MITRE ATT&amp;CK</h6>
+          <p>TTP framework mapping for all threats in the library</p>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /.container -->
+
+  <footer class="page-footer">
+    <div class="container" style="max-height:50px;">
+      <p class="text-center" style="color:white; margin:0; padding:14px 0;">
+        Copyright &copy; 2025. The Sixteen Project — Built with passion for the community.
+      </p>
+    </div>
+  </footer>
+
+  <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
