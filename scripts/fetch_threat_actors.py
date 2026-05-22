@@ -5,9 +5,16 @@ Source: https://raw.githubusercontent.com/mitre/cti/master/enterprise-attack/ent
 
 Approach:
   1. Download enterprise-attack.json (STIX bundle)
-  2. Parse groups (intrusion-set), techniques (attack-pattern), malware/tools
-  3. Extract CVE references from descriptions + external_references
-  4. Walk "uses" relationships: group -> object -> CVEs
+  2. Parse all intrusion-set groups
+  3. Walk "uses" relationships:
+     - CVEs are extracted from the RELATIONSHIP object's own description
+       (e.g. "APT41 exploited CVE-2021-44228...") — these are group-specific.
+     - Also include CVEs from malware/tool external_references (source_name='cve'),
+       which are explicit structured attributions for that software.
+     - Technique (attack-pattern) descriptions are intentionally ignored:
+       they describe generic examples and would falsely credit every group
+       that uses the technique.
+  4. Follow campaign -> attributed-to -> group chains
   5. Output data/threat_actors.json
 
 Usage:
@@ -17,6 +24,7 @@ Usage:
 
 import json, re, os, sys, argparse
 from datetime import datetime, timezone
+from collections import defaultdict
 
 try:
     import requests
@@ -34,7 +42,7 @@ CVE_PATTERN = re.compile(r'\bCVE-\d{4}-\d{4,7}\b')
 
 def fetch_stix():
     print("[*] Downloading MITRE ATT&CK STIX bundle...")
-    resp = requests.get(MITRE_URL, timeout=180, stream=True)
+    resp = requests.get(MITRE_URL, timeout=300, stream=True)
     resp.raise_for_status()
     total = int(resp.headers.get('content-length', 0))
     chunks = []
@@ -53,19 +61,24 @@ def fetch_stix():
 
 
 # ─────────────────────────────────────────────
-#  CVE EXTRACTION
+#  CVE EXTRACTION HELPERS
 # ─────────────────────────────────────────────
 
-def extract_cves(obj):
-    """Extract all CVE IDs from an object's external_references and description."""
+def cves_from_text(obj):
+    """CVEs found by regex in an object's description fields."""
+    cves = set()
+    for field in ('description', 'x_mitre_description'):
+        cves.update(CVE_PATTERN.findall(obj.get(field) or ''))
+    return cves
+
+def cves_from_extref(obj):
+    """CVEs from structured external_references (source_name='cve') only."""
     cves = set()
     for ref in obj.get('external_references', []):
         if ref.get('source_name') == 'cve':
             eid = ref.get('external_id', '')
             if CVE_PATTERN.match(eid):
                 cves.add(eid)
-    for field in ('description', 'x_mitre_detection'):
-        cves.update(CVE_PATTERN.findall(obj.get(field) or ''))
     return cves
 
 
@@ -75,6 +88,7 @@ def extract_cves(obj):
 
 def build_mapping(stix):
     objects = stix['objects']
+    idx     = {o['id']: o for o in objects}
 
     # 1. Collect all groups (intrusion-set)
     groups = {}
@@ -90,25 +104,29 @@ def build_mapping(stix):
                     'url':  ref.get('url') or f"https://attack.mitre.org/groups/{mitre_id}/",
                 }
 
-    # 2. Objects that reference CVEs (attack-pattern, malware, tool, campaign)
-    obj_cves = {}
-    for o in objects:
-        if o['type'] in ('attack-pattern', 'malware', 'tool', 'campaign'):
-            cves = extract_cves(o)
-            if cves:
-                obj_cves[o['id']] = cves
+    print(f"    Groups: {len(groups)}")
 
-    print(f"    Groups: {len(groups)} | Objects with CVE refs: {len(obj_cves)}")
-
-    # 3. Map campaigns to their attributed groups (attributed-to relationships)
-    campaign_groups = {}
+    # 2. Campaign -> attributed group chains
+    campaign_groups = defaultdict(list)
     for o in objects:
         if o['type'] == 'relationship' and o.get('relationship_type') == 'attributed-to':
             src, tgt = o.get('source_ref', ''), o.get('target_ref', '')
             if tgt in groups:
-                campaign_groups.setdefault(src, []).append(groups[tgt])
+                campaign_groups[src].append(groups[tgt])
 
-    # 4. Walk "uses" relationships to link groups -> CVEs
+    # 3. Walk "uses" relationships
+    #
+    #    CVE source (validated against MITRE ATT&CK website):
+    #      * relationship description  — e.g. "menuPass used CVE-2020-1472"
+    #        This text is written per-group and lives on the relationship object,
+    #        not on the technique or group object itself.
+    #      * malware/tool external_references with source_name='cve'
+    #        Explicit structured association for that specific software.
+    #
+    #    NOT used:
+    #      * technique (attack-pattern) descriptions — generic examples shared
+    #        across all groups using the technique (causes false positives).
+    #
     cve_actors = {}
 
     def add_entry(cve, group):
@@ -121,17 +139,31 @@ def build_mapping(stix):
         if o['type'] != 'relationship' or o.get('relationship_type') != 'uses':
             continue
         src, tgt = o.get('source_ref', ''), o.get('target_ref', '')
+        tgt_obj  = idx.get(tgt, {})
+        tgt_type = tgt_obj.get('type', '')
 
-        # Direct: group uses CVE-bearing technique/malware/tool
-        if src in groups and tgt in obj_cves:
-            for cve in obj_cves[tgt]:
-                add_entry(cve, groups[src])
+        # Resolve source to group list (direct group or campaign->group)
+        src_groups = []
+        if src in groups:
+            src_groups = [groups[src]]
+        elif src in campaign_groups:
+            src_groups = campaign_groups[src]
 
-        # Indirect: campaign uses CVE-bearing object -> credit attributed groups
-        if src in campaign_groups and tgt in obj_cves:
-            for grp in campaign_groups[src]:
-                for cve in obj_cves[tgt]:
-                    add_entry(cve, grp)
+        if not src_groups:
+            continue
+
+        # CVEs from the relationship's own description (group-specific usage note)
+        rel_cves = cves_from_text(o)
+
+        # CVEs from malware/tool explicit structured external_references
+        soft_cves = set()
+        if tgt_type in ('malware', 'tool'):
+            soft_cves = cves_from_extref(tgt_obj)
+
+        all_cves = rel_cves | soft_cves
+        for cve in all_cves:
+            for grp in src_groups:
+                add_entry(cve, grp)
 
     # Sort actors alphabetically within each CVE
     for cve in cve_actors:
@@ -157,10 +189,10 @@ def main():
 
     output = {
         'metadata': {
-            'source':           'MITRE ATT&CK Enterprise',
-            'lastFetched':      datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ'),
-            'cvesWithActors':   n_cves,
-            'totalMappings':    n_mappings,
+            'source':        'MITRE ATT&CK Enterprise',
+            'lastFetched':   datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ'),
+            'cvesWithActors': n_cves,
+            'totalMappings': n_mappings,
         },
         'data': cve_actors,
     }
