@@ -606,11 +606,11 @@
       font-family: var(--fn-d);
     }
     .tabulator .tabulator-row {
-      background: transparent !important;
+      background: var(--bg-card) !important;
       border-bottom: 1px solid var(--border) !important;
       transition: background .12s;
     }
-    .tabulator .tabulator-row:hover { background: rgba(255,255,255,.03) !important; }
+    .tabulator .tabulator-row:hover { background: var(--bg-hover) !important; }
     .tabulator .tabulator-row-odd   { background: rgba(255,255,255,.015) !important; }
     .tabulator .tabulator-cell {
       color: var(--t1);
@@ -619,6 +619,37 @@
       min-height: 36px;
       font-size: 12px;
       padding: 8px 10px;
+      vertical-align: top;
+    }
+    /* Frozen column must have solid background so it doesn't bleed over scrolled content */
+    .tabulator .tabulator-cell.tabulator-frozen {
+      background: var(--bg-card) !important;
+      border-right: 2px solid rgba(245,158,11,.2) !important;
+    }
+    .tabulator .tabulator-row:hover .tabulator-cell.tabulator-frozen {
+      background: var(--bg-hover) !important;
+    }
+    .tabulator .tabulator-row-odd .tabulator-cell.tabulator-frozen {
+      background: rgba(12,18,32,.98) !important;
+    }
+    .tabulator .tabulator-col.tabulator-frozen {
+      background: rgba(255,255,255,.03) !important;
+      border-right: 2px solid rgba(245,158,11,.2) !important;
+    }
+    /* Actor badges in table */
+    .actor-overflow {
+      display: inline-block;
+      background: rgba(100,116,139,.15);
+      color: var(--t2);
+      border: 1px solid rgba(100,116,139,.25);
+      border-radius: 3px;
+      padding: 1px 7px;
+      font-size: 10px;
+      font-weight: 600;
+      font-family: var(--fn-m);
+      margin: 1px 0;
+      cursor: default;
+      white-space: nowrap;
     }
     .tabulator .tabulator-footer {
       background: rgba(255,255,255,.02) !important;
@@ -783,6 +814,10 @@ python scripts/fetch_kev.py</pre>
         <option value="all">All</option>
         <option value="Known">Known Ransomware</option>
         <option value="Unknown">Unknown</option>
+      </select>
+
+      <select class="kev-select" id="filterActor" style="max-width:180px;">
+        <option value="all">All Threat Actors</option>
       </select>
 
       <div class="filter-sep"></div>
@@ -990,6 +1025,7 @@ async function loadData() {
     renderMetaBadges(data.metadata || {});
     buildYearDropdown();
     buildVendorDropdown();
+    buildActorDropdown();
     applyFilters();
     document.getElementById('loadingState').style.display = 'none';
     document.getElementById('dashMain').style.display     = 'block';
@@ -1025,6 +1061,16 @@ function buildVendorDropdown() {
   const sel = document.getElementById('filterVendor');
   vendors.forEach(v => { const o=document.createElement('option'); o.value=v; o.textContent=v; sel.appendChild(o); });
 }
+function buildActorDropdown() {
+  const actors = new Map();
+  allVulns.forEach(v => (v.threatActors||[]).forEach(a => actors.set(a.name, a.name)));
+  const sel = document.getElementById('filterActor');
+  [...actors.keys()].sort().forEach(name => {
+    const o = document.createElement('option');
+    o.value = name; o.textContent = name;
+    sel.appendChild(o);
+  });
+}
 
 /* ═══════════════════════════════════════════════════
    FILTER LOGIC
@@ -1035,6 +1081,7 @@ function applyFilters() {
   const vendor = document.getElementById('filterVendor').value;
   const sev    = document.getElementById('filterSeverity').value;
   const ran    = document.getElementById('filterRansomware').value;
+  const actor  = document.getElementById('filterActor').value;
   const q      = document.getElementById('searchInput').value.toLowerCase().trim();
 
   filteredVulns = allVulns.filter(v => {
@@ -1043,6 +1090,7 @@ function applyFilters() {
     if (vendor !== 'all' && v.vendorProject  !== vendor) return false;
     if (sev    !== 'all' && (!v.severity || v.severity !== sev)) return false;
     if (ran    !== 'all' && v.knownRansomwareCampaignUse !== ran) return false;
+    if (actor  !== 'all' && !(v.threatActors||[]).some(a => a.name === actor)) return false;
     if (q) {
       const hay = [v.cveID, v.vendorProject, v.product, v.vulnerabilityName, v.shortDescription]
         .filter(Boolean).join(' ').toLowerCase();
@@ -1615,14 +1663,22 @@ function initTable() {
         }
       },
       {
-        title: 'Threat Actors', field: 'threatActors', minWidth: 180,
+        title: 'Threat Actors', field: 'threatActors', minWidth: 220, maxWidth: 380,
         headerTooltip: 'Known threat actors exploiting this CVE (source: MITRE ATT&CK)',
         formatter: cell => {
           const actors = cell.getValue();
           if (!actors || !actors.length) return '<span style="color:#334155;">—</span>';
-          return actors.map(a =>
+          const MAX = 4;
+          const visible  = actors.slice(0, MAX);
+          const overflow = actors.slice(MAX);
+          let html = visible.map(a =>
             `<a class="actor-badge" href="${a.url}" target="_blank" title="${a.name} (${a.id})">${a.name}</a>`
           ).join('');
+          if (overflow.length) {
+            const tip = overflow.map(a => `${a.name} (${a.id})`).join('\n');
+            html += `<span class="actor-overflow" title="${tip}">+${overflow.length} more</span>`;
+          }
+          return html;
         },
         sorter: (a, b) => (a||[]).length - (b||[]).length
       },
@@ -1650,11 +1706,11 @@ function renderTable() {
 ═══════════════════════════════════════════════════ */
 document.addEventListener('DOMContentLoaded', () => {
   /* Filter events */
-  ['filterYear','filterMonth','filterVendor','filterSeverity','filterRansomware']
+  ['filterYear','filterMonth','filterVendor','filterSeverity','filterRansomware','filterActor']
     .forEach(id => document.getElementById(id).addEventListener('change', applyFilters));
   document.getElementById('searchInput').addEventListener('input', debounce(applyFilters, 260));
   document.getElementById('resetFilters').addEventListener('click', () => {
-    ['filterYear','filterMonth','filterVendor','filterSeverity','filterRansomware']
+    ['filterYear','filterMonth','filterVendor','filterSeverity','filterRansomware','filterActor']
       .forEach(id => { document.getElementById(id).value = 'all'; });
     document.getElementById('searchInput').value = '';
     applyFilters();
