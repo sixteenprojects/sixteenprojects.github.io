@@ -1,0 +1,1651 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>KEV Dashboard — The Sixteen Project</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="CISA Known Exploited Vulnerabilities interactive intelligence dashboard">
+
+  <!-- Fonts: Chakra Petch (display) · DM Sans (body) · JetBrains Mono (data) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600;700&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <!-- Icons -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.10.0/css/all.min.css" rel="stylesheet">
+
+  <!-- Site styles (navbar + footer) -->
+  <link href="assets/dp/css/style.css" rel="stylesheet">
+  <link rel="stylesheet" href="assets/brand.css">
+  <link rel="shortcut icon" type="image/jpg" href="assets/lp/img/logo_main.jpg">
+  <link rel="icon"          type="image/jpg" href="assets/lp/img/logo_main.jpg">
+
+  <!-- Tabulator midnight dark theme -->
+  <link href="https://unpkg.com/tabulator-tables@6.2.1/dist/css/tabulator_midnight.min.css" rel="stylesheet">
+
+  <style>
+    /* ══════════════════════════════════════════════════
+       KEV DASHBOARD  ·  Dark Intelligence Theme
+       ══════════════════════════════════════════════════ */
+    :root {
+      --bg:          #07090f;
+      --bg-card:     #0c1220;
+      --bg-hover:    #111929;
+      --bg-filter:   #080c18;
+      --border:      rgba(255,255,255,0.07);
+      --border-glow: rgba(245,158,11,0.28);
+      --t1:          #e2e8f0;
+      --t2:          #64748b;
+      --t3:          #2d3f57;
+      --amber:       #f59e0b;
+      --amber-bg:    rgba(245,158,11,0.1);
+      --red:         #ef4444;
+      --orange:      #f97316;
+      --purple:      #a855f7;
+      --blue:        #60a5fa;
+      --green:       #22c55e;
+      --cyan:        #22d3ee;
+      --fn-d:        'Chakra Petch', sans-serif;
+      --fn-b:        'DM Sans', sans-serif;
+      --fn-m:        'JetBrains Mono', monospace;
+    }
+
+    /* ── Global page ── */
+    body {
+      background-color: var(--bg);
+      background-image:
+        radial-gradient(rgba(245,158,11,0.03) 1px, transparent 1px);
+      background-size: 28px 28px;
+      font-family: var(--fn-b);
+      color: var(--t1);
+      min-height: 100vh;
+    }
+
+    /* ── Amber accent line just below navbar ── */
+    .kev-accentline {
+      height: 2px;
+      background: linear-gradient(90deg, var(--amber) 0%, var(--orange) 45%, transparent 100%);
+      position: relative;
+    }
+    .kev-accentline::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: inherit;
+      filter: blur(8px);
+      opacity: .45;
+    }
+
+    /* ── Page header ── */
+    .kev-header {
+      padding: 22px 0 16px;
+      border-bottom: 1px solid var(--border);
+    }
+    .kev-header-inner {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 14px;
+      padding: 0 28px;
+    }
+    .kev-title {
+      font-family: var(--fn-d);
+      font-size: 1.85rem;
+      font-weight: 700;
+      color: var(--t1);
+      letter-spacing: .05em;
+      margin: 0;
+      line-height: 1.1;
+    }
+    .kev-title em { color: var(--amber); font-style: normal; }
+    .kev-sub {
+      font-size: .8rem;
+      color: var(--t2);
+      margin-top: 6px;
+      font-family: var(--fn-b);
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+    .live-dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: var(--green);
+      display: inline-block;
+      flex-shrink: 0;
+      animation: pulse-live 2.4s ease-in-out infinite;
+    }
+    @keyframes pulse-live {
+      0%,100% { opacity:1; box-shadow: 0 0 0 0 rgba(34,197,94,.55); }
+      50%      { opacity:.7; box-shadow: 0 0 0 5px rgba(34,197,94,0); }
+    }
+    #metaBadges { margin-top: 9px; }
+    .meta-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      background: rgba(255,255,255,.04);
+      border: 1px solid var(--border);
+      color: var(--t2);
+      padding: 3px 11px;
+      border-radius: 4px;
+      font-size: 10.5px;
+      font-family: var(--fn-m);
+      margin-right: 6px;
+      margin-top: 4px;
+    }
+    .meta-badge i { color: var(--amber); }
+    .btn-source {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      background: var(--amber-bg);
+      border: 1px solid var(--border-glow);
+      color: var(--amber);
+      padding: 8px 18px;
+      border-radius: 5px;
+      font-size: 12px;
+      font-family: var(--fn-d);
+      font-weight: 600;
+      letter-spacing: .06em;
+      text-decoration: none;
+      transition: all .2s;
+      flex-shrink: 0;
+    }
+    .btn-source:hover {
+      background: rgba(245,158,11,.18);
+      color: var(--amber);
+      text-decoration: none;
+      box-shadow: 0 0 18px rgba(245,158,11,.18);
+    }
+
+    /* ── Filter bar ── */
+    .kev-filter-bar {
+      background: var(--bg-filter);
+      border-bottom: 1px solid var(--border);
+      padding: 9px 0;
+      position: sticky;
+      top: 72px;
+      z-index: 90;
+    }
+
+    /* ── Click-filter chips bar (Kibana-style) ── */
+    .filter-chips-bar {
+      background: rgba(245,158,11,.04);
+      border-bottom: 1px solid rgba(245,158,11,.15);
+      padding: 7px 28px;
+      display: none;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 6px;
+      position: sticky;
+      top: 112px;
+      z-index: 89;
+    }
+    .filter-chips-bar.active { display: flex; }
+    .chips-label {
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: .14em;
+      color: var(--amber);
+      font-family: var(--fn-d);
+      white-space: nowrap;
+      margin-right: 2px;
+    }
+    .filter-chip {
+      display: inline-flex;
+      align-items: stretch;
+      border: 1px solid rgba(245,158,11,.3);
+      border-radius: 4px;
+      overflow: hidden;
+      font-size: 11px;
+      font-family: var(--fn-m);
+      animation: fadeUp .18s both;
+    }
+    .chip-field {
+      background: rgba(245,158,11,.18);
+      color: var(--amber);
+      padding: 3px 8px;
+      font-weight: 600;
+      font-size: 10px;
+      border-right: 1px solid rgba(245,158,11,.25);
+      display: flex;
+      align-items: center;
+    }
+    .chip-value {
+      color: var(--t1);
+      padding: 3px 9px;
+      background: rgba(245,158,11,.07);
+      display: flex;
+      align-items: center;
+      max-width: 200px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .chip-remove {
+      background: rgba(245,158,11,.07);
+      border: none;
+      border-left: 1px solid rgba(245,158,11,.25);
+      color: var(--t2);
+      padding: 3px 8px;
+      cursor: pointer;
+      font-size: 13px;
+      line-height: 1;
+      transition: all .15s;
+      display: flex;
+      align-items: center;
+    }
+    .chip-remove:hover { background: rgba(239,68,68,.2); color: var(--red); }
+    .btn-clear-chips {
+      font-size: 10px;
+      font-family: var(--fn-d);
+      font-weight: 600;
+      letter-spacing: .08em;
+      color: var(--t2);
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      cursor: pointer;
+      padding: 3px 10px;
+      transition: all .15s;
+      margin-left: 4px;
+    }
+    .btn-clear-chips:hover { border-color: var(--red); color: var(--red); }
+    .filter-inner {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 6px;
+      padding: 0 28px;
+    }
+    .filter-lbl {
+      font-size: 9.5px;
+      font-weight: 700;
+      letter-spacing: .14em;
+      color: var(--t2);
+      font-family: var(--fn-d);
+      white-space: nowrap;
+    }
+    .filter-sep {
+      width: 1px; height: 18px;
+      background: var(--border);
+      margin: 0 3px;
+    }
+    .kev-select {
+      background: rgba(255,255,255,.04);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 5px 9px;
+      font-size: 11px;
+      color: var(--t1);
+      font-family: var(--fn-b);
+      cursor: pointer;
+      transition: border-color .18s;
+    }
+    .kev-select:focus { outline: none; border-color: var(--amber); }
+    .kev-select option { background: #111827; }
+    .kev-search-wrap { position: relative; flex: 1; min-width: 170px; }
+    .kev-search-wrap i {
+      position: absolute; left: 10px; top: 50%;
+      transform: translateY(-50%);
+      color: var(--t2); font-size: 11px;
+    }
+    .kev-search {
+      width: 100%;
+      background: rgba(255,255,255,.04);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 5px 10px 5px 30px;
+      font-size: 11px;
+      color: var(--t1);
+      font-family: var(--fn-b);
+      transition: border-color .18s;
+    }
+    .kev-search::placeholder { color: var(--t2); }
+    .kev-search:focus { outline: none; border-color: var(--amber); }
+    .btn-reset {
+      background: rgba(255,255,255,.04);
+      color: var(--t2);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 5px 13px;
+      font-size: 11px;
+      font-family: var(--fn-d);
+      font-weight: 600;
+      letter-spacing: .08em;
+      cursor: pointer;
+      transition: all .18s;
+    }
+    .btn-reset:hover { border-color: var(--amber); color: var(--amber); }
+
+    /* ── Stat cards ── */
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 10px;
+      padding: 20px 28px 12px;
+    }
+    @media (max-width:1100px) { .stats-row { grid-template-columns: repeat(3,1fr); } }
+    @media (max-width:600px)  { .stats-row { grid-template-columns: repeat(2,1fr); } }
+
+    .stat-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 16px 16px 14px;
+      position: relative;
+      overflow: hidden;
+      transition: border-color .22s, box-shadow .22s;
+      animation: fadeUp .45s both;
+    }
+    .stat-card:hover {
+      border-color: rgba(255,255,255,.12);
+      box-shadow: 0 0 28px rgba(0,0,0,.35);
+    }
+    /* thin top accent bar */
+    .stat-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+    }
+    .stat-card.c-a::before  { background: var(--amber);  }
+    .stat-card.c-r::before  { background: var(--red);    }
+    .stat-card.c-o::before  { background: var(--orange); }
+    .stat-card.c-p::before  { background: var(--purple); }
+    .stat-card.c-b::before  { background: var(--blue);   }
+    .stat-card.c-g::before  { background: var(--green);  }
+
+    .stat-tag {
+      font-size: 9.5px;
+      font-weight: 600;
+      letter-spacing: .1em;
+      font-family: var(--fn-m);
+      margin-bottom: 9px;
+    }
+    .stat-card.c-a .stat-tag { color: var(--amber); }
+    .stat-card.c-r .stat-tag { color: var(--red);   }
+    .stat-card.c-o .stat-tag { color: var(--orange);}
+    .stat-card.c-p .stat-tag { color: var(--purple);}
+    .stat-card.c-b .stat-tag { color: var(--blue);  }
+    .stat-card.c-g .stat-tag { color: var(--green); }
+
+    .stat-lbl {
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: .1em;
+      color: var(--t2);
+      text-transform: uppercase;
+      font-family: var(--fn-d);
+      margin-bottom: 7px;
+    }
+    .stat-val {
+      font-size: 30px;
+      font-weight: 700;
+      color: var(--t1);
+      line-height: 1;
+      font-family: var(--fn-d);
+      letter-spacing: -.02em;
+    }
+    .stat-sub {
+      font-size: 10px;
+      color: var(--t2);
+      margin-top: 5px;
+      font-family: var(--fn-m);
+    }
+    .stat-card:nth-child(1){animation-delay:.04s}
+    .stat-card:nth-child(2){animation-delay:.09s}
+    .stat-card:nth-child(3){animation-delay:.14s}
+    .stat-card:nth-child(4){animation-delay:.19s}
+    .stat-card:nth-child(5){animation-delay:.24s}
+    .stat-card:nth-child(6){animation-delay:.29s}
+
+    /* ── Chart cards ── */
+    .cg1 {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 10px;
+      padding: 0 28px;
+      margin-bottom: 10px;
+    }
+    .cg2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      padding: 0 28px;
+      margin-bottom: 10px;
+    }
+    @media (max-width:900px) { .cg1, .cg2 { grid-template-columns: 1fr; } }
+
+    .chart-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 18px;
+      animation: fadeUp .45s .18s both;
+    }
+    .cc-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 14px;
+    }
+    .cc-title {
+      font-family: var(--fn-d);
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: .1em;
+      color: var(--t2);
+      text-transform: uppercase;
+    }
+    .chart-box     { width:100%; height:272px; cursor:pointer; }
+    .chart-box.tall{ height:370px; cursor:pointer; }
+
+    /* ── Timeline toggle ── */
+    .tl-toggle { display:flex; gap:4px; }
+    .tl-btn {
+      padding: 3px 11px;
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      font-size: 10px;
+      font-family: var(--fn-d);
+      font-weight: 600;
+      letter-spacing: .07em;
+      cursor: pointer;
+      background: transparent;
+      color: var(--t2);
+      transition: all .18s;
+    }
+    .tl-btn:hover { border-color: var(--amber); color: var(--amber); }
+    .tl-btn.active { background: var(--amber-bg); color: var(--amber); border-color: var(--border-glow); }
+
+    /* ── Table section ── */
+    .table-section {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 18px;
+      margin: 0 28px 32px;
+      animation: fadeUp .45s .28s both;
+    }
+    .table-topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 14px;
+    }
+    .tbl-title {
+      font-family: var(--fn-d);
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: .1em;
+      color: var(--t2);
+      text-transform: uppercase;
+      margin: 0;
+    }
+    #resultCount {
+      font-size: 10.5px;
+      color: var(--t3);
+      margin-top: 4px;
+      font-family: var(--fn-m);
+    }
+    .btn-export {
+      background: rgba(255,255,255,.04);
+      border: 1px solid var(--border);
+      color: var(--t2);
+      border-radius: 4px;
+      padding: 5px 13px;
+      font-size: 11px;
+      font-family: var(--fn-d);
+      font-weight: 600;
+      letter-spacing: .06em;
+      cursor: pointer;
+      transition: all .18s;
+    }
+    .btn-export:hover { border-color: var(--amber); color: var(--amber); }
+
+    /* ── Severity / Ransomware badges ── */
+    .sev {
+      padding: 2px 8px;
+      border-radius: 3px;
+      font-size: 10px;
+      font-weight: 600;
+      white-space: nowrap;
+      font-family: var(--fn-m);
+    }
+    .sev-CRITICAL { background:rgba(239,68,68,.14);  color:#ef4444; border:1px solid rgba(239,68,68,.3); }
+    .sev-HIGH     { background:rgba(249,115,22,.14); color:#f97316; border:1px solid rgba(249,115,22,.3); }
+    .sev-MEDIUM   { background:rgba(234,179,8,.14);  color:#eab308; border:1px solid rgba(234,179,8,.3); }
+    .sev-LOW      { background:rgba(34,197,94,.14);  color:#22c55e; border:1px solid rgba(34,197,94,.3); }
+    .sev-NA       { background:rgba(100,116,139,.1); color:#64748b; border:1px solid rgba(100,116,139,.2); }
+    .ran-known    { background:rgba(168,85,247,.14); color:#a855f7; border:1px solid rgba(168,85,247,.3);  padding:2px 8px; border-radius:3px; font-size:10px; font-weight:600; font-family:var(--fn-m); }
+    .ran-unknown  { background:rgba(100,116,139,.08); color:#475569; border:1px solid rgba(100,116,139,.15); padding:2px 8px; border-radius:3px; font-size:10px; font-family:var(--fn-m); }
+
+    /* ── Loading / Error ── */
+    #loadingState {
+      text-align: center;
+      padding: 110px 20px;
+      color: var(--t2);
+    }
+    .kev-spinner {
+      width: 38px; height: 38px;
+      border: 2px solid var(--border);
+      border-top-color: var(--amber);
+      border-radius: 50%;
+      animation: spin .75s linear infinite;
+      margin: 0 auto 18px;
+    }
+    #loadingState p { font-family: var(--fn-m); font-size: 13px; color: var(--t2); }
+    #errorState { text-align:center; padding:80px 20px; display:none; }
+    #errorState h5 { color: var(--t1); }
+    #errorState p  { color: var(--t2); }
+    #errorState code {
+      background: rgba(255,255,255,.06);
+      padding: 2px 7px;
+      border-radius: 3px;
+      font-family: var(--fn-m);
+      font-size: 13px;
+    }
+    .err-pre {
+      display: inline-block;
+      background: rgba(255,255,255,.04);
+      border: 1px solid var(--border);
+      padding: 12px 24px;
+      border-radius: 6px;
+      font-size: 13px;
+      color: var(--amber);
+      font-family: var(--fn-m);
+      text-align: left;
+    }
+
+    /* ── Tabulator overrides ── */
+    .tabulator {
+      background: transparent !important;
+      border: 1px solid var(--border) !important;
+      border-radius: 6px;
+      font-family: var(--fn-b);
+      font-size: 12px;
+    }
+    .tabulator .tabulator-header {
+      background: rgba(255,255,255,.03) !important;
+      border-bottom: 1px solid var(--border) !important;
+    }
+    .tabulator .tabulator-col {
+      background: transparent !important;
+      border-right: 1px solid var(--border) !important;
+    }
+    .tabulator .tabulator-col-title {
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: .08em;
+      color: var(--t2);
+      text-transform: uppercase;
+      font-family: var(--fn-d);
+    }
+    .tabulator .tabulator-row {
+      background: transparent !important;
+      border-bottom: 1px solid var(--border) !important;
+      transition: background .12s;
+    }
+    .tabulator .tabulator-row:hover { background: rgba(255,255,255,.03) !important; }
+    .tabulator .tabulator-row-odd   { background: rgba(255,255,255,.015) !important; }
+    .tabulator .tabulator-cell {
+      color: var(--t1);
+      border-right: 1px solid var(--border) !important;
+      height: auto !important;
+      min-height: 36px;
+      font-size: 12px;
+      padding: 8px 10px;
+    }
+    .tabulator .tabulator-footer {
+      background: rgba(255,255,255,.02) !important;
+      border-top: 1px solid var(--border) !important;
+      color: var(--t2) !important;
+    }
+    .tabulator .tabulator-footer .tabulator-page {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--t2);
+      border-radius: 3px;
+      margin: 2px;
+    }
+    .tabulator .tabulator-footer .tabulator-page.active {
+      background: var(--amber-bg);
+      color: var(--amber);
+      border-color: var(--border-glow);
+    }
+    .tabulator .tabulator-footer .tabulator-page:hover:not(.disabled) {
+      border-color: var(--amber);
+      color: var(--amber);
+    }
+    .tabulator .tabulator-footer select {
+      background: var(--bg-card);
+      color: var(--t2);
+      border: 1px solid var(--border);
+      border-radius: 3px;
+    }
+    .tabulator-col-sorter { color: var(--t2); }
+
+    /* ── Animations ── */
+    @keyframes fadeUp {
+      from { opacity:0; transform:translateY(14px); }
+      to   { opacity:1; transform:translateY(0); }
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* ── Responsive ── */
+    @media (max-width:768px) {
+      .chart-box { height:220px; }
+      .chart-box.tall { height:290px; }
+      .kev-title { font-size:1.35rem; }
+      .table-section { margin:0 12px 24px; padding:14px; }
+      .stats-row { padding:16px 12px 10px; }
+      .filter-inner, .kev-header-inner { padding:0 14px; }
+      .cg1, .cg2 { padding:0 12px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════
+     NAVBAR  (unchanged — site-wide)
+═══════════════════════════════════ -->
+<header>
+  <nav class="navbar navbar-expand-lg navbar-light bg-white sticky" data-offset="500">
+    <div class="container">
+      <a href="index.html" class="navbar-brand d-flex align-items-center">
+        <img src="assets/lp/img/logo_main.jpg" width="40" style="border-radius:6px;">
+        <span style="color:#162447;font-weight:700;font-size:15px;letter-spacing:.5px;margin-left:8px;">THE SIXTEEN PROJECT</span>
+      </a>
+      <button class="navbar-toggler" data-toggle="collapse" data-target="#navContent"
+              aria-controls="navContent" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="navbar-collapse collapse" id="navContent">
+        <ul class="navbar-nav ml-auto">
+          <li class="nav-item"><a class="nav-link" href="index.html">Home</a></li>
+          <li class="nav-item"><a class="nav-link" href="threat-library.html">Threat Library</a></li>
+          <li class="nav-item"><a class="nav-link" href="threat-report.html">Threat Report</a></li>
+          <li class="nav-item active"><a class="nav-link active-page" href="kev-dashboard.html">KEV Dashboard</a></li>
+          <li class="nav-item"><a class="nav-link" href="threat-tools.html">Threat Hunting Tools</a></li>
+          <li class="nav-item"><a class="nav-link" href="about.html">Whois</a></li>
+          <li class="nav-item"><a class="nav-link" href="https://github.com/sixteenproject" target="_blank">Github</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+</header>
+
+<!-- amber glow line -->
+<div class="kev-accentline"></div>
+
+<!-- ═══════════════════════════════════
+     PAGE HEADER
+═══════════════════════════════════ -->
+<div class="kev-header">
+  <div class="kev-header-inner">
+    <div>
+      <h1 class="kev-title">CISA <em>KEV</em> Dashboard</h1>
+      <p class="kev-sub">
+        <span class="live-dot"></span>
+        Known Exploited Vulnerabilities — Live Intelligence Feed
+      </p>
+      <div id="metaBadges">
+        <span class="meta-badge"><i class="fas fa-circle-notch fa-spin"></i> Initializing…</span>
+      </div>
+    </div>
+    <a href="https://www.cisa.gov/known-exploited-vulnerabilities-catalog" target="_blank" class="btn-source">
+      <i class="fas fa-external-link-alt"></i> CISA Source
+    </a>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════
+     LOADING / ERROR
+═══════════════════════════════════ -->
+<div id="loadingState">
+  <div class="kev-spinner"></div>
+  <p>Loading KEV catalog…</p>
+</div>
+
+<div id="errorState">
+  <i class="fas fa-exclamation-triangle fa-3x mb-3" style="color:var(--red);"></i>
+  <h5>Data file not found</h5>
+  <p>Run the pipeline to generate <code>data/kev_data.json</code>:</p>
+  <pre class="err-pre">cd web
+pip install -r scripts/requirements.txt
+python scripts/fetch_kev.py</pre>
+</div>
+
+<!-- ═══════════════════════════════════
+     MAIN DASHBOARD
+═══════════════════════════════════ -->
+<div id="dashMain" style="display:none;">
+
+  <!-- FILTER BAR -->
+  <div class="kev-filter-bar">
+    <div class="filter-inner">
+      <span class="filter-lbl">FILTER</span>
+      <div class="filter-sep"></div>
+
+      <select class="kev-select" id="filterYear">
+        <option value="all">All Years</option>
+      </select>
+
+      <select class="kev-select" id="filterMonth">
+        <option value="all">All Months</option>
+        <option value="1">January</option><option value="2">February</option>
+        <option value="3">March</option><option value="4">April</option>
+        <option value="5">May</option><option value="6">June</option>
+        <option value="7">July</option><option value="8">August</option>
+        <option value="9">September</option><option value="10">October</option>
+        <option value="11">November</option><option value="12">December</option>
+      </select>
+
+      <select class="kev-select" id="filterVendor" style="max-width:160px;">
+        <option value="all">All Vendors</option>
+      </select>
+
+      <select class="kev-select" id="filterSeverity">
+        <option value="all">All Severity</option>
+        <option value="CRITICAL">Critical</option>
+        <option value="HIGH">High</option>
+        <option value="MEDIUM">Medium</option>
+        <option value="LOW">Low</option>
+      </select>
+
+      <select class="kev-select" id="filterRansomware">
+        <option value="all">All</option>
+        <option value="Known">Known Ransomware</option>
+        <option value="Unknown">Unknown</option>
+      </select>
+
+      <div class="filter-sep"></div>
+
+      <div class="kev-search-wrap">
+        <i class="fas fa-search"></i>
+        <input type="text" class="kev-search" id="searchInput"
+               placeholder="Search CVE ID, vendor, product, description…">
+      </div>
+
+      <button class="btn-reset" id="resetFilters">
+        <i class="fas fa-times" style="margin-right:4px;"></i>Reset
+      </button>
+    </div>
+  </div>
+
+  <!-- CLICK-FILTER CHIPS (Kibana-style) -->
+  <div id="filterChipsBar" class="filter-chips-bar">
+    <span class="chips-label">ACTIVE FILTERS</span>
+    <div id="chipsContainer" style="display:flex;flex-wrap:wrap;gap:6px;align-items:center;"></div>
+    <button class="btn-clear-chips" id="btnClearChips">Clear all</button>
+  </div>
+
+  <!-- STAT CARDS -->
+  <div class="stats-row">
+    <div class="stat-card c-a">
+      <div class="stat-tag"><i class="fas fa-database"></i> TOTAL</div>
+      <div class="stat-lbl">Vulnerabilities</div>
+      <div class="stat-val" id="statTotal">—</div>
+      <div class="stat-sub" id="statTotalSub">in filtered view</div>
+    </div>
+    <div class="stat-card c-r">
+      <div class="stat-tag"><i class="fas fa-radiation"></i> CVSS ≥ 9.0</div>
+      <div class="stat-lbl">Critical</div>
+      <div class="stat-val" id="statCritical">—</div>
+      <div class="stat-sub" id="statCriticalPct">—</div>
+    </div>
+    <div class="stat-card c-o">
+      <div class="stat-tag"><i class="fas fa-arrow-up"></i> CVSS 7–8.9</div>
+      <div class="stat-lbl">High</div>
+      <div class="stat-val" id="statHigh">—</div>
+      <div class="stat-sub" id="statHighPct">—</div>
+    </div>
+    <div class="stat-card c-p">
+      <div class="stat-tag"><i class="fas fa-skull-crossbones"></i> RANSOMWARE</div>
+      <div class="stat-lbl">Known Campaigns</div>
+      <div class="stat-val" id="statRansomware">—</div>
+      <div class="stat-sub" id="statRansomwarePct">—</div>
+    </div>
+    <div class="stat-card c-b">
+      <div class="stat-tag"><i class="fas fa-building"></i> AFFECTED</div>
+      <div class="stat-lbl">Vendors</div>
+      <div class="stat-val" id="statVendors">—</div>
+      <div class="stat-sub">unique vendors</div>
+    </div>
+    <div class="stat-card c-g">
+      <div class="stat-tag"><i class="fas fa-calendar-plus"></i> LATEST</div>
+      <div class="stat-lbl">Last Added</div>
+      <div class="stat-val" id="statLastAdded" style="font-size:16px;padding-top:6px;">—</div>
+      <div class="stat-sub" id="statLast30">—</div>
+    </div>
+  </div>
+
+  <!-- CHARTS ROW 1 -->
+  <div class="cg1">
+    <div class="chart-card">
+      <div class="cc-head">
+        <span class="cc-title">CVEs Added Over Time</span>
+        <div class="tl-toggle">
+          <button class="tl-btn active" id="btnMonthly">Monthly</button>
+          <button class="tl-btn"        id="btnYearly">Yearly</button>
+        </div>
+      </div>
+      <div id="chartTimeline" class="chart-box"></div>
+    </div>
+    <div class="chart-card">
+      <div class="cc-head">
+        <span class="cc-title">Severity Distribution</span>
+      </div>
+      <div id="chartSeverity" class="chart-box"></div>
+    </div>
+  </div>
+
+  <!-- CHARTS ROW 2 -->
+  <div class="cg2">
+    <div class="chart-card">
+      <div class="cc-head">
+        <span class="cc-title">Top 15 Vendors by KEV Count</span>
+      </div>
+      <div id="chartVendors" class="chart-box tall"></div>
+    </div>
+    <div class="chart-card">
+      <div class="cc-head">
+        <span class="cc-title">Top 15 Products by KEV Count</span>
+      </div>
+      <div id="chartProducts" class="chart-box tall"></div>
+    </div>
+  </div>
+
+  <!-- TABLE -->
+  <div class="table-section">
+    <div class="table-topbar">
+      <div>
+        <p class="tbl-title">Vulnerability Raw Table</p>
+        <div id="resultCount">Loading…</div>
+      </div>
+      <div style="display:flex;gap:8px;">
+        <button id="exportCSV" class="btn-export">
+          <i class="fas fa-file-csv" style="margin-right:4px;"></i>CSV
+        </button>
+        <button id="exportJSON" class="btn-export">
+          <i class="fas fa-file-code" style="margin-right:4px;"></i>JSON
+        </button>
+      </div>
+    </div>
+    <div style="overflow-x:auto;">
+      <div id="kevTable"></div>
+    </div>
+  </div>
+
+</div><!-- /dashMain -->
+
+<!-- ═══════════════════════════════════
+     FOOTER
+═══════════════════════════════════ -->
+<footer class="page-footer">
+  <div class="container">
+    <p class="text-center" style="color:rgba(255,255,255,.4);margin:0;padding:14px 0;font-size:12px;font-family:'DM Sans',sans-serif;">
+      &copy; 2025 The Sixteen Project &nbsp;&mdash;&nbsp;
+      Data: <a href="https://www.cisa.gov/known-exploited-vulnerabilities-catalog" target="_blank"
+               style="color:rgba(255,255,255,.35);">CISA KEV Catalog</a>
+    </p>
+  </div>
+</footer>
+
+<!-- ═══════════════════════════════════
+     SCRIPTS
+═══════════════════════════════════ -->
+<script src="assets/lp/js/jquery-3.5.1.min.js"></script>
+<script src="assets/lp/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+<script src="https://unpkg.com/tabulator-tables@6.2.1/dist/js/tabulator.min.js"></script>
+
+<script>
+/* ═══════════════════════════════════════════════════
+   STATE
+═══════════════════════════════════════════════════ */
+let allVulns      = [];
+let filteredVulns = [];
+let kevTable      = null;
+let charts        = {};
+let tlMode        = 'monthly';
+let clickFilters  = [];
+
+/* Dark palette for charts */
+const C_AMBER   = '#f59e0b';
+const C_ORANGE  = '#f97316';
+const C_RED     = '#ef4444';
+const C_PURPLE  = '#a855f7';
+const C_BLUE    = '#60a5fa';
+const C_GREEN   = '#22c55e';
+const C_CYAN    = '#22d3ee';
+const C_T2      = '#64748b';
+const C_BORDER  = '#1a2744';
+
+const SEV_COLOR = {
+  CRITICAL: C_RED,
+  HIGH:     C_ORANGE,
+  MEDIUM:   '#eab308',
+  LOW:      C_GREEN,
+  'N/A':    '#475569'
+};
+
+/* Shared ECharts tooltip style */
+const TOOLTIP_STYLE = {
+  backgroundColor: 'rgba(10,14,28,0.95)',
+  borderColor: C_BORDER,
+  textStyle: { color: '#e2e8f0', fontSize: 12, fontFamily: 'DM Sans' }
+};
+
+/* ═══════════════════════════════════════════════════
+   DATA LOAD
+═══════════════════════════════════════════════════ */
+async function loadData() {
+  try {
+    const resp = await fetch('data/kev_data.json');
+    if (!resp.ok) throw new Error('HTTP ' + resp.status);
+    const data = await resp.json();
+    allVulns = data.vulnerabilities || [];
+    renderMetaBadges(data.metadata || {});
+    buildYearDropdown();
+    buildVendorDropdown();
+    applyFilters();
+    document.getElementById('loadingState').style.display = 'none';
+    document.getElementById('dashMain').style.display     = 'block';
+  } catch (e) {
+    console.error(e);
+    document.getElementById('loadingState').style.display = 'none';
+    document.getElementById('errorState').style.display   = 'block';
+  }
+}
+
+function renderMetaBadges(m) {
+  const date     = (m.lastFetched || '').slice(0,10) || '?';
+  const ver      = m.catalogVersion
+    ? `<span class="meta-badge"><i class="fas fa-tag"></i> v${m.catalogVersion}</span>`
+    : '';
+  const enriched = m.enriched
+    ? `<span class="meta-badge"><i class="fas fa-check-circle"></i> CVSS Enriched (${m.enrichedCount || 0})</span>`
+    : `<span class="meta-badge" style="opacity:.55;" title="Run: python scripts/fetch_kev.py --enrich"><i class="fas fa-info-circle"></i> No CVSS data</span>`;
+  document.getElementById('metaBadges').innerHTML =
+    `<span class="meta-badge"><i class="fas fa-sync-alt"></i> Updated: ${date}</span>${ver}${enriched}`;
+}
+
+/* ═══════════════════════════════════════════════════
+   DROPDOWNS
+═══════════════════════════════════════════════════ */
+function buildYearDropdown() {
+  const years = [...new Set(allVulns.map(v=>v.year).filter(Boolean))].sort((a,b)=>b-a);
+  const sel = document.getElementById('filterYear');
+  years.forEach(y => { const o=document.createElement('option'); o.value=y; o.textContent=y; sel.appendChild(o); });
+}
+function buildVendorDropdown() {
+  const vendors = [...new Set(allVulns.map(v=>v.vendorProject).filter(Boolean))].sort();
+  const sel = document.getElementById('filterVendor');
+  vendors.forEach(v => { const o=document.createElement('option'); o.value=v; o.textContent=v; sel.appendChild(o); });
+}
+
+/* ═══════════════════════════════════════════════════
+   FILTER LOGIC
+═══════════════════════════════════════════════════ */
+function applyFilters() {
+  const year   = document.getElementById('filterYear').value;
+  const month  = document.getElementById('filterMonth').value;
+  const vendor = document.getElementById('filterVendor').value;
+  const sev    = document.getElementById('filterSeverity').value;
+  const ran    = document.getElementById('filterRansomware').value;
+  const q      = document.getElementById('searchInput').value.toLowerCase().trim();
+
+  filteredVulns = allVulns.filter(v => {
+    if (year   !== 'all' && String(v.year)  !== year)   return false;
+    if (month  !== 'all' && String(v.month) !== month)  return false;
+    if (vendor !== 'all' && v.vendorProject  !== vendor) return false;
+    if (sev    !== 'all' && (!v.severity || v.severity !== sev)) return false;
+    if (ran    !== 'all' && v.knownRansomwareCampaignUse !== ran) return false;
+    if (q) {
+      const hay = [v.cveID, v.vendorProject, v.product, v.vulnerabilityName, v.shortDescription]
+        .filter(Boolean).join(' ').toLowerCase();
+      if (!hay.includes(q)) return false;
+    }
+    return true;
+  });
+
+  /* Apply click filters: AND across fields, OR within same field (Kibana behaviour) */
+  if (clickFilters.length > 0) {
+    const grouped = {};
+    clickFilters.forEach(f => {
+      if (!grouped[f.field]) grouped[f.field] = [];
+      grouped[f.field].push(f.value);
+    });
+    filteredVulns = filteredVulns.filter(v => {
+      for (const [field, vals] of Object.entries(grouped)) {
+        const match = vals.some(val => {
+          if (field === 'year')        return String(v.year) === String(val);
+          if (field === 'yearMonth') {
+            const ym = `${v.year}-${String(v.month||1).padStart(2,'0')}`;
+            return ym === val;
+          }
+          if (field === 'vendorProduct') return `${v.vendorProject} ${v.product}` === val;
+          if (Array.isArray(v[field]))   return v[field].includes(val);
+          return String(v[field]) === String(val);
+        });
+        if (!match) return false;
+      }
+      return true;
+    });
+  }
+
+  renderStats();
+  renderCharts();
+  renderTable();
+}
+
+const debounce = (fn, ms) => { let t; return (...a) => { clearTimeout(t); t = setTimeout(()=>fn(...a), ms); }; };
+
+/* ═══════════════════════════════════════════════════
+   STAT COUNTER ANIMATION
+═══════════════════════════════════════════════════ */
+function animCount(el, target, dur=700) {
+  if (typeof target !== 'number') { el.textContent = target; return; }
+  const start = performance.now();
+  (function tick(now) {
+    const p = Math.min((now - start) / dur, 1);
+    const ease = 1 - Math.pow(1 - p, 3);
+    el.textContent = Math.round(ease * target).toLocaleString();
+    if (p < 1) requestAnimationFrame(tick);
+  })(start);
+}
+
+/* ═══════════════════════════════════════════════════
+   STATS
+═══════════════════════════════════════════════════ */
+function renderStats() {
+  const n = filteredVulns.length;
+  const tot = allVulns.length;
+
+  animCount(document.getElementById('statTotal'), n);
+  document.getElementById('statTotalSub').textContent = `of ${tot.toLocaleString()} total`;
+
+  const crit = filteredVulns.filter(v=>v.severity==='CRITICAL').length;
+  const high = filteredVulns.filter(v=>v.severity==='HIGH').length;
+  animCount(document.getElementById('statCritical'), crit);
+  document.getElementById('statCriticalPct').textContent = n ? `${Math.round(crit/n*100)}% of view` : 'CVSS ≥ 9.0';
+  animCount(document.getElementById('statHigh'), high);
+  document.getElementById('statHighPct').textContent     = n ? `${Math.round(high/n*100)}% of view` : 'CVSS 7–8.9';
+
+  const ranN = filteredVulns.filter(v=>v.knownRansomwareCampaignUse==='Known').length;
+  animCount(document.getElementById('statRansomware'), ranN);
+  document.getElementById('statRansomwarePct').textContent = n ? `${Math.round(ranN/n*100)}% of view` : 'known campaigns';
+
+  const vCount = new Set(filteredVulns.map(v=>v.vendorProject).filter(Boolean)).size;
+  animCount(document.getElementById('statVendors'), vCount);
+
+  const dates = filteredVulns.map(v=>v.dateAdded).filter(Boolean).sort();
+  document.getElementById('statLastAdded').textContent = dates.length ? dates[dates.length-1] : '—';
+
+  const now    = Date.now();
+  const days30 = filteredVulns.filter(v=>v.dateAdded && (now - new Date(v.dateAdded).getTime()) < 30*86400000).length;
+  document.getElementById('statLast30').textContent = `+${days30} in last 30 days`;
+
+  document.getElementById('resultCount').textContent =
+    `Showing ${filteredVulns.length.toLocaleString()} of ${allVulns.length.toLocaleString()} vulnerabilities`;
+}
+
+/* ═══════════════════════════════════════════════════
+   CHARTS
+═══════════════════════════════════════════════════ */
+function initCharts() {
+  charts.timeline = echarts.init(document.getElementById('chartTimeline'), null, {renderer:'canvas'});
+  charts.severity = echarts.init(document.getElementById('chartSeverity'), null, {renderer:'canvas'});
+  charts.vendors  = echarts.init(document.getElementById('chartVendors'),  null, {renderer:'canvas'});
+  charts.products = echarts.init(document.getElementById('chartProducts'), null, {renderer:'canvas'});
+  window.addEventListener('resize', () => Object.values(charts).forEach(c=>c.resize()));
+}
+
+function renderCharts() {
+  renderTimeline();
+  renderSeverity();
+  renderVendors();
+  renderProducts();
+}
+
+function renderTimeline() {
+  const grouped = {};
+  filteredVulns.forEach(v => {
+    if (!v.year) return;
+    const key = tlMode === 'monthly'
+      ? `${v.year}-${String(v.month||1).padStart(2,'0')}`
+      : String(v.year);
+    grouped[key] = (grouped[key]||0) + 1;
+  });
+  const keys = Object.keys(grouped).sort();
+  const vals = keys.map(k=>grouped[k]);
+  const maxVal = Math.max(...vals, 1);
+
+  charts.timeline.setOption({
+    backgroundColor: 'transparent',
+    tooltip: {
+      ...TOOLTIP_STYLE,
+      trigger: 'axis',
+      formatter: p=>`<span style="font-family:var(--fn-m,monospace);font-size:11px;color:#64748b;">${p[0].axisValue}</span><br/><b style="color:#f59e0b;font-size:16px;">${p[0].value}</b> <span style="color:#64748b;font-size:11px;">CVEs</span>`
+    },
+    xAxis: {
+      type: 'category',
+      data: keys,
+      axisLabel: { rotate: tlMode==='monthly'?45:0, fontSize:10, color:C_T2 },
+      axisLine:  { lineStyle:{ color:C_BORDER } },
+      axisTick:  { lineStyle:{ color:C_BORDER } }
+    },
+    yAxis: {
+      type: 'value',
+      axisLabel:  { fontSize:10, color:C_T2 },
+      splitLine:  { lineStyle:{ color:C_BORDER, type:'dashed' } },
+      axisLine:   { show:false }
+    },
+    series: [{
+      type: 'bar',
+      data: vals.map((v,i) => ({
+        value: v,
+        itemStyle: {
+          color: new echarts.graphic.LinearGradient(0,0,0,1,[
+            { offset:0, color: v===maxVal ? C_AMBER : '#1e3a5f' },
+            { offset:1, color: v===maxVal ? C_ORANGE : '#0c1f38' }
+          ]),
+          borderRadius: [3,3,0,0]
+        }
+      })),
+      emphasis: {
+        itemStyle: { color: new echarts.graphic.LinearGradient(0,0,0,1,[
+          {offset:0,color:C_AMBER},{offset:1,color:C_ORANGE}
+        ])}
+      }
+    }],
+    grid: { left:45, right:20, bottom:tlMode==='monthly'?80:38, top:14 }
+  }, true);
+}
+
+function renderSeverity() {
+  const cnt = {};
+  filteredVulns.forEach(v => { const s = v.severity || 'N/A'; cnt[s] = (cnt[s] || 0) + 1; });
+
+  const order = ['CRITICAL', 'HIGH', 'MEDIUM', 'LOW', 'N/A'];
+  const total = filteredVulns.length;
+
+  /* Severity → glow color map for emphasis shadow */
+  const GLOW = {
+    CRITICAL: 'rgba(239,68,68,0.55)',
+    HIGH:     'rgba(249,115,22,0.55)',
+    MEDIUM:   'rgba(234,179,8,0.45)',
+    LOW:      'rgba(34,197,94,0.45)',
+    'N/A':    'rgba(100,116,139,0.35)',
+  };
+
+  const rawData = order
+    .filter(s => cnt[s] > 0)
+    .map(s => ({
+      _key:  s,
+      name:  s === 'N/A' ? 'N/A' : s.charAt(0) + s.slice(1).toLowerCase(),
+      value: cnt[s],
+      itemStyle: {
+        color:       SEV_COLOR[s],
+        borderColor: '#07090f',
+        borderWidth: 3,
+        borderRadius: 4,
+      },
+      emphasis: {
+        itemStyle: {
+          shadowBlur:  22,
+          shadowColor: GLOW[s] || 'rgba(0,0,0,0.5)',
+        },
+        scale:     true,
+        scaleSize: 6,
+      }
+    }));
+
+  /* Dominant severity for center label */
+  const dominant = rawData.reduce((a, b) => a.value > b.value ? a : b, rawData[0] || {});
+
+  /* Legend rows: name · count · pct */
+  const legendData = rawData.map(d => {
+    const pct = total > 0 ? ((d.value / total) * 100).toFixed(1) : '0.0';
+    return {
+      name: d.name,
+      icon: 'circle',
+    };
+  });
+
+  charts.severity.setOption({
+    backgroundColor: 'transparent',
+
+    tooltip: {
+      ...TOOLTIP_STYLE,
+      trigger: 'item',
+      formatter: params => {
+        const pct = (params.percent || 0).toFixed(1);
+        const col = SEV_COLOR[params.data._key] || C_T2;
+        return `
+          <div style="font-family:'DM Sans',sans-serif;min-width:140px;">
+            <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;">
+              <span style="width:8px;height:8px;border-radius:50%;background:${col};flex-shrink:0;box-shadow:0 0 6px ${col};"></span>
+              <b style="color:#e2e8f0;font-family:'Chakra Petch',sans-serif;font-size:12px;">${params.name}</b>
+            </div>
+            <div style="display:flex;justify-content:space-between;gap:16px;">
+              <span style="color:#64748b;font-size:11px;">Count</span>
+              <b style="color:#e2e8f0;font-family:'JetBrains Mono',monospace;">${params.value.toLocaleString()}</b>
+            </div>
+            <div style="display:flex;justify-content:space-between;gap:16px;margin-top:2px;">
+              <span style="color:#64748b;font-size:11px;">Share</span>
+              <b style="color:${col};font-family:'JetBrains Mono',monospace;font-size:13px;">${pct}%</b>
+            </div>
+          </div>`;
+      }
+    },
+
+    /* Center overlay: total count + label */
+    graphic: [
+      {
+        type: 'text',
+        left: 'center',
+        top: '33%',
+        style: {
+          text:       total > 0 ? total.toLocaleString() : '—',
+          fill:       '#e2e8f0',
+          fontSize:   20,
+          fontWeight: 'bold',
+          fontFamily: 'Chakra Petch, sans-serif',
+          textAlign:  'center',
+        }
+      },
+      {
+        type: 'text',
+        left: 'center',
+        top: '43%',
+        style: {
+          text:       'TOTAL',
+          fill:       '#334155',
+          fontSize:   9,
+          fontFamily: 'DM Sans, sans-serif',
+          textAlign:  'center',
+        }
+      },
+    ],
+
+    legend: {
+      orient:     'horizontal',
+      bottom:     6,
+      itemWidth:  8,
+      itemHeight: 8,
+      itemGap:    14,
+      icon:       'circle',
+      formatter:  name => name,
+      textStyle: {
+        fontSize:   11,
+        color:      '#94a3b8',
+        fontFamily: 'DM Sans, sans-serif',
+      }
+    },
+
+    series: [{
+      type:       'pie',
+      radius:     ['40%', '70%'],
+      center:     ['50%', '42%'],
+      startAngle: 90,
+      minAngle:   4,
+      data:      rawData,
+      label: {
+        show:      true,
+        position:  'inside',
+        formatter: params => params.percent >= 8 ? `${params.percent.toFixed(1)}%` : '',
+        fontSize:  11,
+        fontWeight: 'bold',
+        fontFamily: 'Chakra Petch, sans-serif',
+        color:     '#ffffff',
+        textShadowBlur:  4,
+        textShadowColor: 'rgba(0,0,0,0.6)',
+      },
+      labelLine: { show: false },
+    }]
+  }, true);
+}
+
+function renderVendors() {
+  const cnt = {};
+  filteredVulns.forEach(v=>{ if(v.vendorProject) cnt[v.vendorProject]=(cnt[v.vendorProject]||0)+1; });
+  const sorted = Object.entries(cnt).sort((a,b)=>b[1]-a[1]).slice(0,15);
+  const names  = sorted.map(e=>e[0]).reverse();
+  const vals   = sorted.map(e=>e[1]).reverse();
+  const maxV   = Math.max(...vals, 1);
+
+  charts.vendors.setOption({
+    backgroundColor: 'transparent',
+    tooltip: { ...TOOLTIP_STYLE, trigger:'axis' },
+    xAxis: {
+      type: 'value',
+      axisLabel:  { fontSize:10, color:C_T2 },
+      splitLine:  { lineStyle:{ color:C_BORDER, type:'dashed' } },
+      axisLine:   { show:false }
+    },
+    yAxis: {
+      type: 'category',
+      data: names,
+      axisLabel: { fontSize:10, color:'#94a3b8', width:115, overflow:'truncate' },
+      axisLine: { lineStyle:{ color:C_BORDER } }
+    },
+    series: [{
+      type: 'bar',
+      data: vals.map(v => ({
+        value: v,
+        itemStyle: {
+          color: new echarts.graphic.LinearGradient(1,0,0,0,[
+            {offset:0,color:v===maxV?C_AMBER:'#1e3a5f'},
+            {offset:1,color:'#0c1f38'}
+          ]),
+          borderRadius:[0,3,3,0]
+        }
+      })),
+      emphasis: { itemStyle:{ color:C_AMBER }},
+      label: { show:true, position:'right', fontSize:10, color:C_T2 }
+    }],
+    grid: { left:125, right:55, top:10, bottom:20 }
+  }, true);
+}
+
+function renderProducts() {
+  const cnt = {};
+  filteredVulns.forEach(v=>{
+    if(v.vendorProject && v.product) {
+      const k=`${v.vendorProject} ${v.product}`;
+      cnt[k]=(cnt[k]||0)+1;
+    }
+  });
+  const sorted = Object.entries(cnt).sort((a,b)=>b[1]-a[1]).slice(0,15);
+  const names  = sorted.map(e=>e[0]).reverse();
+  const vals   = sorted.map(e=>e[1]).reverse();
+  const maxV   = Math.max(...vals, 1);
+
+  charts.products.setOption({
+    backgroundColor: 'transparent',
+    tooltip: { ...TOOLTIP_STYLE, trigger:'axis' },
+    xAxis: {
+      type: 'value',
+      axisLabel:  { fontSize:10, color:C_T2 },
+      splitLine:  { lineStyle:{ color:C_BORDER, type:'dashed' } },
+      axisLine:   { show:false }
+    },
+    yAxis: {
+      type: 'category',
+      data: names,
+      axisLabel: { fontSize:10, color:'#94a3b8', width:140, overflow:'truncate' },
+      axisLine: { lineStyle:{ color:C_BORDER } }
+    },
+    series: [{
+      type: 'bar',
+      data: vals.map(v => ({
+        value: v,
+        itemStyle: {
+          color: new echarts.graphic.LinearGradient(1,0,0,0,[
+            {offset:0,color:v===maxV?C_CYAN:'#1a3050'},
+            {offset:1,color:'#0c1f38'}
+          ]),
+          borderRadius:[0,3,3,0]
+        }
+      })),
+      emphasis: { itemStyle:{ color:C_CYAN }},
+      label: { show:true, position:'right', fontSize:10, color:C_T2 }
+    }],
+    grid: { left:150, right:55, top:10, bottom:20 }
+  }, true);
+}
+
+/* ═══════════════════════════════════════════════════
+   CLICK FILTERS  (Kibana-style)
+═══════════════════════════════════════════════════ */
+const CHIP_LABELS = {
+  vendorProject: 'vendor',
+  severity:      'severity',
+  year:          'year',
+  yearMonth:     'date',
+  vendorProduct: 'product'
+};
+
+function toggleClickFilter(field, value) {
+  const idx = clickFilters.findIndex(f => f.field === field && f.value === value);
+  if (idx !== -1) {
+    clickFilters.splice(idx, 1);
+  } else {
+    clickFilters.push({ field, value });
+  }
+  renderFilterChips();
+  applyFilters();
+}
+
+function removeClickFilter(idx) {
+  clickFilters.splice(idx, 1);
+  renderFilterChips();
+  applyFilters();
+}
+
+function clearAllClickFilters() {
+  clickFilters = [];
+  renderFilterChips();
+  applyFilters();
+}
+
+function renderFilterChips() {
+  const bar  = document.getElementById('filterChipsBar');
+  const cont = document.getElementById('chipsContainer');
+  if (clickFilters.length === 0) {
+    bar.classList.remove('active');
+    cont.innerHTML = '';
+    return;
+  }
+  bar.classList.add('active');
+  cont.innerHTML = clickFilters.map((f, i) => {
+    const fieldLabel = CHIP_LABELS[f.field] || f.field;
+    const val = String(f.value).length > 30 ? String(f.value).slice(0,28)+'…' : f.value;
+    return `<span class="filter-chip">
+      <span class="chip-field">${fieldLabel}</span>
+      <span class="chip-value" title="${f.value}">${val}</span>
+      <button class="chip-remove" onclick="removeClickFilter(${i})" title="Remove filter">×</button>
+    </span>`;
+  }).join('');
+}
+
+function attachChartClickEvents() {
+  /* Vendors chart */
+  charts.vendors.on('click', params => {
+    if (params.componentType === 'series') {
+      toggleClickFilter('vendorProject', params.name);
+    }
+  });
+  charts.vendors.getZr().on('click', e => {
+    if (!e.target) { clearAllClickFilters(); }
+  });
+
+  /* Products chart */
+  charts.products.on('click', params => {
+    if (params.componentType === 'series') {
+      toggleClickFilter('vendorProduct', params.name);
+    }
+  });
+  charts.products.getZr().on('click', e => {
+    if (!e.target) { clearAllClickFilters(); }
+  });
+
+  /* Severity pie */
+  charts.severity.on('click', params => {
+    if (params.componentType === 'series') {
+      const sevMap = { Critical:'CRITICAL', High:'HIGH', Medium:'MEDIUM', Low:'LOW', 'N/a':'N/A', 'N/A':'N/A' };
+      const sev = sevMap[params.name] || params.name.toUpperCase();
+      toggleClickFilter('severity', sev);
+    }
+  });
+
+  /* Timeline bar */
+  charts.timeline.on('click', params => {
+    if (params.componentType !== 'series') return;
+    if (tlMode === 'yearly') {
+      toggleClickFilter('year', params.name);
+    } else {
+      toggleClickFilter('yearMonth', params.name);
+    }
+  });
+}
+
+/* ═══════════════════════════════════════════════════
+   TABLE
+═══════════════════════════════════════════════════ */
+function initTable() {
+  kevTable = new Tabulator('#kevTable', {
+    data: [],
+    layout: 'fitData',
+    pagination: 'local',
+    paginationSize: 25,
+    paginationSizeSelector: [10, 25, 50, 100, 250],
+    movableColumns: true,
+    placeholder: '<div style="padding:32px;color:#475569;text-align:center;font-family:JetBrains Mono,monospace;font-size:12px;">No vulnerabilities match current filters</div>',
+    columns: [
+      {
+        title: 'CVE ID', field: 'cveID', width: 148, frozen: true,
+        formatter: cell => {
+          const v = cell.getValue();
+          return `<a href="https://nvd.nist.gov/vuln/detail/${v}" target="_blank"
+                     style="color:${C_AMBER};font-weight:600;font-family:'JetBrains Mono',monospace;font-size:11px;">${v}</a>`;
+        }
+      },
+      { title: 'Vendor',  field: 'vendorProject', width: 130 },
+      { title: 'Product', field: 'product',        width: 130 },
+      {
+        title: 'Vulnerability Name', field: 'vulnerabilityName', minWidth: 280,
+        formatter: cell => {
+          const v = cell.getValue() || '';
+          return `<span style="white-space:normal;word-break:break-word;">${v}</span>`;
+        }
+      },
+      {
+        title: 'Date Added', field: 'dateAdded', width: 112, sorter: 'date',
+        sorterParams: { format: 'YYYY-MM-DD' },
+        formatter: cell => `<span style="font-family:'JetBrains Mono',monospace;font-size:11px;">${cell.getValue()||'—'}</span>`
+      },
+      {
+        title: 'Due Date', field: 'dueDate', width: 104, sorter: 'date',
+        sorterParams: { format: 'YYYY-MM-DD' },
+        formatter: cell => {
+          const v = cell.getValue();
+          if (!v) return '<span style="color:#334155;">—</span>';
+          const past = new Date(v) < new Date();
+          return `<span style="color:${past?C_RED:C_GREEN};font-family:'JetBrains Mono',monospace;font-size:11px;">${v}</span>`;
+        }
+      },
+      {
+        title: 'CVSS', field: 'cvssScore', width: 70, hozAlign: 'center', sorter: 'number',
+        formatter: cell => {
+          const v = cell.getValue();
+          if (v == null) return '<span style="color:#334155;">—</span>';
+          const c = v>=9?C_RED:v>=7?C_ORANGE:v>=4?'#eab308':C_GREEN;
+          return `<span style="font-weight:700;color:${c};font-family:'JetBrains Mono',monospace;font-size:12px;"
+                        title="CVSS ${cell.getRow().getData().cvssVersion||''}">${v.toFixed(1)}</span>`;
+        }
+      },
+      {
+        title: 'Severity', field: 'severity', width: 98, hozAlign: 'center',
+        formatter: cell => {
+          const v = cell.getValue();
+          if (!v) return '<span class="sev sev-NA">N/A</span>';
+          return `<span class="sev sev-${v}">${v}</span>`;
+        }
+      },
+      {
+        title: 'Ransomware', field: 'knownRansomwareCampaignUse', width: 115, hozAlign: 'center',
+        formatter: cell => cell.getValue() === 'Known'
+          ? '<span class="ran-known">Known</span>'
+          : '<span class="ran-unknown">Unknown</span>'
+      },
+      {
+        title: 'CWE', field: 'cwes', width: 170,
+        formatter: cell => {
+          const cwes = cell.getValue();
+          if (!cwes || !cwes.length) return '<span style="color:#334155;">—</span>';
+          return cwes.map(cwe => {
+            const id = cwe.replace('CWE-','');
+            return `<a href="https://cwe.mitre.org/data/definitions/${id}.html" target="_blank"
+                       style="color:${C_BLUE};font-size:11px;margin-right:4px;font-family:'JetBrains Mono',monospace;">${cwe}</a>`;
+          }).join('');
+        }
+      },
+      {
+        title: 'Description', field: 'shortDescription', minWidth: 200, visible: false,
+        formatter: cell => {
+          const v = cell.getValue() || '';
+          return `<span title="${v.replace(/"/g,'&quot;')}" style="font-size:11px;">${v.length>100?v.slice(0,98)+'…':v}</span>`;
+        }
+      },
+      {
+        title: 'Required Action', field: 'requiredAction', minWidth: 180, visible: false,
+        formatter: cell => `<span style="font-size:11px;">${cell.getValue()||''}</span>`
+      }
+    ]
+  });
+}
+
+function renderTable() {
+  if (kevTable) kevTable.setData(filteredVulns);
+}
+
+/* ═══════════════════════════════════════════════════
+   BOOT
+═══════════════════════════════════════════════════ */
+document.addEventListener('DOMContentLoaded', () => {
+  /* Filter events */
+  ['filterYear','filterMonth','filterVendor','filterSeverity','filterRansomware']
+    .forEach(id => document.getElementById(id).addEventListener('change', applyFilters));
+  document.getElementById('searchInput').addEventListener('input', debounce(applyFilters, 260));
+  document.getElementById('resetFilters').addEventListener('click', () => {
+    ['filterYear','filterMonth','filterVendor','filterSeverity','filterRansomware']
+      .forEach(id => { document.getElementById(id).value = 'all'; });
+    document.getElementById('searchInput').value = '';
+    applyFilters();
+  });
+
+  /* Timeline toggle */
+  document.getElementById('btnMonthly').addEventListener('click', () => {
+    tlMode = 'monthly';
+    document.getElementById('btnMonthly').classList.add('active');
+    document.getElementById('btnYearly').classList.remove('active');
+    renderTimeline();
+  });
+  document.getElementById('btnYearly').addEventListener('click', () => {
+    tlMode = 'yearly';
+    document.getElementById('btnYearly').classList.add('active');
+    document.getElementById('btnMonthly').classList.remove('active');
+    renderTimeline();
+  });
+
+  /* Export */
+  document.getElementById('exportCSV').addEventListener('click', () => {
+    kevTable.download('csv', `cisa_kev_${new Date().toISOString().slice(0,10)}.csv`);
+  });
+  document.getElementById('exportJSON').addEventListener('click', () => {
+    const b = new Blob([JSON.stringify(filteredVulns, null, 2)], {type:'application/json'});
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(b);
+    a.download = `cisa_kev_${new Date().toISOString().slice(0,10)}.json`;
+    a.click();
+  });
+
+  document.getElementById('btnClearChips').addEventListener('click', clearAllClickFilters);
+
+  initCharts();
+  attachChartClickEvents();
+  initTable();
+  loadData();
+});
+</script>
+
+</body>
+</html>

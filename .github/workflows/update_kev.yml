@@ -1,0 +1,44 @@
+name: Update CISA KEV Data
+
+on:
+  schedule:
+    - cron: '0 0 * * *'   # Daily at 00:00 UTC = 07:00 WIB
+  workflow_dispatch:        # Manual trigger from GitHub UI → Actions tab
+
+permissions:
+  contents: write
+
+jobs:
+  update-kev:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+          cache-dependency-path: scripts/requirements.txt
+
+      - name: Install dependencies
+        run: pip install -r scripts/requirements.txt
+
+      - name: Fetch latest CISA KEV catalog + NVD CVSS data
+        run: python scripts/fetch_kev.py --output data/kev_data.json --force
+
+      - name: Commit and push if data changed
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add data/kev_data.json
+          if git diff --staged --quiet; then
+            echo "KEV data is already up to date. No commit needed."
+          else
+            TODAY=$(date -u +%Y-%m-%d)
+            COUNT=$(python -c "import json; d=json.load(open('data/kev_data.json')); print(d['metadata']['totalCount'])")
+            git commit -m "chore: update CISA KEV data [${TODAY}] (${COUNT} entries)"
+            git push
+          fi
