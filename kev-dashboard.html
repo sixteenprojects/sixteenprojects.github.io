@@ -621,6 +621,8 @@
       font-size: 12px;
       padding: 8px 10px;
       vertical-align: top;
+      overflow: visible !important;
+      white-space: normal !important;
     }
     /* Frozen column must have solid background so it doesn't bleed over scrolled content */
     .tabulator .tabulator-cell.tabulator-frozen {
@@ -1594,6 +1596,11 @@ function initTable() {
     paginationSizeSelector: [10, 25, 50, 100, 250, 500],
     movableColumns: true,
     virtualDom: false,
+    rowFormatter: row => {
+      const el = row.getElement();
+      el.style.height    = '';      /* clear Tabulator's inline height so CSS height:auto wins */
+      el.style.minHeight = '36px';
+    },
     placeholder: '<div style="padding:32px;color:#475569;text-align:center;font-family:JetBrains Mono,monospace;font-size:12px;">No vulnerabilities match current filters</div>',
     columns: [
       {
