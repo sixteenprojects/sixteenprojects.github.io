@@ -609,6 +609,7 @@
       background: var(--bg-card) !important;
       border-bottom: 1px solid var(--border) !important;
       transition: background .12s;
+      height: auto !important;
     }
     .tabulator .tabulator-row:hover { background: var(--bg-hover) !important; }
     .tabulator .tabulator-row-odd   { background: rgba(255,255,255,.015) !important; }
@@ -1663,22 +1664,14 @@ function initTable() {
         }
       },
       {
-        title: 'Threat Actors', field: 'threatActors', minWidth: 220, maxWidth: 380,
+        title: 'Threat Actors', field: 'threatActors', minWidth: 220, maxWidth: 420,
         headerTooltip: 'Known threat actors exploiting this CVE (source: MITRE ATT&CK)',
         formatter: cell => {
           const actors = cell.getValue();
           if (!actors || !actors.length) return '<span style="color:#334155;">—</span>';
-          const MAX = 4;
-          const visible  = actors.slice(0, MAX);
-          const overflow = actors.slice(MAX);
-          let html = visible.map(a =>
+          return actors.map(a =>
             `<a class="actor-badge" href="${a.url}" target="_blank" title="${a.name} (${a.id})">${a.name}</a>`
           ).join('');
-          if (overflow.length) {
-            const tip = overflow.map(a => `${a.name} (${a.id})`).join('\n');
-            html += `<span class="actor-overflow" title="${tip}">+${overflow.length} more</span>`;
-          }
-          return html;
         },
         sorter: (a, b) => (a||[]).length - (b||[]).length
       },
