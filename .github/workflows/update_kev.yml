@@ -29,16 +29,20 @@ jobs:
       - name: Fetch latest CISA KEV catalog + NVD CVSS data
         run: python scripts/fetch_kev.py --output data/kev_data.json --force
 
+      - name: Fetch MITRE ATT&CK threat actor attribution
+        run: python scripts/fetch_threat_actors.py --output data/threat_actors.json
+
       - name: Commit and push if data changed
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add data/kev_data.json
+          git add data/kev_data.json data/threat_actors.json
           if git diff --staged --quiet; then
-            echo "KEV data is already up to date. No commit needed."
+            echo "Data is already up to date. No commit needed."
           else
             TODAY=$(date -u +%Y-%m-%d)
             COUNT=$(python -c "import json; d=json.load(open('data/kev_data.json')); print(d['metadata']['totalCount'])")
-            git commit -m "chore: update CISA KEV data [${TODAY}] (${COUNT} entries)"
+            TA=$(python -c "import json; d=json.load(open('data/threat_actors.json')); print(d['metadata']['cvesWithActors'])")
+            git commit -m "chore: update KEV + threat actor data [${TODAY}] (${COUNT} KEV, ${TA} CVEs with actors)"
             git push
           fi
