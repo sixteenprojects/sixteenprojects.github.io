@@ -1,25 +1,32 @@
 /* map.css — Full-page threat intelligence geo map */
 
-/* ── Page root: escapes view-container padding, fills viewport ─────────── */
+/* ── View container override when map is active ────────────────────────── */
+.view-container--map {
+  padding: 0 !important;
+  overflow: hidden !important;
+}
+
+/* ── Page root: fills the entire content area ──────────────────────────── */
 .map-page {
   position: relative;
-  margin: -24px;
-  height: calc(100vh - 56px);
+  width: 100%;
+  height: 100%;
+  min-height: calc(100vh - 56px);
   overflow: hidden;
   background: #0d1117;
   font-family: var(--font-sans);
 }
 
-/* ── Leaflet canvas fills entire page ─────────────────────────────────── */
+/* ── Leaflet canvas: fills the page ───────────────────────────────────── */
 .map-canvas {
   position: absolute;
-  inset: 0;
+  top: 0; left: 0; right: 0; bottom: 0;
   z-index: 0;
 }
 .map-canvas .leaflet-container {
   background: #0d1117;
-  height: 100%;
-  width: 100%;
+  height: 100% !important;
+  width: 100% !important;
 }
 
 /* ══ TOPBAR ═══════════════════════════════════════════════════════════════ */

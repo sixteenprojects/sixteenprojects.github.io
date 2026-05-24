@@ -249,6 +249,11 @@ const MapView = (() => {
     const el = document.getElementById('ti-map-el');
     if (!el || !window.L) return;
 
+    // Explicitly set container height via JS (avoids CSS positioning race)
+    const headerH = 56;
+    el.style.width  = '100%';
+    el.style.height = (window.innerHeight - headerH) + 'px';
+
     _map = L.map(el, {
       center: [20, 10], zoom: 2,
       minZoom: 1, maxZoom: 8,
@@ -266,6 +271,14 @@ const MapView = (() => {
 
     L.control.zoom({ position: 'bottomright' }).addTo(_map);
     L.control.attribution({ prefix: false, position: 'bottomright' }).addTo(_map);
+
+    // Resize map when window resizes
+    window.addEventListener('resize', () => {
+      if (_map && el) {
+        el.style.height = (window.innerHeight - headerH) + 'px';
+        _map.invalidateSize();
+      }
+    });
 
     _map.invalidateSize();
   }
@@ -288,12 +301,15 @@ const MapView = (() => {
     _buildRanks(counts);
 
     // Remove stale layers based on mode
-    if (_mode === 'bubbles' && _geoLayer)   { _map.removeLayer(_geoLayer);   _geoLayer = null; }
+    if (_mode === 'bubbles' && _geoLayer)      { _map.removeLayer(_geoLayer);    _geoLayer = null; }
     if (_mode === 'choropleth' && _bubbleLayer) { _map.removeLayer(_bubbleLayer); _bubbleLayer = null; }
+
     if (_mode !== 'bubbles')    _renderChoropleth(counts);
-    if (_mode !== 'choropleth') _renderBubbles(counts);
+    // Always show bubbles if no geo data (fallback) OR when mode includes bubbles
+    if (_mode !== 'choropleth' || !_geoData)   _renderBubbles(counts);
 
     _updateKPIs(counts);
+    if (_map) _map.invalidateSize();
   }
 
   function _renderChoropleth(counts) {
@@ -318,7 +334,7 @@ const MapView = (() => {
         const n = counts[iso] || 0;
 
         layer.bindTooltip(
-          () => _tooltipHTML(iso, name, n, counts),
+          _tooltipHTML(iso, name, n, counts),
           { sticky: true, className: 'map-tt', direction: 'top', opacity: 1, offset: [0, -4] }
         );
 
@@ -371,7 +387,7 @@ const MapView = (() => {
       });
 
       bubble.bindTooltip(
-        () => _tooltipHTML(iso, name, n, counts),
+        _tooltipHTML(iso, name, n, counts),
         { sticky: true, className: 'map-tt', direction: 'top', opacity: 1 }
       );
       bubble.on({

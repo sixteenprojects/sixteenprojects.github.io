@@ -73,6 +73,9 @@ function _renderView(viewName) {
   _showLoading(false);
   container.innerHTML = '';
 
+  // Map view needs zero padding and no scroll
+  container.classList.toggle('view-container--map', viewName === 'map');
+
   switch (viewName) {
     case 'overview':   OverviewView.render(container, data);            break;
     case 'malware':    MalwareView.render(container, data, refs);       break;
