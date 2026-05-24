@@ -6,6 +6,7 @@
 import Security  from '../security.js';
 import Table     from '../components/table.js';
 import DetailView from './detail.js';
+import Export    from '../export.js';
 
 const RansomwareView = (() => {
   'use strict';
@@ -119,6 +120,24 @@ const RansomwareView = (() => {
     countEl.style.marginLeft = 'auto';
     countEl.textContent = `${groups.length.toLocaleString()} groups`;
     bar.appendChild(countEl);
+
+    const exportLbl = _el('span', 'filter-label');
+    exportLbl.style.marginLeft = '8px';
+    exportLbl.textContent = 'Export:';
+    bar.appendChild(exportLbl);
+    [['CSV','csv'],['JSON','json'],['YARA','yara']].forEach(([label, fmt]) => {
+      const btn = document.createElement('button');
+      btn.className = 'btn btn-ghost btn-sm';
+      btn.textContent = label;
+      btn.addEventListener('click', () => {
+        const data = _tableInstance?.getFiltered() || groups;
+        const ts   = new Date().toISOString().slice(0,10);
+        if (fmt === 'csv')  Export.toCSV(data,  `tihub_ransomware_${ts}.csv`);
+        if (fmt === 'json') Export.toJSON(data, `tihub_ransomware_${ts}.json`);
+        if (fmt === 'yara') Export.toYARA(data, `tihub_ransomware_${ts}.yar`);
+      });
+      bar.appendChild(btn);
+    });
 
     let _debounce = null;
     searchInput.addEventListener('input', () => {

@@ -4,6 +4,7 @@
  */
 
 import Security from '../security.js';
+import Export   from '../export.js';
 
 const DetailView = (() => {
   'use strict';
@@ -106,7 +107,7 @@ const DetailView = (() => {
     _bodyEl.appendChild(_infoGrid(rows));
     if (item.description) _bodyEl.appendChild(_descBlock(item.description));
     if (item.references?.length) _bodyEl.appendChild(_refList(item.references));
-    _bodyEl.appendChild(_phaseNote('Full malware detail — yara rules, actor links, IOC export — coming in Phase 3'));
+    _bodyEl.appendChild(Export.buildToolbar([item], 'malware', item.name || item.id));
   }
 
   // ── Actor detail ────────────────────────────────────────────────────────
@@ -122,7 +123,7 @@ const DetailView = (() => {
     _bodyEl.appendChild(_infoGrid(rows));
     if (item.description) _bodyEl.appendChild(_descBlock(item.description));
     if (item.references?.length) _bodyEl.appendChild(_refList(item.references));
-    _bodyEl.appendChild(_phaseNote('Full actor profile — TTP matrix, associated malware, victim list — coming in Phase 3'));
+    _bodyEl.appendChild(Export.buildToolbar([item], 'actors', item.name || item.id));
   }
 
   // ── Ransomware detail ───────────────────────────────────────────────────
@@ -139,7 +140,7 @@ const DetailView = (() => {
     _bodyEl.appendChild(_infoGrid(rows));
     if (item.description) _bodyEl.appendChild(_descBlock(item.description));
     if (item.locations?.length) _bodyEl.appendChild(_locList(item.locations));
-    _bodyEl.appendChild(_phaseNote('Full ransomware profile — MITRE TTPs, victim list, location history — coming in Phase 4'));
+    _bodyEl.appendChild(Export.buildToolbar([item], 'ransomware', item.name || item.id));
   }
 
   // ── Victim detail ────────────────────────────────────────────────────────
@@ -168,6 +169,7 @@ const DetailView = (() => {
       row.appendChild(a);
       _bodyEl.appendChild(row);
     }
+    _bodyEl.appendChild(Export.buildToolbar([item], 'victims', item.victim || item.id));
   }
 
   // ── Generic fallback ─────────────────────────────────────────────────────
