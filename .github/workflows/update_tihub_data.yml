@@ -15,6 +15,11 @@ on:
         required: false
         default: "false"
         type: boolean
+      with_otx:
+        description: "Fetch OTX AlienVault IOCs (requires OTX_API_KEY secret)"
+        required: false
+        default: "false"
+        type: boolean
 
 jobs:
   update-data:
@@ -36,7 +41,12 @@ jobs:
       - name: Install dependencies
         run: pip install -r ti-hub/scripts/requirements.txt
 
-      - name: Run fetch_all.py
+      - name: Update world geodata (geo.json)
+        run: |
+          cd ti-hub/scripts
+          python fetch_geodata.py
+
+      - name: Run fetch_all.py (malware, actors, ransomware, victims, stats)
         env:
           RANSOMLOOK_API_KEY: ${{ secrets.RANSOMLOOK_API_KEY }}
         run: |
@@ -48,7 +58,19 @@ jobs:
           if [ "${{ github.event.inputs.skip_ransomware }}" = "true" ]; then
             ARGS="$ARGS --skip-ransomware"
           fi
+          if [ "${{ github.event.inputs.with_otx }}" = "true" ]; then
+            ARGS="$ARGS --with-otx"
+          fi
           python fetch_all.py $ARGS
+
+      - name: Fetch OTX AlienVault IOCs (scheduled, if key configured)
+        if: github.event_name == 'schedule' && secrets.OTX_API_KEY != ''
+        env:
+          OTX_API_KEY: ${{ secrets.OTX_API_KEY }}
+        run: |
+          cd ti-hub/scripts
+          python fetch_otx.py
+        continue-on-error: true
 
       - name: Commit and push data
         run: |
@@ -58,6 +80,6 @@ jobs:
           if git diff --staged --quiet; then
             echo "No data changes to commit."
           else
-            git commit -m "chore(ti-hub): auto-update threat intelligence data [skip ci]"
+            git commit -m "chore(ti-hub): auto-update threat intelligence data [$(date -u '+%Y-%m-%d')] [skip ci]"
             git push
           fi
