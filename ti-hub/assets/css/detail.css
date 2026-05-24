@@ -17,7 +17,7 @@
   overflow: hidden;
 }
 
-.detail-panel:not([hidden]) {
+.detail-panel.open {
   transform: translateX(0);
 }
 

@@ -9,6 +9,7 @@ import Api     from './api.js';
 import Router  from './router.js';
 import Toast   from './components/toast.js';
 import Security from './security.js';
+import Search   from './search.js';
 
 import OverviewView   from './views/overview.js';
 import MalwareView    from './views/malware.js';
@@ -33,7 +34,10 @@ import GraphView      from './components/graph.js';
   // 3. Wire sidebar pin button
   _initSidebar();
 
-  // 4. Wire refresh button
+  // 4. Wire detail panel close + Escape
+  _initDetailPanel();
+
+  // 4b. Wire refresh button
   _initRefreshButton();
 
   // 5. Load data
@@ -43,6 +47,7 @@ import GraphView      from './components/graph.js';
     State.loadData(data);
     await _updateLastUpdated();
     _updateSidebarCounts(data);
+    Search.init(data);
     Toast.success('Threat intelligence data loaded.', 3000);
   } catch (err) {
     console.error('[Boot] Data load failed:', err);
@@ -78,6 +83,20 @@ function _renderView(viewName) {
   }
 }
 
+// ── Detail panel ───────────────────────────────────────────────────────
+
+function _initDetailPanel() {
+  const closeBtn = document.getElementById('detail-panel-close');
+  const panel    = document.getElementById('detail-panel');
+  if (!panel) return;
+
+  if (closeBtn) closeBtn.addEventListener('click', () => DetailView.close());
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape' && !panel.hidden) DetailView.close();
+  });
+}
+
 // ── Sidebar ────────────────────────────────────────────────────────────
 
 function _initSidebar() {
@@ -89,14 +108,23 @@ function _initSidebar() {
   // Apply saved pin preference
   _applySidebarPin(State.get('sidebarPinned'));
 
-  // Hover reveal via trigger zone
+  // Hover reveal via trigger zone with collapse delay (prevents flicker)
+  let _hideTimer = null;
   if (trigger && sidebar) {
-    trigger.addEventListener('mouseenter', () => {
+    const _show = () => {
+      clearTimeout(_hideTimer);
       if (!State.get('sidebarPinned')) sidebar.classList.add('visible');
-    });
-    sidebar.addEventListener('mouseleave', () => {
-      if (!State.get('sidebarPinned')) sidebar.classList.remove('visible');
-    });
+    };
+    const _hide = () => {
+      clearTimeout(_hideTimer);
+      _hideTimer = setTimeout(() => {
+        if (!State.get('sidebarPinned')) sidebar.classList.remove('visible');
+      }, 200);
+    };
+
+    trigger.addEventListener('mouseenter', _show);
+    sidebar.addEventListener('mouseenter', _show);
+    sidebar.addEventListener('mouseleave', _hide);
   }
 
   // Pin toggle
@@ -149,6 +177,7 @@ function _initRefreshButton() {
       State.loadData(Api.getAll());
       await _updateLastUpdated();
       _updateSidebarCounts(Api.getAll());
+      Search.updateData(Api.getAll());
       _renderView(Router.currentView());
       Toast.success('Data refreshed successfully.');
     } catch (err) {
@@ -233,7 +262,29 @@ toastStyles.textContent = `
 @keyframes toastIn  { from { opacity:0; transform:translateX(16px); } to { opacity:1; transform:none; } }
 @keyframes toastOut { from { opacity:1; transform:none; } to { opacity:0; transform:translateX(16px); } }
 .search-overlay { position:fixed; inset:0; z-index:var(--z-modal); background:rgba(0,0,0,.5); display:flex; align-items:flex-start; justify-content:center; padding-top:80px; }
-.search-overlay-inner { background:var(--bg-surface); border:1px solid var(--border-color); border-radius:var(--radius-lg); width:100%; max-width:600px; max-height:60vh; overflow-y:auto; box-shadow:var(--shadow-lg); }
-.search-results { padding: 8px; }
+.search-overlay-inner { background:var(--bg-surface); border:1px solid var(--border-color); border-radius:var(--radius-lg); width:100%; max-width:640px; max-height:65vh; overflow-y:auto; box-shadow:var(--shadow-lg); }
+.search-results { padding:8px; }
+.search-empty { padding:20px; color:var(--text-muted); font-size:13px; text-align:center; }
+.search-result-section { margin-bottom:4px; }
+.search-result-label { padding:8px 12px 4px; font-size:10px; font-weight:700; color:var(--text-muted); text-transform:uppercase; letter-spacing:.06em; }
+.search-result-row { display:flex; align-items:center; gap:8px; padding:8px 12px; border-radius:6px; cursor:pointer; transition:background .1s; }
+.search-result-row:hover, .search-result-row.active { background:var(--bg-surface-2); }
+.search-result-name { flex:1; font-size:13px; font-weight:500; color:var(--text-primary); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.search-result-sub { font-size:11px; color:var(--text-muted); white-space:nowrap; flex-shrink:0; max-width:200px; overflow:hidden; text-overflow:ellipsis; }
+.search-result-footer { padding:8px 12px; font-size:11px; color:var(--text-muted); border-top:1px solid var(--border-color); }
+mark.search-highlight { background:var(--color-brand-accent); color:#fff; border-radius:2px; padding:0 2px; }
+.detail-info-grid { display:grid; grid-template-columns:140px 1fr; gap:2px 12px; padding:16px 20px; font-size:13px; }
+.detail-info-grid dt { color:var(--text-muted); font-weight:500; padding:4px 0; }
+.detail-info-grid dd { color:var(--text-primary); padding:4px 0; word-break:break-word; margin:0; }
+.detail-desc { padding:0 20px 16px; }
+.detail-desc h4 { font-size:12px; font-weight:700; color:var(--text-muted); text-transform:uppercase; letter-spacing:.06em; margin-bottom:8px; }
+.detail-desc p { font-size:13px; color:var(--text-secondary); line-height:1.6; }
+.detail-refs { padding:0 20px 16px; }
+.detail-refs h4 { font-size:12px; font-weight:700; color:var(--text-muted); text-transform:uppercase; letter-spacing:.06em; margin-bottom:8px; }
+.detail-refs ul { list-style:none; padding:0; display:flex; flex-direction:column; gap:4px; }
+.detail-refs li { font-size:12px; color:var(--text-secondary); word-break:break-all; }
+.ref-link { color:var(--color-brand-accent); text-decoration:none; }
+.ref-link:hover { text-decoration:underline; }
+.detail-phase-note { margin:0 20px 20px; padding:10px 14px; background:var(--bg-surface-2); border:1px solid var(--border-color); border-radius:var(--radius-md); font-size:12px; color:var(--text-muted); }
 `;
 document.head.appendChild(toastStyles);
