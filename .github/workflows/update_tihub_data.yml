@@ -63,8 +63,8 @@ jobs:
           fi
           python fetch_all.py $ARGS
 
-      - name: Fetch OTX AlienVault IOCs (scheduled, if key configured)
-        if: github.event_name == 'schedule' && secrets.OTX_API_KEY != ''
+      - name: Fetch OTX AlienVault IOCs (scheduled daily)
+        if: github.event_name == 'schedule'
         env:
           OTX_API_KEY: ${{ secrets.OTX_API_KEY }}
         run: |
