@@ -154,7 +154,123 @@ const DetailView = (() => {
 
     if (item.description) _bodyEl.appendChild(_descBlock(item.description));
     if (item.references?.length) _bodyEl.appendChild(_refList(item.references));
+
+    // OTX AlienVault IOC block (async — loads after sync render)
+    _appendOTXBlock(item.id);
+
     _bodyEl.appendChild(Export.buildToolbar([item], 'actors', item.name || item.id));
+  }
+
+  // ── OTX AlienVault IOC block ───────────────────────────────────────────
+
+  function _appendOTXBlock(actorId) {
+    const iocData = (Api.getAll().ioc || {})[actorId];
+    if (!iocData) return;
+
+    const { indicators = {}, pulses = [], updated = '' } = iocData;
+    const totalIOCs = Object.values(indicators).reduce((s, arr) => s + arr.length, 0);
+    if (!totalIOCs && !pulses.length) return;
+
+    const sec = _el('div', 'detail-refs');
+    sec.style.cssText = 'border-top:1px solid var(--border-color);padding-top:14px;margin-top:4px;';
+
+    // Header with OTX attribution
+    const hRow = _el('div');
+    hRow.style.cssText = 'display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;';
+    hRow.innerHTML = `
+      <h4 style="margin:0;font-size:13px;font-weight:700;color:var(--text-primary);">
+        IOC Indicators
+        <span class="badge badge-gray" style="font-size:10px;margin-left:6px;">${totalIOCs.toLocaleString()} total</span>
+      </h4>
+      <a href="https://otx.alienvault.com/browse/global/pulses?q=${encodeURIComponent(actorId)}&sort=-modified"
+         target="_blank" rel="noopener noreferrer"
+         style="display:inline-flex;align-items:center;gap:5px;font-size:11px;color:#f59e0b;text-decoration:none;font-weight:600;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13">
+          <circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10"/>
+        </svg>
+        OTX AlienVault
+      </a>`;
+    sec.appendChild(hRow);
+
+    // IOC tabs: IP | Domain | URL | Hash
+    const tabDefs = [
+      { key: 'ip',     label: 'IP',     icon: '🌐' },
+      { key: 'domain', label: 'Domain', icon: '🔗' },
+      { key: 'url',    label: 'URL',    icon: '↗' },
+      { key: 'md5',    label: 'MD5',    icon: '#' },
+      { key: 'sha256', label: 'SHA256', icon: '#' },
+    ].filter(t => (indicators[t.key] || []).length > 0);
+
+    if (tabDefs.length) {
+      const tabBar = _el('div');
+      tabBar.style.cssText = 'display:flex;gap:4px;margin-bottom:8px;flex-wrap:wrap;';
+
+      const paneWrap = _el('div');
+      paneWrap.style.cssText = 'background:var(--bg-surface-2);border-radius:8px;border:1px solid var(--border-color);';
+
+      tabDefs.forEach((t, i) => {
+        const btn = _el('button');
+        btn.style.cssText = `height:26px;padding:0 10px;border:1px solid var(--border-color);border-radius:6px;background:${i===0?'var(--bg-surface)':'transparent'};color:${i===0?'var(--text-primary)':'var(--text-muted)'};font-size:11px;font-weight:600;cursor:pointer;`;
+        btn.textContent = `${t.icon} ${t.label} (${(indicators[t.key]||[]).length})`;
+
+        const pane = _el('div');
+        pane.style.cssText = `display:${i===0?'block':'none'};padding:10px 12px;max-height:180px;overflow-y:auto;`;
+        const list = (indicators[t.key] || []).slice(0, 100);
+        pane.innerHTML = list.map(v =>
+          `<div style="font-family:var(--font-mono);font-size:11px;color:var(--text-secondary);padding:2px 0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${Security.escapeHtml(v)}</div>`
+        ).join('');
+
+        btn.addEventListener('click', () => {
+          tabBar.querySelectorAll('button').forEach(b => {
+            b.style.background = 'transparent';
+            b.style.color = 'var(--text-muted)';
+          });
+          btn.style.background = 'var(--bg-surface)';
+          btn.style.color = 'var(--text-primary)';
+          paneWrap.querySelectorAll('div').forEach(p => p.style.display = 'none');
+          pane.style.display = 'block';
+        });
+
+        tabBar.appendChild(btn);
+        paneWrap.appendChild(pane);
+      });
+
+      sec.appendChild(tabBar);
+      sec.appendChild(paneWrap);
+    }
+
+    // Pulse list (collapsible)
+    if (pulses.length) {
+      const h4 = _el('h4');
+      h4.style.cssText = 'font-size:12px;color:var(--text-secondary);margin:12px 0 6px;font-weight:600;';
+      h4.textContent = `OTX Pulses (${pulses.length})`;
+      sec.appendChild(h4);
+
+      const pulseList = _el('div');
+      pulseList.style.cssText = 'display:flex;flex-direction:column;gap:4px;';
+      for (const p of pulses.slice(0, 8)) {
+        const row = _el('div');
+        row.style.cssText = 'display:flex;align-items:center;gap:8px;padding:5px 8px;background:var(--bg-surface-2);border-radius:6px;';
+        row.innerHTML = `
+          <div style="flex:1;min-width:0;">
+            <div style="font-size:11.5px;font-weight:600;color:var(--text-primary);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${Security.escapeHtml(p.name || '—')}</div>
+            <div style="font-size:10px;color:var(--text-muted);">${p.author || ''} · ${p.modified || p.created || ''} · ${p.indicators_count || 0} IOCs</div>
+          </div>
+          <a href="https://otx.alienvault.com/pulse/${Security.escapeHtml(p.id)}" target="_blank" rel="noopener noreferrer"
+             style="font-size:10px;color:#f59e0b;text-decoration:none;flex-shrink:0;">View ↗</a>`;
+        pulseList.appendChild(row);
+      }
+      sec.appendChild(pulseList);
+    }
+
+    if (updated) {
+      const ts = _el('div');
+      ts.style.cssText = 'font-size:10px;color:var(--text-muted);margin-top:8px;';
+      ts.textContent = `OTX data updated: ${updated.slice(0, 10)}`;
+      sec.appendChild(ts);
+    }
+
+    _bodyEl.appendChild(sec);
   }
 
   // ── Ransomware detail ───────────────────────────────────────────────────

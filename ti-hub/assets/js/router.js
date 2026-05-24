@@ -19,7 +19,7 @@ const Router = (() => {
     '/graph':      'graph',
   };
 
-  const DEFAULT_ROUTE = '/overview';
+  const DEFAULT_ROUTE = '/map';
   let _onNavigate = null;
 
   /** Parse current hash to route path */
