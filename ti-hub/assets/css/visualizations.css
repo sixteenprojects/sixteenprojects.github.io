@@ -1,0 +1,229 @@
+/* visualizations.css — MITRE heatmap, timeline, network graph */
+
+/* ── MITRE ATT&CK Heatmap ───────────────────────────────────────────── */
+.mitre-matrix {
+  overflow-x: auto;
+}
+
+.mitre-grid {
+  display: grid;
+  gap: 3px;
+  min-width: 800px;
+}
+
+.mitre-tactic-col { display: flex; flex-direction: column; gap: 3px; }
+
+.mitre-tactic-header {
+  background: var(--color-brand-primary);
+  color: #fff;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+  font-size: var(--font-size-xs);
+  font-weight: 700;
+  text-align: center;
+  white-space: nowrap;
+}
+[data-theme="dark"] .mitre-tactic-header {
+  background: #1a2847;
+}
+
+.mitre-technique {
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-sm);
+  font-size: 10px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  min-height: 40px;
+  display: flex;
+  align-items: center;
+}
+
+.mitre-technique.inactive {
+  background: var(--bg-surface-2);
+  color: var(--text-muted);
+}
+.mitre-technique.active {
+  background: rgba(220,38,38,.15);
+  color: var(--color-danger);
+  border: 1px solid rgba(220,38,38,.3);
+}
+.mitre-technique.active:hover {
+  background: rgba(220,38,38,.25);
+  transform: scale(1.02);
+}
+
+/* Heat levels */
+.mitre-heat-1 { background: rgba(220,38,38,.1); }
+.mitre-heat-2 { background: rgba(220,38,38,.25); }
+.mitre-heat-3 { background: rgba(220,38,38,.45); }
+.mitre-heat-4 { background: rgba(220,38,38,.65); }
+.mitre-heat-5 { background: rgba(220,38,38,.85); color: #fff; }
+
+/* ── Attack Timeline ────────────────────────────────────────────────── */
+.timeline {
+  position: relative;
+  padding-left: var(--space-6);
+}
+
+.timeline::before {
+  content: '';
+  position: absolute;
+  left: 12px;
+  top: 0; bottom: 0;
+  width: 2px;
+  background: var(--border-color);
+}
+
+.timeline-item {
+  position: relative;
+  padding-bottom: var(--space-5);
+}
+
+.timeline-dot {
+  position: absolute;
+  left: -22px;
+  top: 4px;
+  width: 12px; height: 12px;
+  border-radius: 50%;
+  border: 2px solid var(--bg-surface);
+  background: var(--color-brand-accent);
+  box-shadow: 0 0 0 2px var(--color-brand-accent);
+}
+.timeline-dot.danger { background: var(--color-danger); box-shadow: 0 0 0 2px var(--color-danger); }
+.timeline-dot.warning{ background: var(--color-warning);box-shadow: 0 0 0 2px var(--color-warning);}
+
+.timeline-date {
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  color: var(--text-muted);
+  margin-bottom: var(--space-1);
+}
+
+.timeline-content {
+  background: var(--bg-surface-2);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: var(--space-3) var(--space-4);
+}
+
+.timeline-title {
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: var(--space-1);
+}
+
+.timeline-meta {
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+}
+
+/* ── Network Graph ──────────────────────────────────────────────────── */
+.graph-container {
+  width: 100%;
+  height: 600px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  background: var(--bg-surface);
+  position: relative;
+  overflow: hidden;
+}
+
+.graph-container svg { width: 100%; height: 100%; }
+
+/* D3 graph nodes */
+.graph-node circle {
+  stroke-width: 2;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.graph-node circle:hover { stroke-width: 3; filter: brightness(1.2); }
+
+.graph-node text {
+  font-size: 11px;
+  font-family: var(--font-sans);
+  fill: var(--text-primary);
+  pointer-events: none;
+  text-anchor: middle;
+  dominant-baseline: middle;
+}
+
+/* Node types */
+.node-malware circle  { fill: #3b82f6; stroke: #2563eb; }
+.node-actor circle    { fill: #ef4444; stroke: #dc2626; }
+.node-ransomware circle{ fill: #f59e0b; stroke: #d97706; }
+.node-victim circle   { fill: #6b7280; stroke: #4b5563; }
+
+/* D3 graph links */
+.graph-link {
+  stroke: var(--border-strong);
+  stroke-opacity: .6;
+  stroke-width: 1.5;
+  fill: none;
+}
+
+/* Graph controls overlay */
+.graph-controls {
+  position: absolute;
+  bottom: var(--space-4);
+  right: var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.graph-legend {
+  position: absolute;
+  top: var(--space-4);
+  left: var(--space-4);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: var(--space-3);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.graph-legend-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--font-size-xs);
+  color: var(--text-secondary);
+}
+
+.graph-legend-dot {
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.graph-legend-dot.malware    { background: #3b82f6; }
+.graph-legend-dot.actor      { background: #ef4444; }
+.graph-legend-dot.ransomware { background: #f59e0b; }
+.graph-legend-dot.victim     { background: #6b7280; }
+
+/* ── Bar/Line charts (for overview stats) ───────────────────────────── */
+.chart-container {
+  width: 100%;
+  height: 200px;
+  position: relative;
+}
+
+.chart-bar {
+  fill: var(--color-brand-accent);
+  opacity: .8;
+  transition: opacity var(--transition-fast);
+  cursor: pointer;
+}
+.chart-bar:hover { opacity: 1; }
+
+.chart-axis text {
+  font-size: 10px;
+  fill: var(--text-muted);
+  font-family: var(--font-sans);
+}
+.chart-axis line, .chart-axis path {
+  stroke: var(--border-color);
+}

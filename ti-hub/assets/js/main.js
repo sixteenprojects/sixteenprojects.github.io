@@ -1,0 +1,239 @@
+/**
+ * main.js — Application entry point. Boots the TI-Hub SPA.
+ * Wires: Theme → State → Api → Router → Views → Sidebar → Header
+ */
+
+import Theme   from './theme.js';
+import State   from './state.js';
+import Api     from './api.js';
+import Router  from './router.js';
+import Toast   from './components/toast.js';
+import Security from './security.js';
+
+import OverviewView   from './views/overview.js';
+import MalwareView    from './views/malware.js';
+import ActorsView     from './views/actors.js';
+import RansomwareView from './views/ransomware.js';
+import VictimsView    from './views/victims.js';
+import DetailView     from './views/detail.js';
+import MapView        from './components/map.js';
+import GraphView      from './components/graph.js';
+
+// ── Boot sequence ──────────────────────────────────────────────────────
+
+(async function boot() {
+  // 1. Theme (must be first — prevents FOUC)
+  Theme.init();
+  Theme.bindToggleButton(document.getElementById('theme-toggle-btn'));
+
+  // 2. Load persistent preferences
+  State.loadSavedFilters();
+  State.loadSidebarPref();
+
+  // 3. Wire sidebar pin button
+  _initSidebar();
+
+  // 4. Wire refresh button
+  _initRefreshButton();
+
+  // 5. Load data
+  _showLoading(true);
+  try {
+    const data = await Api.loadAll();
+    State.loadData(data);
+    await _updateLastUpdated();
+    _updateSidebarCounts(data);
+    Toast.success('Threat intelligence data loaded.', 3000);
+  } catch (err) {
+    console.error('[Boot] Data load failed:', err);
+    Toast.error('Failed to load data. Some views may be empty.');
+    State.loadData({ malware: [], actors: [], ransomware: [], victims: [], meta: {} });
+  }
+
+  // 6. Init router — triggers first render
+  Router.init(_renderView);
+})();
+
+// ── View rendering ─────────────────────────────────────────────────────
+
+function _renderView(viewName) {
+  const container = document.getElementById('view-container');
+  if (!container) return;
+
+  const data = Api.getAll();
+  const refs  = Api.buildCrossRefs();
+
+  _showLoading(false);
+  container.innerHTML = '';
+
+  switch (viewName) {
+    case 'overview':   OverviewView.render(container, data);            break;
+    case 'malware':    MalwareView.render(container, data, refs);       break;
+    case 'actors':     ActorsView.render(container, data, refs);        break;
+    case 'ransomware': RansomwareView.render(container, data, refs);    break;
+    case 'victims':    VictimsView.render(container, data, refs);       break;
+    case 'map':        MapView.render(container, data);                 break;
+    case 'graph':      GraphView.render(container, data, refs);         break;
+    default:           OverviewView.render(container, data);
+  }
+}
+
+// ── Sidebar ────────────────────────────────────────────────────────────
+
+function _initSidebar() {
+  const appShell = document.getElementById('app');
+  const sidebar  = document.getElementById('sidebar');
+  const trigger  = document.getElementById('sidebar-trigger');
+  const pinBtn   = document.getElementById('sidebar-pin-btn');
+
+  // Apply saved pin preference
+  _applySidebarPin(State.get('sidebarPinned'));
+
+  // Hover reveal via trigger zone
+  if (trigger && sidebar) {
+    trigger.addEventListener('mouseenter', () => {
+      if (!State.get('sidebarPinned')) sidebar.classList.add('visible');
+    });
+    sidebar.addEventListener('mouseleave', () => {
+      if (!State.get('sidebarPinned')) sidebar.classList.remove('visible');
+    });
+  }
+
+  // Pin toggle
+  if (pinBtn) {
+    pinBtn.addEventListener('click', () => {
+      const pinned = State.toggleSidebarPin();
+      _applySidebarPin(pinned);
+      pinBtn.title = pinned ? 'Unpin sidebar' : 'Pin sidebar';
+      Toast.info(pinned ? 'Sidebar pinned' : 'Sidebar unpinned', 2000);
+    });
+  }
+
+  // Wire sidebar nav clicks
+  document.querySelectorAll('.sidebar-link[data-view]').forEach(link => {
+    link.addEventListener('click', e => {
+      e.preventDefault();
+      Router.navigate(link.dataset.view);
+      // Collapse sidebar if not pinned
+      if (!State.get('sidebarPinned') && sidebar) {
+        sidebar.classList.remove('visible');
+      }
+    });
+  });
+}
+
+function _applySidebarPin(pinned) {
+  const appShell = document.getElementById('app');
+  const sidebar  = document.getElementById('sidebar');
+  if (appShell) appShell.classList.toggle('sidebar-pinned', pinned);
+  if (sidebar) {
+    sidebar.classList.toggle('visible', pinned);
+  }
+}
+
+// ── Refresh button ─────────────────────────────────────────────────────
+
+function _initRefreshButton() {
+  const btn  = document.getElementById('refresh-btn');
+  const icon = document.getElementById('refresh-icon');
+  if (!btn) return;
+
+  btn.addEventListener('click', async () => {
+    if (btn.disabled) return;
+    btn.disabled = true;
+    if (icon) icon.style.animation = 'spin 0.6s linear infinite';
+    Toast.info('Refreshing data…', 0);
+
+    try {
+      await Api.forceReload();
+      State.loadData(Api.getAll());
+      await _updateLastUpdated();
+      _updateSidebarCounts(Api.getAll());
+      _renderView(Router.currentView());
+      Toast.success('Data refreshed successfully.');
+    } catch (err) {
+      Toast.error('Refresh failed: ' + (err.message || 'Unknown error'));
+    } finally {
+      btn.disabled = false;
+      if (icon) icon.style.animation = '';
+    }
+  });
+}
+
+// ── Header helpers ─────────────────────────────────────────────────────
+
+async function _updateLastUpdated() {
+  const el = document.getElementById('last-updated');
+  if (!el) return;
+  const ts = await Api.getLastUpdated();
+  el.textContent = ts;
+}
+
+function _updateSidebarCounts(data) {
+  const map = {
+    'count-malware':    (data.malware    || []).length,
+    'count-actors':     (data.actors     || []).length,
+    'count-ransomware': (data.ransomware || []).length,
+    'count-victims':    (data.victims    || []).length,
+  };
+  for (const [id, count] of Object.entries(map)) {
+    const el = document.getElementById(id);
+    if (el) el.textContent = count.toLocaleString();
+  }
+}
+
+function _showLoading(show) {
+  const container = document.getElementById('view-container');
+  if (!container) return;
+  if (show) {
+    container.innerHTML = `
+      <div class="loading-overlay">
+        <div class="spinner"></div>
+        <p>Loading threat intelligence data…</p>
+      </div>`;
+  }
+}
+
+// ── Toast CSS injection (avoids extra file for Phase 1) ────────────────
+
+const toastStyles = document.createElement('style');
+toastStyles.textContent = `
+.toast-container {
+  position: fixed; bottom: 24px; right: 24px;
+  display: flex; flex-direction: column; gap: 8px;
+  z-index: var(--z-toast); pointer-events: none;
+}
+.toast {
+  display: flex; align-items: center; gap: 10px;
+  padding: 12px 16px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  font-size: 13px; color: var(--text-primary);
+  pointer-events: auto;
+  max-width: 380px; min-width: 240px;
+}
+.toast-info    { border-left: 3px solid var(--color-info); }
+.toast-success { border-left: 3px solid var(--color-success); }
+.toast-warning { border-left: 3px solid var(--color-warning); }
+.toast-error   { border-left: 3px solid var(--color-danger); }
+.toast-icon { font-size: 12px; flex-shrink: 0; }
+.toast-info .toast-icon    { color: var(--color-info); }
+.toast-success .toast-icon { color: var(--color-success); }
+.toast-warning .toast-icon { color: var(--color-warning); }
+.toast-error .toast-icon   { color: var(--color-danger); }
+.toast-message { flex: 1; line-height: 1.4; }
+.toast-close {
+  background: none; border: none; cursor: pointer;
+  color: var(--text-muted); font-size: 12px; padding: 2px 4px;
+  border-radius: 4px; flex-shrink: 0;
+}
+.toast-close:hover { color: var(--text-primary); background: var(--bg-surface-3); }
+@keyframes toastIn  { from { opacity:0; transform:translateX(16px); } to { opacity:1; transform:none; } }
+@keyframes toastOut { from { opacity:1; transform:none; } to { opacity:0; transform:translateX(16px); } }
+.search-overlay { position:fixed; inset:0; z-index:var(--z-modal); background:rgba(0,0,0,.5); display:flex; align-items:flex-start; justify-content:center; padding-top:80px; }
+.search-overlay-inner { background:var(--bg-surface); border:1px solid var(--border-color); border-radius:var(--radius-lg); width:100%; max-width:600px; max-height:60vh; overflow-y:auto; box-shadow:var(--shadow-lg); }
+.search-results { padding: 8px; }
+`;
+document.head.appendChild(toastStyles);

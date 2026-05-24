@@ -1,0 +1,228 @@
+/* theme.css — dark/light mode overrides via data-theme attribute */
+
+/* ── Dark Mode ──────────────────────────────────────────────────────── */
+[data-theme="dark"] {
+  --bg-app:        #0d1117;
+  --bg-surface:    #161b22;
+  --bg-surface-2:  #1c2230;
+  --bg-surface-3:  #21293a;
+  --bg-sidebar:    #0d1117;
+  --bg-sidebar-hover:  #1c2230;
+  --bg-sidebar-active: #1a6fff;
+
+  --text-primary:   #e6edf3;
+  --text-secondary: #8b949e;
+  --text-muted:     #6e7681;
+  --text-on-dark:   #e6edf3;
+  --text-accent:    #4d8fff;
+  --text-sidebar:   #8b949e;
+  --text-sidebar-active: #ffffff;
+
+  --border-color:   #30363d;
+  --border-strong:  #484f58;
+
+  --color-success:  #3fb950;
+  --color-warning:  #d29922;
+  --color-danger:   #f85149;
+  --color-info:     #22d3ee;
+
+  --bg-success: rgba(63,185,80,.15);
+  --bg-warning: rgba(210,153,34,.15);
+  --bg-danger:  rgba(248,81,73,.15);
+  --bg-info:    rgba(34,211,238,.15);
+
+  --shadow-sm:  0 1px 2px rgba(0,0,0,.3);
+  --shadow-md:  0 4px 12px rgba(0,0,0,.4);
+  --shadow-lg:  0 8px 24px rgba(0,0,0,.5);
+
+  color-scheme: dark;
+}
+
+/* ── Light Mode (explicit, same as :root defaults) ──────────────────── */
+[data-theme="light"] {
+  color-scheme: light;
+}
+
+/* ── Theme toggle button ────────────────────────────────────────────── */
+.theme-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-md);
+  background: var(--bg-surface-2);
+  border: 1px solid var(--border-color);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: background var(--transition-fast), color var(--transition-fast);
+  flex-shrink: 0;
+}
+.theme-toggle:hover {
+  background: var(--bg-surface-3);
+  color: var(--text-primary);
+}
+.theme-toggle svg { width: 16px; height: 16px; }
+
+/* Sun icon visible in dark mode, moon in light mode */
+.theme-toggle .icon-sun  { display: none; }
+.theme-toggle .icon-moon { display: block; }
+
+[data-theme="dark"] .theme-toggle .icon-sun  { display: block; }
+[data-theme="dark"] .theme-toggle .icon-moon { display: none; }
+
+/* ── Scrollbar ──────────────────────────────────────────────────────── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background: var(--border-strong);
+  border-radius: var(--radius-full);
+}
+::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+
+/* ── Smooth theme transition ────────────────────────────────────────── */
+body,
+.sidebar,
+.main-header,
+.content-area,
+.card,
+.stat-card,
+.data-table,
+.detail-panel,
+.tab-bar,
+.badge,
+.btn {
+  transition:
+    background-color var(--transition-slow),
+    border-color var(--transition-slow),
+    color var(--transition-slow);
+}
+
+/* ── Common surface styles (used across themes) ─────────────────────── */
+.card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px var(--space-2);
+  border-radius: var(--radius-full);
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  letter-spacing: .3px;
+  white-space: nowrap;
+}
+.badge-blue    { background: var(--color-brand-light); color: var(--color-brand-primary); }
+.badge-green   { background: var(--bg-success); color: var(--color-success); }
+.badge-red     { background: var(--bg-danger);  color: var(--color-danger); }
+.badge-yellow  { background: var(--bg-warning); color: var(--color-warning); }
+.badge-gray    { background: var(--bg-surface-3); color: var(--text-secondary); }
+.badge-cyan    { background: var(--bg-info); color: var(--color-info); }
+
+[data-theme="dark"] .badge-blue {
+  background: rgba(26,111,255,.2);
+  color: #4d8fff;
+}
+
+/* ── Buttons ────────────────────────────────────────────────────────── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  border: 1px solid transparent;
+}
+.btn-primary {
+  background: var(--color-brand-accent);
+  color: #fff;
+}
+.btn-primary:hover { background: #1558d6; }
+
+.btn-secondary {
+  background: var(--bg-surface-2);
+  color: var(--text-primary);
+  border-color: var(--border-color);
+}
+.btn-secondary:hover { background: var(--bg-surface-3); }
+
+.btn-ghost {
+  background: transparent;
+  color: var(--text-secondary);
+}
+.btn-ghost:hover {
+  background: var(--bg-surface-2);
+  color: var(--text-primary);
+}
+
+.btn-danger {
+  background: var(--bg-danger);
+  color: var(--color-danger);
+  border-color: var(--color-danger);
+}
+.btn-danger:hover { background: var(--color-danger); color: #fff; }
+
+.btn-sm {
+  padding: var(--space-1) var(--space-3);
+  font-size: var(--font-size-xs);
+}
+
+.btn-icon {
+  padding: var(--space-2);
+  border-radius: var(--radius-md);
+}
+
+/* ── Status indicators ──────────────────────────────────────────────── */
+.status-dot {
+  display: inline-block;
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.status-dot.active   { background: var(--color-success); box-shadow: 0 0 6px var(--color-success); }
+.status-dot.inactive { background: var(--color-danger); }
+.status-dot.unknown  { background: var(--text-muted); }
+
+/* ── Loading spinner ────────────────────────────────────────────────── */
+.spinner {
+  width: 20px; height: 20px;
+  border: 2px solid var(--border-color);
+  border-top-color: var(--color-brand-accent);
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+  flex-shrink: 0;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.loading-overlay {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-4);
+  padding: var(--space-12);
+  color: var(--text-muted);
+  font-size: var(--font-size-sm);
+}
+
+/* ── Empty state ────────────────────────────────────────────────────── */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-3);
+  padding: var(--space-12) var(--space-6);
+  color: var(--text-muted);
+  text-align: center;
+}
+.empty-state svg { opacity: 0.3; }
+.empty-state h4 { color: var(--text-secondary); }

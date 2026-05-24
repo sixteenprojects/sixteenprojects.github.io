@@ -1,0 +1,212 @@
+/* sidebar.css — Sidebar layout, hover-trigger behavior */
+
+/* ── Sidebar trigger zone ───────────────────────────────────────────── */
+.sidebar-trigger {
+  position: fixed;
+  top: 0; left: 0;
+  width: var(--sidebar-peek);
+  height: 100vh;
+  z-index: calc(var(--z-sidebar) - 1);
+  cursor: pointer;
+}
+
+/* ── Sidebar base ───────────────────────────────────────────────────── */
+.sidebar {
+  position: fixed;
+  top: 0; left: 0;
+  width: var(--sidebar-width);
+  height: 100vh;
+  background: var(--bg-sidebar);
+  border-right: 1px solid rgba(255,255,255,.06);
+  display: flex;
+  flex-direction: column;
+  z-index: var(--z-sidebar);
+  transform: translateX(calc(-1 * var(--sidebar-width) + var(--sidebar-peek)));
+  transition: transform var(--sidebar-transition), box-shadow var(--sidebar-transition);
+  overflow: hidden;
+  will-change: transform;
+}
+
+/* Shown state — hover or pinned */
+.sidebar.visible,
+.sidebar:hover,
+.sidebar-trigger:hover + * .sidebar,
+.app-shell.sidebar-pinned .sidebar {
+  transform: translateX(0);
+  box-shadow: var(--shadow-lg);
+}
+
+/* When sidebar is pinned, main content shifts */
+.app-shell.sidebar-pinned .main-wrapper {
+  margin-left: var(--sidebar-width);
+  transition: margin-left var(--sidebar-transition);
+}
+
+/* ── Logo area ──────────────────────────────────────────────────────── */
+.sidebar-logo {
+  padding: var(--space-5) var(--space-4);
+  border-bottom: 1px solid rgba(255,255,255,.06);
+  flex-shrink: 0;
+}
+
+.sidebar-logo-link {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  text-decoration: none;
+}
+
+.sidebar-logo-img {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-md);
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.sidebar-logo-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.sidebar-logo-title {
+  font-size: var(--font-size-xs);
+  font-weight: 700;
+  color: var(--text-on-dark);
+  letter-spacing: .6px;
+  white-space: nowrap;
+}
+
+.sidebar-logo-sub {
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  color: var(--color-brand-accent);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+/* ── Search ─────────────────────────────────────────────────────────── */
+.sidebar-search {
+  padding: var(--space-3) var(--space-4);
+  border-bottom: 1px solid rgba(255,255,255,.06);
+  flex-shrink: 0;
+}
+
+.sidebar-search-wrap {
+  position: relative;
+}
+
+.sidebar-search-wrap svg {
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 13px;
+  height: 13px;
+  color: var(--text-sidebar);
+  pointer-events: none;
+}
+
+.sidebar-search-wrap input {
+  width: 100%;
+  padding: var(--space-2) var(--space-3) var(--space-2) 30px;
+  background: rgba(255,255,255,.06);
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: var(--radius-md);
+  color: var(--text-on-dark);
+  font-size: var(--font-size-sm);
+  transition: background var(--transition-fast), border-color var(--transition-fast);
+}
+
+.sidebar-search-wrap input::placeholder { color: var(--text-sidebar); }
+
+.sidebar-search-wrap input:focus {
+  background: rgba(255,255,255,.1);
+  border-color: var(--color-brand-accent);
+  box-shadow: 0 0 0 2px rgba(26,111,255,.2);
+}
+
+/* ── Navigation ─────────────────────────────────────────────────────── */
+.sidebar-nav {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: var(--space-3) 0;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255,255,255,.1) transparent;
+}
+
+.sidebar-section-label {
+  padding: var(--space-4) var(--space-4) var(--space-1);
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: .7px;
+  color: rgba(255,255,255,.3);
+  user-select: none;
+}
+
+.sidebar-item { padding: 1px var(--space-2); }
+
+.sidebar-link {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-md);
+  color: var(--text-sidebar);
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  text-decoration: none;
+  transition: background var(--transition-fast), color var(--transition-fast);
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.sidebar-link svg {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  opacity: .7;
+  transition: opacity var(--transition-fast);
+}
+
+.sidebar-link:hover {
+  background: var(--bg-sidebar-hover);
+  color: #fff;
+  text-decoration: none;
+}
+.sidebar-link:hover svg { opacity: 1; }
+
+.sidebar-link.active,
+.sidebar-link[aria-current="page"] {
+  background: var(--bg-sidebar-active);
+  color: var(--text-sidebar-active);
+  font-weight: 600;
+}
+.sidebar-link.active svg { opacity: 1; }
+
+.sidebar-count {
+  margin-left: auto;
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  background: rgba(255,255,255,.1);
+  color: rgba(255,255,255,.6);
+  padding: 1px 6px;
+  border-radius: var(--radius-full);
+  flex-shrink: 0;
+}
+
+/* ── Footer ─────────────────────────────────────────────────────────── */
+.sidebar-footer {
+  padding: var(--space-3) var(--space-2);
+  border-top: 1px solid rgba(255,255,255,.06);
+  flex-shrink: 0;
+}
+
+.sidebar-link-back {
+  font-size: var(--font-size-xs);
+  color: rgba(255,255,255,.35);
+}
+.sidebar-link-back:hover { color: rgba(255,255,255,.7); }
