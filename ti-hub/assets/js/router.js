@@ -14,6 +14,7 @@ const Router = (() => {
     '/actors':     'actors',
     '/ransomware': 'ransomware',
     '/victims':    'victims',
+    '/stats':      'stats',
     '/map':        'map',
     '/graph':      'graph',
   };
@@ -51,7 +52,7 @@ const Router = (() => {
       const labels = {
         overview: 'Dashboard', malware: 'Malware Library', actors: 'Threat Actors',
         ransomware: 'Ransomware Groups', victims: 'Victims Feed',
-        map: 'World Map', graph: 'Threat Graph',
+        stats: 'Statistics', map: 'World Map', graph: 'Threat Graph',
       };
       bc.textContent = labels[viewName] || viewName;
     }

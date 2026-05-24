@@ -6,8 +6,8 @@
   --bg-surface:    #161b22;
   --bg-surface-2:  #1c2230;
   --bg-surface-3:  #21293a;
-  --bg-sidebar:    #0d1117;
-  --bg-sidebar-hover:  #1c2230;
+  --bg-sidebar:    #1a2236;
+  --bg-sidebar-hover:  #243050;
   --bg-sidebar-active: #1a6fff;
 
   --text-primary:   #e6edf3;
@@ -122,6 +122,9 @@ body,
 .badge-yellow  { background: var(--bg-warning); color: var(--color-warning); }
 .badge-gray    { background: var(--bg-surface-3); color: var(--text-secondary); }
 .badge-cyan    { background: var(--bg-info); color: var(--color-info); }
+.badge-purple  { background: rgba(124,58,237,.15); color: #a78bfa; }
+.badge-orange  { background: rgba(234,88,12,.15);  color: #fb923c; }
+[data-theme="dark"] .badge-purple { background: rgba(124,58,237,.25); color: #c4b5fd; }
 
 [data-theme="dark"] .badge-blue {
   background: rgba(26,111,255,.2);

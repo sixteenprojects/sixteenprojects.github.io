@@ -9,11 +9,12 @@ const OverviewView = (() => {
   'use strict';
 
   function render(container, data) {
-    const { malware = [], actors = [], ransomware = [], victims = [], meta = {} } = data;
+    const { malware = [], actors = [], ransomware = [], victims = [], meta = {}, stats = {}, recent = [] } = data;
     const counts = meta.counts || {
       malware: malware.length, actors: actors.length,
       ransomware_groups: ransomware.length, victims: victims.length,
     };
+    const ov = stats.overview || {};
 
     container.innerHTML = '';
 
@@ -25,11 +26,17 @@ const OverviewView = (() => {
           <h1 class="page-title">Threat Intelligence Dashboard</h1>
           <p class="page-subtitle">Live data from Malpedia · Ransomware.live · RansomLook</p>
         </div>
+        <a href="#/stats" class="btn btn-secondary btn-sm">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" width="12" height="12">
+            <path d="M1 13V10h2v3H1zM5 13V7h2v6H5zM9 13V4h2v9H9zM13 13V1h2v12h-2z" fill="currentColor" stroke="none"/>
+          </svg>
+          Full Statistics
+        </a>
       </div>`;
     container.appendChild(hdr);
 
     // ── Stat cards ──
-    container.appendChild(_buildStats(counts));
+    container.appendChild(_buildStats(counts, ov));
 
     // ── Timeline chart (D3) ──
     if (victims.length) container.appendChild(_buildTimeline(victims));
@@ -44,26 +51,34 @@ const OverviewView = (() => {
     // ── Lower row: Sectors + Platforms ──
     const lowerRow = _el('div', 'grid-2');
     lowerRow.style.marginBottom = 'var(--space-4)';
-    lowerRow.appendChild(_buildSectors(victims));
+    const sectorData = stats.sectors || null;
+    lowerRow.appendChild(_buildSectors(victims, sectorData));
     lowerRow.appendChild(_buildPlatforms(malware));
     container.appendChild(lowerRow);
 
     // ── Recent victims table ──
-    container.appendChild(_buildRecentVictims(victims.slice(0, 15)));
+    const recentVics = recent.length
+      ? recent.slice(0, 15).map(r => ({ victim: r.victim, group: r.group, country: r.country, sector: '', attack_date: r.date || r.published, source: r.source }))
+      : victims.slice(0, 15);
+    container.appendChild(_buildRecentVictims(recentVics));
   }
 
   // ── Stats cards ────────────────────────────────────────────────────────
 
-  function _buildStats(counts) {
+  function _buildStats(counts, ov) {
     const grid = _el('div', 'stats-grid');
     const defs = [
       { label: 'Malware Families', value: counts.malware || 0,           view: 'malware',    color: 'blue',
+        sub: null,
         icon: '<path d="M8 3C5.2 3 3 5.2 3 8s2.2 5 5 5 5-2.2 5-5-2.2-5-5-5zm0 9c-2.2 0-4-1.8-4-4s1.8-4 4-4 4 1.8 4 4-1.8 4-4 4z"/><circle cx="8" cy="8" r="1.5" fill="currentColor"/>' },
       { label: 'Threat Actors',    value: counts.actors || 0,            view: 'actors',     color: 'red',
+        sub: null,
         icon: '<circle cx="8" cy="5" r="3" stroke="currentColor" stroke-width="1.5" fill="none"/><path d="M2 14c0-3 2.7-5 6-5s6 2 6 5" stroke="currentColor" stroke-width="1.5" fill="none"/>' },
       { label: 'Ransomware Groups',value: counts.ransomware_groups || 0, view: 'ransomware', color: 'yellow',
+        sub: ov.active_groups ? `${ov.active_groups} active` : null,
         icon: '<rect x="3" y="7" width="10" height="8" rx="1" stroke="currentColor" stroke-width="1.5" fill="none"/><path d="M5 7V5a3 3 0 016 0v2" stroke="currentColor" stroke-width="1.5" fill="none"/><circle cx="8" cy="11" r="1" fill="currentColor"/>' },
       { label: 'Recorded Victims', value: counts.victims || 0,           view: 'victims',    color: 'cyan',
+        sub: ov.victims_this_year ? `${(ov.victims_this_year||0).toLocaleString()} this year` : null,
         icon: '<path d="M8 1L2 4v5c0 3.5 2.5 6.3 6 7 3.5-.7 6-3.5 6-7V4L8 1z" stroke="currentColor" stroke-width="1.5" fill="none"/><path d="M5.5 8l1.5 1.5 3-3" stroke="currentColor" stroke-width="1.5" fill="none"/>' },
     ];
     for (const d of defs) {
@@ -74,7 +89,8 @@ const OverviewView = (() => {
           <svg viewBox="0 0 16 16" fill="none">${d.icon}</svg>
         </div>
         <div class="stat-card-value" style="font-variant-numeric:tabular-nums">${d.value.toLocaleString()}</div>
-        <div class="stat-card-label">${d.label}</div>`;
+        <div class="stat-card-label">${d.label}</div>
+        ${d.sub ? `<div style="font-size:10px;color:var(--text-muted);margin-top:2px">${Security.escapeHtml(d.sub)}</div>` : ''}`;
       card.addEventListener('click', () => { window.location.hash = `#/${d.view}`; });
       grid.appendChild(card);
     }
@@ -212,7 +228,9 @@ const OverviewView = (() => {
       </svg>`);
 
     const body = wrap.querySelector('.section-card-body');
-    const sorted = [...ransomware].sort((a, b) => (b.victim_count || 0) - (a.victim_count || 0)).slice(0, 10);
+    const sorted = [...ransomware]
+      .filter(g => g.id !== 'unknown' && (g.name||'').toLowerCase() !== 'unknown')
+      .sort((a, b) => (b.victim_count || 0) - (a.victim_count || 0)).slice(0, 10);
     const max = sorted[0]?.victim_count || 1;
 
     const list = _el('div');
@@ -224,7 +242,7 @@ const OverviewView = (() => {
       row.innerHTML = `
         <span style="font-size:10px;color:var(--text-muted);min-width:16px;text-align:right">${i + 1}</span>
         <span class="status-dot ${isActive ? 'active' : 'inactive'}" title="${g.status}"></span>
-        <span style="flex:1;font-size:12px;font-weight:600;color:var(--text-primary);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${Security.escapeHtml(g.name)}</span>
+        <span style="flex:1;font-size:12px;font-weight:600;color:var(--text-primary);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${Security.escapeHtml(_fmtGroup(g.name||g.id))}</span>
         <div style="width:80px;height:16px;background:var(--bg-surface-3);border-radius:4px;overflow:hidden;">
           <div style="height:100%;width:${((g.victim_count||0)/max*100).toFixed(1)}%;background:var(--color-warning);opacity:.8;border-radius:4px;"></div>
         </div>
@@ -238,21 +256,28 @@ const OverviewView = (() => {
 
   // ── Sector distribution ──────────────────────────────────────────────────
 
-  function _buildSectors(victims) {
+  function _buildSectors(victims, sectorData) {
     const wrap = _sectionCard('Attacked Sectors', `
       <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
         <path d="M2 14V6l6-4 6 4v8"/><rect x="5" y="9" width="2" height="5"/><rect x="9" y="9" width="2" height="5"/>
       </svg>`);
 
     const body = wrap.querySelector('.section-card-body');
-    const counts = {};
-    for (const v of victims) {
-      const s = (v.sector || 'Unknown').trim() || 'Unknown';
-      counts[s] = (counts[s] || 0) + 1;
-    }
-    const top = Object.entries(counts).sort((a, b) => b[1] - a[1]).slice(0, 8);
-    const max = top[0]?.[1] || 1;
 
+    // Prefer pre-computed sector data from stats.json (official ransomware.live counts)
+    let top;
+    if (sectorData && Object.keys(sectorData).length) {
+      top = Object.entries(sectorData).slice(0, 8);
+    } else {
+      const counts = {};
+      for (const v of victims) {
+        const s = (v.sector || 'Unknown').trim() || 'Unknown';
+        counts[s] = (counts[s] || 0) + 1;
+      }
+      top = Object.entries(counts).sort((a, b) => b[1] - a[1]).slice(0, 8);
+    }
+
+    const max = top[0]?.[1] || 1;
     const list = _el('div');
     list.style.cssText = 'display:flex;flex-direction:column;gap:6px;';
     const colors = ['#1a6fff','#3b82f6','#0891b2','#2563eb','#4f46e5','#7c3aed','#db2777','#e11d48'];
@@ -264,10 +289,18 @@ const OverviewView = (() => {
         <div style="width:80px;height:14px;background:var(--bg-surface-3);border-radius:3px;overflow:hidden;">
           <div style="height:100%;width:${(count/max*100).toFixed(1)}%;background:${colors[i % colors.length]};opacity:.8;border-radius:3px;"></div>
         </div>
-        <span style="font-size:11px;font-weight:700;min-width:30px;text-align:right;color:var(--text-primary)">${count}</span>`;
+        <span style="font-size:11px;font-weight:700;min-width:36px;text-align:right;color:var(--text-primary)">${Number(count).toLocaleString()}</span>`;
       list.appendChild(row);
     });
     body.appendChild(list);
+
+    // Link to full stats
+    const link = _el('a', 'btn btn-ghost btn-sm');
+    link.href = '#/stats';
+    link.style.cssText = 'margin-top:10px;font-size:11px;';
+    link.textContent = 'View full statistics →';
+    body.appendChild(link);
+
     return wrap;
   }
 
@@ -357,6 +390,13 @@ const OverviewView = (() => {
   }
 
   // ── Helpers ───────────────────────────────────────────────────────────────
+
+  function _fmtGroup(name) {
+    if (!name) return '—';
+    return name.replace(/([a-z])([A-Z0-9])/g, '$1 $2')
+      .replace(/(^|[\s-])([a-z])/g, (_, s, c) => (s || '') + c.toUpperCase())
+      .replace(/-/g, ' ');
+  }
 
   function _el(tag, className = '') {
     const el = document.createElement(tag);

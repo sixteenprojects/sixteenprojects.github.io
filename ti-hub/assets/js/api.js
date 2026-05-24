@@ -15,6 +15,8 @@ const Api = (() => {
     actors:     `${BASE_DATA}/actors.json`,
     ransomware: `${BASE_DATA}/ransomware.json`,
     victims:    `${BASE_DATA}/victims.json`,
+    stats:      `${BASE_DATA}/stats.json`,
+    recent:     `${BASE_DATA}/recent.json`,
     meta:       `${BASE_DATA}/meta.json`,
   };
 
@@ -24,6 +26,8 @@ const Api = (() => {
     actors:     null,
     ransomware: null,
     victims:    null,
+    stats:      null,
+    recent:     null,
     meta:       null,
   };
 
@@ -52,6 +56,8 @@ const Api = (() => {
       _fetchJSON(FILES.actors).then(d  => { _cache.actors  = Array.isArray(d) ? d : []; }),
       _fetchJSON(FILES.ransomware).then(d=>{ _cache.ransomware = Array.isArray(d) ? d : []; }),
       _fetchJSON(FILES.victims).then(d => { _cache.victims  = Array.isArray(d) ? d : []; }),
+      _fetchJSON(FILES.stats).then(d   => { _cache.stats    = typeof d === 'object' && !Array.isArray(d) ? d : {}; }),
+      _fetchJSON(FILES.recent).then(d  => { _cache.recent   = Array.isArray(d) ? d : []; }),
       _fetchJSON(FILES.meta).then(d    => { _cache.meta     = typeof d === 'object' ? d : {}; }),
     ]);
 

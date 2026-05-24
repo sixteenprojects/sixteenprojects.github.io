@@ -60,6 +60,11 @@
             <span class="sidebar-logo-sub">TI-Hub</span>
           </div>
         </a>
+        <button id="sidebar-collapse-btn" class="sidebar-logo-collapse" title="Minimize sidebar" aria-label="Minimize sidebar">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M10 4L6 8l4 4"/><path d="M14 4l-4 4 4 4"/>
+          </svg>
+        </button>
       </div>
 
       <div class="sidebar-search">
@@ -130,6 +135,16 @@
           </a>
         </li>
 
+        <li class="sidebar-item">
+          <a href="#/stats" class="sidebar-link" data-view="stats">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M1 13V10h2v3H1zM5 13V7h2v6H5zM9 13V4h2v9H9zM13 13V1h2v12h-2z" fill="currentColor" stroke="none" opacity=".7"/>
+              <path d="M1 13V10h2v3H1zM5 13V7h2v6H5zM9 13V4h2v9H9zM13 13V1h2v12h-2z"/>
+            </svg>
+            <span>Statistics</span>
+          </a>
+        </li>
+
         <li class="sidebar-section-label">Visualizations</li>
         <li class="sidebar-item">
           <a href="#/map" class="sidebar-link" data-view="map">
@@ -165,16 +180,30 @@
       </div>
     </nav>
 
+    <!-- Tab expand: visible on left edge when sidebar is collapsed -->
+    <button id="sidebar-expand-btn" class="sidebar-expand-tab" aria-label="Show sidebar" title="Show sidebar">
+      <svg viewBox="0 0 10 16" fill="none" stroke="currentColor" stroke-width="1.8">
+        <path d="M2 3l5 5-5 5"/>
+      </svg>
+    </button>
+
     <!-- ── Main Content ─────────────────────────────────────────── -->
     <div class="main-wrapper">
 
       <!-- Top header bar -->
       <header class="main-header" role="banner">
         <div class="header-left">
-          <button id="sidebar-pin-btn" class="btn btn-ghost btn-icon" title="Pin sidebar"
-                  aria-label="Pin/unpin sidebar">
+          <!-- Mobile hamburger (hidden on desktop via CSS) -->
+          <button id="mobile-menu-btn" class="btn btn-ghost btn-icon mobile-only" aria-label="Open navigation menu">
             <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
-              <path d="M9 2l5 5-1.5 1.5L11 7l-4 4 1 2-5 2 2-5 2 1 4-4-1.5-1.5L9 2z"/>
+              <path d="M2 4h12M2 8h12M2 12h12"/>
+            </svg>
+          </button>
+          <button id="sidebar-pin-btn" class="btn btn-ghost btn-icon" title="Hide sidebar"
+                  aria-label="Hide sidebar">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+              <rect x="1" y="1" width="14" height="14" rx="1.5"/>
+              <path d="M5.5 1v14"/>
             </svg>
           </button>
           <nav class="breadcrumb" aria-label="Breadcrumb">
@@ -223,6 +252,9 @@
       </main>
     </div>
 
+    <!-- Detail panel backdrop (click to close) -->
+    <div id="detail-backdrop" class="detail-backdrop" aria-hidden="true"></div>
+
     <!-- Detail panel (slide-in from right) -->
     <aside id="detail-panel" class="detail-panel" aria-label="Detail panel" hidden>
       <div class="detail-panel-header">
@@ -241,6 +273,9 @@
 
     <!-- Toast container -->
     <div id="toast-container" class="toast-container" aria-live="assertive" aria-atomic="true"></div>
+
+    <!-- Mobile sidebar backdrop -->
+    <div id="mobile-sidebar-backdrop" class="mobile-sidebar-backdrop" aria-hidden="true"></div>
   </div>
 
   <!-- Search results overlay -->

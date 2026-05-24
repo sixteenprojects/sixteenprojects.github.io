@@ -1,52 +1,39 @@
 /* sidebar.css — Sidebar layout, hover-trigger behavior */
 
-/* ── Sidebar trigger zone ───────────────────────────────────────────── */
-.sidebar-trigger {
-  position: fixed;
-  top: 0; left: 0;
-  width: var(--sidebar-peek);
-  height: 100vh;
-  z-index: calc(var(--z-sidebar) - 1);
-  cursor: pointer;
-}
+/* ── Sidebar trigger zone (hidden — no longer used) ─────────────────── */
+.sidebar-trigger { display: none; }
 
-/* ── Sidebar base ───────────────────────────────────────────────────── */
+/* ── Sidebar base — always visible on desktop ────────────────────────── */
 .sidebar {
   position: fixed;
   top: 0; left: 0;
   width: var(--sidebar-width);
   height: 100vh;
   background: var(--bg-sidebar);
-  border-right: 1px solid rgba(255,255,255,.06);
+  border-right: 1px solid rgba(255,255,255,.12);
   display: flex;
   flex-direction: column;
   z-index: var(--z-sidebar);
-  transform: translateX(calc(-1 * var(--sidebar-width) + var(--sidebar-peek)));
+  transform: translateX(0);
   transition: transform var(--sidebar-transition), box-shadow var(--sidebar-transition);
   overflow: hidden;
   will-change: transform;
 }
 
-/* Shown state — hover or pinned */
-.sidebar.visible,
-.sidebar:hover,
-.sidebar-trigger:hover + * .sidebar,
-.app-shell.sidebar-pinned .sidebar {
-  transform: translateX(0);
-  box-shadow: var(--shadow-lg);
-}
-
-/* When sidebar is pinned, main content shifts */
-.app-shell.sidebar-pinned .main-wrapper {
-  margin-left: var(--sidebar-width);
-  transition: margin-left var(--sidebar-transition);
+/* Collapsed state — sidebar slides off-screen */
+.app-shell.sidebar-collapsed .sidebar {
+  transform: translateX(-100%);
 }
 
 /* ── Logo area ──────────────────────────────────────────────────────── */
 .sidebar-logo {
-  padding: var(--space-5) var(--space-4);
+  padding: var(--space-4) var(--space-3) var(--space-4) var(--space-4);
   border-bottom: 1px solid rgba(255,255,255,.06);
   flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
 }
 
 .sidebar-logo-link {
@@ -54,6 +41,63 @@
   align-items: center;
   gap: var(--space-3);
   text-decoration: none;
+  min-width: 0;
+  flex: 1;
+}
+
+/* Minimize button — top right of logo area */
+.sidebar-logo-collapse {
+  flex-shrink: 0;
+  width: 30px;
+  height: 30px;
+  border-radius: var(--radius-md);
+  border: 1px solid rgba(255,255,255,.18);
+  background: rgba(255,255,255,.07);
+  color: rgba(255,255,255,.65);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background var(--transition-fast), color var(--transition-fast), border-color var(--transition-fast);
+}
+.sidebar-logo-collapse:hover {
+  background: rgba(255,255,255,.16);
+  color: #fff;
+  border-color: rgba(255,255,255,.35);
+}
+.sidebar-logo-collapse svg { width: 14px; height: 14px; }
+
+/* Expand tab — small fixed tab on left edge when sidebar is collapsed */
+.sidebar-expand-tab {
+  position: fixed;
+  top: 13px;
+  left: 0;
+  width: 22px;
+  height: 38px;
+  background: var(--bg-sidebar);
+  border: 1px solid rgba(255,255,255,.2);
+  border-left: none;
+  border-radius: 0 var(--radius-md) var(--radius-md) 0;
+  color: rgba(255,255,255,.75);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: var(--z-sidebar);
+  transition: width var(--transition-fast), background var(--transition-fast), color var(--transition-fast);
+  padding: 0;
+}
+.sidebar-expand-tab svg { width: 10px; height: 16px; }
+.sidebar-expand-tab:hover {
+  width: 30px;
+  background: var(--color-brand-accent);
+  color: #fff;
+  border-color: var(--color-brand-accent);
+}
+
+/* Show expand tab only when sidebar is collapsed */
+.app-shell.sidebar-collapsed .sidebar-expand-tab {
+  display: flex;
 }
 
 .sidebar-logo-img {
@@ -205,8 +249,42 @@
   flex-shrink: 0;
 }
 
+
 .sidebar-link-back {
   font-size: var(--font-size-xs);
   color: rgba(255,255,255,.35);
 }
 .sidebar-link-back:hover { color: rgba(255,255,255,.7); }
+
+/* ── Mobile ─────────────────────────────────────────────────────────── */
+.mobile-only { display: none !important; }
+
+.mobile-sidebar-backdrop {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.55);
+  z-index: calc(var(--z-sidebar) - 1);
+  cursor: pointer;
+}
+.mobile-sidebar-backdrop.visible { display: block; }
+
+@media (max-width: 768px) {
+  .mobile-only { display: flex !important; }
+
+  /* Sidebar hidden off-screen on mobile by default */
+  .sidebar {
+    transform: translateX(-100%);
+  }
+  /* Override collapsed state on mobile — JS controls mobile via mobile-open */
+  .app-shell.sidebar-collapsed .sidebar {
+    transform: translateX(-100%);
+  }
+  /* Mobile open state via JS toggle */
+  .sidebar.mobile-open {
+    transform: translateX(0) !important;
+    box-shadow: var(--shadow-lg) !important;
+  }
+  /* Hide desktop toggle btn on mobile (mobile has its own hamburger) */
+  #sidebar-pin-btn { display: none; }
+}

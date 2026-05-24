@@ -1,64 +1,121 @@
 /* visualizations.css — MITRE heatmap, timeline, network graph */
 
 /* ── MITRE ATT&CK Heatmap ───────────────────────────────────────────── */
-.mitre-matrix {
-  overflow-x: auto;
-}
+.mitre-matrix { margin-bottom: 4px; }
+
+.mitre-scroll { overflow-x: auto; padding-bottom: 4px; }
 
 .mitre-grid {
   display: grid;
-  gap: 3px;
-  min-width: 800px;
+  gap: 4px;
+  min-width: max-content;
 }
 
-.mitre-tactic-col { display: flex; flex-direction: column; gap: 3px; }
+.mitre-col {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 110px;
+}
 
-.mitre-tactic-header {
+.mitre-tactic-hdr {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
   background: var(--color-brand-primary);
-  color: #fff;
-  padding: var(--space-2) var(--space-3);
-  border-radius: var(--radius-sm) var(--radius-sm) 0 0;
-  font-size: var(--font-size-xs);
-  font-weight: 700;
-  text-align: center;
-  white-space: nowrap;
+  padding: 6px 8px;
+  border-radius: 4px 4px 0 0;
+  min-height: 46px;
 }
-[data-theme="dark"] .mitre-tactic-header {
-  background: #1a2847;
+[data-theme="dark"] .mitre-tactic-hdr { background: #1a2847; }
+
+.mitre-tactic-id {
+  font-size: 9px;
+  font-weight: 700;
+  color: rgba(255,255,255,.55);
+  font-family: var(--font-mono);
+  letter-spacing: .4px;
 }
 
-.mitre-technique {
-  padding: var(--space-2) var(--space-3);
-  border-radius: var(--radius-sm);
+.mitre-tactic-name {
   font-size: 10px;
+  font-weight: 700;
+  color: #fff;
+  line-height: 1.2;
+  word-break: break-word;
+}
+
+.mitre-cell {
+  padding: 4px 6px;
+  border-radius: 3px;
+  cursor: default;
+  transition: filter var(--transition-fast);
+  min-height: 36px;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  border: 1px solid transparent;
+}
+.mitre-cell:hover { filter: brightness(1.2); }
+
+.mitre-tech-id {
+  font-size: 9px;
+  font-weight: 700;
+  font-family: var(--font-mono);
+  opacity: .8;
+  line-height: 1.2;
+}
+.mitre-tech-name {
+  font-size: 9.5px;
   font-weight: 500;
-  cursor: pointer;
-  transition: all var(--transition-fast);
-  min-height: 40px;
+  line-height: 1.2;
+}
+
+/* Single group: active technique */
+.mitre-cell-active {
+  background: rgba(220,38,38,.15);
+  color: #ef4444;
+  border-color: rgba(220,38,38,.3);
+}
+
+/* Cross-group heat levels */
+.mitre-cell-heat-1 { background: rgba(220,38,38,.15); color: #f09090; }
+.mitre-cell-heat-2 { background: rgba(220,38,38,.30); color: #ef6060; }
+.mitre-cell-heat-3 { background: rgba(220,38,38,.52); color: #ef4444; }
+.mitre-cell-heat-4 { background: rgba(220,38,38,.78); color: #fff; }
+
+.mitre-legend {
   display: flex;
   align-items: center;
+  gap: 6px;
+  padding: 0 0 8px;
+  font-size: 11px;
+  flex-wrap: wrap;
+}
+.mitre-legend-label { color: var(--text-muted); }
+.mitre-legend-swatch {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1px 8px;
+  border-radius: 3px;
+  font-size: 10px;
+  font-weight: 700;
+  min-width: 24px;
 }
 
-.mitre-technique.inactive {
-  background: var(--bg-surface-2);
+/* Section wrapper for detail panel embedding */
+.mitre-detail-section {
+  padding: 0 20px 16px;
+}
+.mitre-detail-section > h4 {
+  font-size: 12px;
+  font-weight: 700;
   color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  margin-bottom: 8px;
 }
-.mitre-technique.active {
-  background: rgba(220,38,38,.15);
-  color: var(--color-danger);
-  border: 1px solid rgba(220,38,38,.3);
-}
-.mitre-technique.active:hover {
-  background: rgba(220,38,38,.25);
-  transform: scale(1.02);
-}
-
-/* Heat levels */
-.mitre-heat-1 { background: rgba(220,38,38,.1); }
-.mitre-heat-2 { background: rgba(220,38,38,.25); }
-.mitre-heat-3 { background: rgba(220,38,38,.45); }
-.mitre-heat-4 { background: rgba(220,38,38,.65); }
-.mitre-heat-5 { background: rgba(220,38,38,.85); color: #fff; }
 
 /* ── Attack Timeline ────────────────────────────────────────────────── */
 .timeline {

@@ -59,51 +59,138 @@ def _get(endpoint: str, retries: int = MAX_RETRIES) -> dict | list | None:
     return None
 
 
+def _parse_rl_group_detail(name: str, detail: dict) -> dict:
+    """Parse /group/{name} response into normalized group dict."""
+    locations = []
+    for loc in (detail.get("locations") or []):
+        if isinstance(loc, dict):
+            locations.append({
+                "url": loc.get("fqdn", loc.get("url", "")),
+                "type": loc.get("type", "unknown"),
+                "available": loc.get("available", False),
+                "title": loc.get("title", "")
+            })
+
+    affiliates = detail.get("affiliates") or []
+    if isinstance(affiliates, str):
+        affiliates = [a.strip() for a in affiliates.split(",") if a.strip()]
+
+    return {
+        "id": name.lower().replace(" ", "-"),
+        "name": name,
+        "is_raas": bool(detail.get("raas", False)),
+        "locations": locations[:10],
+        "affiliates": list(affiliates)[:20],
+        "jabber": (detail.get("jabber") or "")[:200],
+        "mail": (detail.get("mail") or "")[:200],
+        "telegram": (detail.get("telegram") or "")[:200],
+        "profile": (detail.get("profile") or "")[:800],
+        "captcha": bool(detail.get("captcha", False)),
+        "source": "ransomlook"
+    }
+
+
 def fetch_groups() -> list[dict]:
     log.info("Fetching RansomLook groups...")
-    raw = _get("/export/0")  # export database 0 = groups
+    # /groups returns list of group name strings; /export/0 requires auth
+    raw = _get("/groups")
     if not raw:
-        log.warning("Export endpoint failed, trying individual group fallback...")
+        log.warning("RansomLook /groups failed — skipping.")
         return []
 
     groups = []
+
     if isinstance(raw, list):
-        source_list = raw
-    elif isinstance(raw, dict):
-        source_list = list(raw.values()) if raw else []
-    else:
-        return []
-
-    for item in source_list:
-        if not isinstance(item, dict):
-            continue
-
-        name = item.get("name", item.get("group_name", ""))
-        if not name:
-            continue
-
-        locations = []
-        for loc in item.get("locations", []):
-            if isinstance(loc, dict):
-                locations.append({
-                    "url": loc.get("fqdn", loc.get("url", "")),
-                    "type": loc.get("type", "unknown"),
-                    "available": loc.get("available", False),
-                    "title": loc.get("title", "")
+        for item in raw:
+            if isinstance(item, str):
+                name = item.strip()
+                if name:
+                    groups.append({
+                        "id": name.lower().replace(" ", "-"),
+                        "name": name,
+                        "is_raas": False,
+                        "locations": [],
+                        "affiliates": [],
+                        "source": "ransomlook"
+                    })
+            elif isinstance(item, dict):
+                name = item.get("name", item.get("group_name", ""))
+                if not name:
+                    continue
+                locations = []
+                for loc in item.get("locations", []):
+                    if isinstance(loc, dict):
+                        locations.append({
+                            "url": loc.get("fqdn", loc.get("url", "")),
+                            "type": loc.get("type", "unknown"),
+                            "available": loc.get("available", False),
+                        })
+                groups.append({
+                    "id": name.lower().replace(" ", "-"),
+                    "name": name,
+                    "is_raas": bool(item.get("raas", item.get("is_raas", False))),
+                    "locations": locations[:10],
+                    "affiliates": list(item.get("affiliates", []))[:20],
+                    "profile": (item.get("profile") or "")[:800],
+                    "source": "ransomlook"
                 })
-
-        groups.append({
-            "id": name.lower().replace(" ", "-"),
-            "name": name,
-            "is_raas": item.get("is_raas", False),
-            "locations": locations[:10],
-            "crypto": item.get("crypto", {}),
-            "meta": item.get("meta", {}),
-            "source": "ransomlook"
-        })
+    elif isinstance(raw, dict):
+        source_list = raw.get("groups", raw.get("data", list(raw.values())))
+        if isinstance(source_list, list):
+            for item in source_list:
+                if isinstance(item, dict):
+                    name = item.get("name", "")
+                    if name:
+                        groups.append({
+                            "id": name.lower().replace(" ", "-"),
+                            "name": name,
+                            "is_raas": bool(item.get("raas", False)),
+                            "source": "ransomlook"
+                        })
 
     log.info(f"Done. Fetched {len(groups)} groups from RansomLook.")
     return groups
+
+
+def fetch_stats() -> dict:
+    """Fetch global statistics from RansomLook /stats."""
+    log.info("Fetching RansomLook global stats...")
+    raw = _get("/stats")
+    if isinstance(raw, dict):
+        return {
+            "groups": int(raw.get("groups") or 0),
+            "posts_total": int(raw.get("posts_total") or 0),
+            "posts_24h": int(raw.get("posts_24h") or 0),
+            "posts_month": int(raw.get("posts_month") or 0),
+            "posts_90d": int(raw.get("posts_90d") or 0),
+            "posts_year": int(raw.get("posts_year") or 0),
+            "markets": int(raw.get("markets") or 0),
+        }
+    return {}
+
+
+def fetch_recent(limit: int = 50) -> list[dict]:
+    """Fetch recent victim posts from RansomLook /recent."""
+    log.info("Fetching RansomLook recent posts...")
+    raw = _get("/recent")
+    if not raw or not isinstance(raw, list):
+        return []
+
+    result = []
+    for item in raw[:limit]:
+        if not isinstance(item, dict):
+            continue
+        result.append({
+            "victim": (item.get("post_title") or "")[:200],
+            "group": (item.get("group_name") or "")[:100],
+            "published": item.get("discovered", ""),
+            "description": (item.get("description") or "")[:400],
+            "link": (item.get("link") or "")[:500],
+            "source": "ransomlook"
+        })
+
+    log.info(f"Fetched {len(result)} recent posts from RansomLook.")
+    return result
 
 
 def fetch_posts(days: int = 30) -> list[dict]:
@@ -114,25 +201,18 @@ def fetch_posts(days: int = 30) -> list[dict]:
     log.info(f"Fetching RansomLook posts (last {days} days)...")
     raw = _get(f"/posts?days={days}")
     if not raw:
-        # Try export endpoint
         raw = _get("/export/2")
-
     if not raw:
         return []
 
     posts = []
-    source_list = raw if isinstance(raw, list) else []
-
-    for item in source_list:
+    for item in (raw if isinstance(raw, list) else []):
         if not isinstance(item, dict):
             continue
-
         group = item.get("group_name", item.get("group", ""))
         victim = item.get("post_title", item.get("victim", ""))
-
         if not victim:
             continue
-
         posts.append({
             "id": f"rl-{group}-{victim[:20].lower().replace(' ', '-')}",
             "victim": victim[:200],
@@ -148,31 +228,6 @@ def fetch_posts(days: int = 30) -> list[dict]:
     return posts
 
 
-def fetch_markets() -> list[dict]:
-    log.info("Fetching RansomLook markets...")
-    raw = _get("/export/3")  # database 3 = markets
-    if not raw:
-        return []
-
-    markets = []
-    source_list = raw if isinstance(raw, list) else list(raw.values()) if isinstance(raw, dict) else []
-
-    for item in source_list:
-        if not isinstance(item, dict):
-            continue
-        name = item.get("name", "")
-        if not name:
-            continue
-        markets.append({
-            "name": name,
-            "locations": item.get("locations", [])[:5],
-            "source": "ransomlook"
-        })
-
-    log.info(f"Done. Fetched {len(markets)} markets.")
-    return markets
-
-
 def merge_with_ransomwarelive(rl_groups: list[dict], ransomlook_groups: list[dict]) -> list[dict]:
     """Merge RansomLook data into existing ransomware.live group records."""
     rl_index = {g["id"]: g for g in ransomlook_groups}
@@ -182,11 +237,20 @@ def merge_with_ransomwarelive(rl_groups: list[dict], ransomlook_groups: list[dic
         if gid in rl_index:
             extra = rl_index[gid]
             group["is_raas"] = extra.get("is_raas", False)
-            group["crypto"] = extra.get("crypto", {})
-            # Merge locations
-            existing_urls = {l["url"] for l in group.get("locations", [])}
+            if extra.get("affiliates"):
+                group["affiliates"] = extra["affiliates"]
+            if extra.get("jabber"):
+                group["jabber"] = extra["jabber"]
+            if extra.get("mail"):
+                group["mail"] = extra["mail"]
+            if extra.get("telegram"):
+                group["telegram"] = extra["telegram"]
+            if extra.get("profile") and not group.get("description"):
+                group["description"] = extra["profile"]
+            # Merge extra locations (Tor sites from RansomLook)
+            existing_urls = {l.get("url", "") for l in group.get("locations", [])}
             for loc in extra.get("locations", []):
                 if loc.get("url") and loc["url"] not in existing_urls:
-                    group["locations"].append(loc)
+                    group.setdefault("locations", []).append(loc)
 
     return rl_groups

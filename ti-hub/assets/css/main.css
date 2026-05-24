@@ -59,7 +59,7 @@
   /* Sidebar */
   --sidebar-width: 240px;
   --sidebar-collapsed: 0px;
-  --sidebar-peek: 4px;
+  --sidebar-peek: 0px;
   --sidebar-transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 
   /* Radius */
@@ -95,6 +95,7 @@
 
 /* ── Reset ───────────────────────────────────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+[hidden] { display: none !important; }
 
 html { font-size: 16px; scroll-behavior: smooth; }
 

@@ -255,17 +255,17 @@ const VictimsView = (() => {
       {
         key: 'group',
         label: 'Group',
-        width: '140px',
+        width: '130px',
         render: item => {
           const badge = _el('span', 'badge badge-red');
-          badge.textContent = Security.truncate(item.group || 'unknown', 20);
+          badge.textContent = Security.truncate(item.group || 'unknown', 18);
           return badge;
         }
       },
       {
         key: 'country',
-        label: 'Country',
-        width: '90px',
+        label: 'Ctry',
+        width: '60px',
         render: item => {
           const el = _el('span', 'badge badge-gray');
           el.textContent = item.country || '??';
@@ -278,27 +278,67 @@ const VictimsView = (() => {
         render: item => {
           const el = _el('span', 'text-muted');
           el.style.fontSize = '11px';
-          el.textContent = Security.truncate(item.sector || 'Unknown', 25);
+          el.textContent = Security.truncate(item.sector || 'Unknown', 22);
           return el;
         }
       },
       {
         key: 'attack_date',
-        label: 'Attack Date',
-        width: '110px',
+        label: 'Date',
+        width: '100px',
         className: 'cell-nowrap',
         render: item => _muted(Security.formatDate(item.attack_date) || '—')
       },
       {
-        key: 'source',
-        label: 'Source',
-        width: '90px',
+        key: 'data_size',
+        label: 'Data',
+        width: '70px',
         sortable: false,
         render: item => {
+          if (!item.data_size) return _muted('—');
           const el = _el('span', 'badge badge-gray');
           el.style.fontSize = '10px';
-          el.textContent = item.source || '—';
+          el.textContent = Security.truncate(String(item.data_size), 10);
           return el;
+        }
+      },
+      {
+        key: 'infostealer',
+        label: 'Stealer',
+        width: '70px',
+        sortable: false,
+        render: item => {
+          const is = item.infostealer || {};
+          const stealers = is.stealers || {};
+          const hasData = typeof stealers === 'object' && Object.keys(stealers).length > 0;
+          if (!hasData) return _muted('—');
+          const wrap = _el('div');
+          wrap.style.cssText = 'display:flex;flex-direction:column;gap:2px;';
+          const badge = _el('span', 'badge badge-purple');
+          badge.style.fontSize = '9px';
+          const names = Object.keys(stealers).slice(0, 2).join(', ');
+          badge.textContent = Security.truncate(names || 'Yes', 14);
+          badge.title = Object.keys(stealers).join(', ');
+          wrap.appendChild(badge);
+          if (is.employees) {
+            const sub = _el('span', 'text-muted');
+            sub.style.fontSize = '10px';
+            sub.textContent = `${Number(is.employees).toLocaleString()} emp`;
+            wrap.appendChild(sub);
+          }
+          return wrap;
+        }
+      },
+      {
+        key: 'press',
+        label: 'Press',
+        width: '60px',
+        sortable: false,
+        render: item => {
+          if (!item.press && !item.url) return _muted('—');
+          const link = Security.safeLink('Link', item.url || item.press, { className: 'ref-link', external: true });
+          link.style.fontSize = '11px';
+          return link;
         }
       }
     ];

@@ -16,6 +16,7 @@ import MalwareView    from './views/malware.js';
 import ActorsView     from './views/actors.js';
 import RansomwareView from './views/ransomware.js';
 import VictimsView    from './views/victims.js';
+import StatsView      from './views/stats.js';
 import DetailView     from './views/detail.js';
 import MapView        from './components/map.js';
 import GraphView      from './components/graph.js';
@@ -31,8 +32,9 @@ import GraphView      from './components/graph.js';
   State.loadSavedFilters();
   State.loadSidebarPref();
 
-  // 3. Wire sidebar pin button
+  // 3. Wire sidebar + mobile hamburger
   _initSidebar();
+  _initMobileMenu();
 
   // 4. Wire detail panel close + Escape
   _initDetailPanel();
@@ -77,6 +79,7 @@ function _renderView(viewName) {
     case 'actors':     ActorsView.render(container, data, refs);        break;
     case 'ransomware': RansomwareView.render(container, data, refs);    break;
     case 'victims':    VictimsView.render(container, data, refs);       break;
+    case 'stats':      StatsView.render(container, data);               break;
     case 'map':        MapView.render(container, data);                 break;
     case 'graph':      GraphView.render(container, data, refs);         break;
     default:           OverviewView.render(container, data);
@@ -97,65 +100,75 @@ function _initDetailPanel() {
   });
 }
 
+// ── Mobile hamburger menu ──────────────────────────────────────────────
+
+function _initMobileMenu() {
+  const btn      = document.getElementById('mobile-menu-btn');
+  const sidebar  = document.getElementById('sidebar');
+  const backdrop = document.getElementById('mobile-sidebar-backdrop');
+  if (!btn || !sidebar) return;
+
+  function _openMobile() {
+    sidebar.classList.add('mobile-open');
+    if (backdrop) backdrop.classList.add('visible');
+  }
+  function _closeMobile() {
+    sidebar.classList.remove('mobile-open');
+    if (backdrop) backdrop.classList.remove('visible');
+  }
+
+  btn.addEventListener('click', () => {
+    if (sidebar.classList.contains('mobile-open')) _closeMobile();
+    else _openMobile();
+  });
+  if (backdrop) backdrop.addEventListener('click', _closeMobile);
+
+  // Close sidebar when a nav link is clicked on mobile
+  document.querySelectorAll('.sidebar-link[data-view]').forEach(link => {
+    link.addEventListener('click', () => {
+      if (window.innerWidth <= 768) _closeMobile();
+    });
+  });
+}
+
 // ── Sidebar ────────────────────────────────────────────────────────────
 
 function _initSidebar() {
-  const appShell = document.getElementById('app');
-  const sidebar  = document.getElementById('sidebar');
-  const trigger  = document.getElementById('sidebar-trigger');
-  const pinBtn   = document.getElementById('sidebar-pin-btn');
+  const pinBtn      = document.getElementById('sidebar-pin-btn');
+  const collapseBtn = document.getElementById('sidebar-collapse-btn');
+  const expandBtn   = document.getElementById('sidebar-expand-btn');
 
-  // Apply saved pin preference
-  _applySidebarPin(State.get('sidebarPinned'));
+  // Sidebar always starts expanded (no saved state)
+  _applySidebarCollapsed(false);
 
-  // Hover reveal via trigger zone with collapse delay (prevents flicker)
-  let _hideTimer = null;
-  if (trigger && sidebar) {
-    const _show = () => {
-      clearTimeout(_hideTimer);
-      if (!State.get('sidebarPinned')) sidebar.classList.add('visible');
-    };
-    const _hide = () => {
-      clearTimeout(_hideTimer);
-      _hideTimer = setTimeout(() => {
-        if (!State.get('sidebarPinned')) sidebar.classList.remove('visible');
-      }, 200);
-    };
-
-    trigger.addEventListener('mouseenter', _show);
-    sidebar.addEventListener('mouseenter', _show);
-    sidebar.addEventListener('mouseleave', _hide);
+  function _toggle() {
+    const collapsed = State.toggleSidebarCollapsed();
+    _applySidebarCollapsed(collapsed);
   }
 
-  // Pin toggle
-  if (pinBtn) {
-    pinBtn.addEventListener('click', () => {
-      const pinned = State.toggleSidebarPin();
-      _applySidebarPin(pinned);
-      pinBtn.title = pinned ? 'Unpin sidebar' : 'Pin sidebar';
-      Toast.info(pinned ? 'Sidebar pinned' : 'Sidebar unpinned', 2000);
-    });
-  }
+  if (pinBtn)      pinBtn.addEventListener('click', _toggle);
+  if (collapseBtn) collapseBtn.addEventListener('click', _toggle);
+  if (expandBtn)   expandBtn.addEventListener('click', _toggle);
 
   // Wire sidebar nav clicks
   document.querySelectorAll('.sidebar-link[data-view]').forEach(link => {
     link.addEventListener('click', e => {
       e.preventDefault();
       Router.navigate(link.dataset.view);
-      // Collapse sidebar if not pinned
-      if (!State.get('sidebarPinned') && sidebar) {
-        sidebar.classList.remove('visible');
-      }
     });
   });
 }
 
-function _applySidebarPin(pinned) {
+function _applySidebarCollapsed(collapsed) {
   const appShell = document.getElementById('app');
-  const sidebar  = document.getElementById('sidebar');
-  if (appShell) appShell.classList.toggle('sidebar-pinned', pinned);
-  if (sidebar) {
-    sidebar.classList.toggle('visible', pinned);
+  if (appShell) {
+    if (collapsed) appShell.classList.add('sidebar-collapsed');
+    else           appShell.classList.remove('sidebar-collapsed');
+  }
+  const pinBtn = document.getElementById('sidebar-pin-btn');
+  if (pinBtn) {
+    pinBtn.title = collapsed ? 'Show sidebar' : 'Hide sidebar';
+    pinBtn.setAttribute('aria-label', collapsed ? 'Show sidebar' : 'Hide sidebar');
   }
 }
 
@@ -286,5 +299,9 @@ mark.search-highlight { background:var(--color-brand-accent); color:#fff; border
 .ref-link { color:var(--color-brand-accent); text-decoration:none; }
 .ref-link:hover { text-decoration:underline; }
 .detail-phase-note { margin:0 20px 20px; padding:10px 14px; background:var(--bg-surface-2); border:1px solid var(--border-color); border-radius:var(--radius-md); font-size:12px; color:var(--text-muted); }
+.cross-link-chip { cursor:pointer; transition:filter .1s; }
+.cross-link-chip:hover { filter:brightness(1.25); text-decoration:underline; }
+.filter-saved-wrap { display:flex; align-items:center; gap:6px; flex-wrap:wrap; }
+.saved-filter-chip { cursor:pointer; display:inline-flex; align-items:center; gap:4px; }
 `;
 document.head.appendChild(toastStyles);

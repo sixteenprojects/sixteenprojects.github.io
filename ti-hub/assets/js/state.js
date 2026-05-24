@@ -18,7 +18,7 @@ const State = (() => {
     currentView:   'overview',
     detailItem:    null,
     detailType:    null,
-    sidebarPinned: false,
+    sidebarCollapsed: false,
     isLoading:     true,
     searchQuery:   '',
 
@@ -148,26 +148,22 @@ const State = (() => {
     } catch {}
   }
 
-  /** Toggle sidebar pinned state */
-  function toggleSidebarPin() {
-    const next = !_state.sidebarPinned;
-    set('sidebarPinned', next);
-    try { localStorage.setItem('tihub-sidebar-pinned', next ? '1' : '0'); } catch {}
+  /** Toggle sidebar collapsed state (session-only, not persisted) */
+  function toggleSidebarCollapsed() {
+    const next = !_state.sidebarCollapsed;
+    set('sidebarCollapsed', next);
     return next;
   }
 
-  /** Load sidebar preference from localStorage */
+  /** Load sidebar preference — sidebar always starts expanded */
   function loadSidebarPref() {
-    try {
-      const v = localStorage.getItem('tihub-sidebar-pinned');
-      if (v !== null) set('sidebarPinned', v === '1');
-    } catch {}
+    // Intentionally empty: sidebar always starts expanded on page load
   }
 
   return {
     get, set, merge, on, loadData, loadSavedFilters, loadSidebarPref,
     setView, openDetail, closeDetail,
-    setFilter, clearFilters, saveFilter, toggleSidebarPin,
+    setFilter, clearFilters, saveFilter, toggleSidebarCollapsed,
   };
 })();
 

@@ -140,54 +140,137 @@ def _infer_status(item: dict, detail: dict | None) -> str:
     return "unknown"
 
 
+def _parse_victim_item(item: dict) -> dict | None:
+    """Parse a raw victim/cyberattack record into normalized format."""
+    if not isinstance(item, dict):
+        return None
+    group = item.get("group", "unknown")
+    victim_name = item.get("victim", item.get("post_title", ""))
+    if not victim_name:
+        return None
+
+    infostealer = {}
+    raw_is = item.get("infostealer", {})
+    if isinstance(raw_is, dict):
+        infostealer = {
+            "employees": int(raw_is.get("employees") or 0),
+            "users": int(raw_is.get("users") or 0),
+            "stealers": raw_is.get("stealers", {}) if isinstance(raw_is.get("stealers"), dict) else {}
+        }
+
+    return {
+        "id": f"{group}-{victim_name[:30].lower().replace(' ', '-').replace('/', '-')}",
+        "victim": victim_name[:200],
+        "domain": (item.get("domain") or "")[:100],
+        "group": group,
+        "group_id": group.lower().replace(" ", "-"),
+        "country": (item.get("country") or "").upper()[:2],
+        "sector": item.get("activity", item.get("sector", "Unknown")),
+        "attack_date": item.get("attackdate", item.get("date", "")),
+        "discovered": item.get("discovered", ""),
+        "description": (item.get("description") or "")[:500],
+        "claim_url": (item.get("claim_url") or "")[:500],
+        "url": (item.get("url") or "")[:500],
+        "press": (item.get("press") or "")[:1000],
+        "data_size": str(item.get("data_size") or ""),
+        "ransom": str(item.get("ransom") or ""),
+        "screenshot": (item.get("screenshot") or "")[:500],
+        "infostealer": infostealer,
+        "source": "ransomware.live"
+    }
+
+
 def fetch_victims() -> list[dict]:
     log.info("Fetching all victims (cyberattacks)...")
-    raw = _get("/allcyberattacks")
-    if not raw:
-        log.warning("allcyberattacks failed, trying recentvictims...")
-        raw = _get("/recentvictims")
 
-    if not raw:
+    # Try /allcyberattacks first (returns full dataset when working)
+    raw_all = _get("/allcyberattacks")
+
+    # Also fetch year-by-year to capture historical data not in /allcyberattacks
+    current_year = datetime.now(timezone.utc).year
+    raw_yearly: list[dict] = []
+    for year in range(2019, current_year + 1):
+        year_data = _get(f"/victims/{year}")
+        if year_data and isinstance(year_data, list):
+            log.info(f"  Year {year}: {len(year_data)} victims")
+            raw_yearly.extend(year_data)
+        time.sleep(RATE_LIMIT_DELAY)
+
+    # Merge: start with yearly (historical), add anything from allcyberattacks not already covered
+    seen_keys: set[str] = set()
+    merged: list[dict] = []
+
+    def _add_raw(items: list) -> None:
+        for item in items:
+            if not isinstance(item, dict):
+                continue
+            key = f"{item.get('group','')}:{item.get('victim', item.get('post_title',''))}"
+            if key and key not in seen_keys:
+                seen_keys.add(key)
+                merged.append(item)
+
+    _add_raw(raw_yearly)
+    if raw_all and isinstance(raw_all, list):
+        _add_raw(raw_all)
+
+    if not merged:
+        log.warning("All endpoints empty, trying recentvictims fallback...")
+        fallback = _get("/recentvictims")
+        if fallback and isinstance(fallback, list):
+            merged = fallback
+
+    if not merged:
         return []
 
     victims = []
+    for item in merged:
+        parsed = _parse_victim_item(item)
+        if parsed:
+            victims.append(parsed)
+
+    log.info(f"Done. Fetched {len(victims)} victims total "
+             f"({len(raw_yearly)} from yearly, "
+             f"{len(raw_all) if raw_all else 0} from allcyberattacks).")
+    return victims
+
+
+def fetch_sectors() -> dict:
+    """Fetch victim count by sector from ransomware.live /v2/sectors."""
+    log.info("Fetching sector statistics...")
+    raw = _get("/sectors")
+    if isinstance(raw, dict) and raw:
+        log.info(f"Fetched {len(raw)} sectors.")
+        return dict(sorted(raw.items(), key=lambda x: x[1], reverse=True))
+    return {}
+
+
+def fetch_recent_attacks() -> list[dict]:
+    """Fetch recent attacks with AI-generated summaries from /v2/recentcyberattacks."""
+    log.info("Fetching recent cyber attacks...")
+    raw = _get("/recentcyberattacks")
+    if not raw or not isinstance(raw, list):
+        return []
+
+    result = []
     for item in raw:
         if not isinstance(item, dict):
             continue
-
-        group = item.get("group", "unknown")
-        victim_name = item.get("victim", item.get("post_title", ""))
-        if not victim_name:
-            continue
-
-        # Infostealer data
-        infostealer = {}
-        raw_is = item.get("infostealer", {})
-        if isinstance(raw_is, dict):
-            infostealer = {
-                "employees": raw_is.get("employees", 0),
-                "users": raw_is.get("users", 0),
-                "stealers": raw_is.get("stealers", {}) if isinstance(raw_is.get("stealers"), dict) else {}
-            }
-
-        victims.append({
-            "id": f"{group}-{victim_name[:30].lower().replace(' ', '-').replace('/', '-')}",
-            "victim": victim_name[:200],
+        result.append({
+            "victim": (item.get("victim") or item.get("title") or "")[:200],
+            "group": (item.get("claim_gang") or item.get("group") or "")[:100],
+            "country": (item.get("country") or "")[:2].upper(),
             "domain": (item.get("domain") or "")[:100],
-            "group": group,
-            "group_id": group.lower().replace(" ", "-"),
-            "country": (item.get("country") or "").upper()[:2],
-            "sector": item.get("activity", item.get("sector", "Unknown")),
-            "attack_date": item.get("attackdate", item.get("date", "")),
-            "discovered": item.get("discovered", ""),
-            "description": (item.get("description") or "")[:500],
-            "claim_url": item.get("claim_url", ""),
-            "infostealer": infostealer,
+            "date": item.get("date") or item.get("added") or "",
+            "summary": (item.get("summary") or "")[:600],
+            "url": (item.get("url") or item.get("link") or "")[:500],
+            "claim_url": (item.get("claim_url") or "")[:500],
+            "has_infostealer": bool(item.get("has_infostealer_info")),
+            "infostealer_data": item.get("infostealer_data") if isinstance(item.get("infostealer_data"), dict) else {},
             "source": "ransomware.live"
         })
 
-    log.info(f"Done. Fetched {len(victims)} victims.")
-    return victims
+    log.info(f"Fetched {len(result)} recent attacks.")
+    return result
 
 
 def enrich_group_victim_counts(groups: list[dict], victims: list[dict]) -> list[dict]:

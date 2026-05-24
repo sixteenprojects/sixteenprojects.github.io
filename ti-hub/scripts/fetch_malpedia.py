@@ -185,16 +185,35 @@ def fetch_actors() -> list[dict]:
         # Description
         description = str(detail.get("description") or "")[:1000]
 
+        # Extra fields from CFR/meta
+        suspected_victims   = meta.get("cfr-suspected-victims", []) or []
+        target_categories   = meta.get("cfr-target-category", []) or []
+        incident_types      = meta.get("cfr-type-of-incident", []) or []
+        state_sponsor       = meta.get("cfr-suspected-state-sponsor", "") or ""
+        attribution_conf    = meta.get("attribution-confidence", "") or ""
+
+        # Collect alternative vendor names (e.g. "origin:APT-C-26": "QiAnXin")
+        vendor_names = {}
+        for k, v in meta.items():
+            if k.startswith("origin:") and isinstance(v, str):
+                vendor_names[k[7:]] = v  # strip "origin:" prefix
+
         actors.append({
-            "id":          actor_name,
-            "name":        str(detail.get("common_name") or actor_name),
-            "aliases":     alt_names[:20],
-            "description": description,
-            "malware":     list(dict.fromkeys(malware_used))[:30],
-            "country":     country,
-            "country_iso": country if len(country) == 2 else "??",
-            "references":  refs,
-            "updated":     now
+            "id":                actor_name,
+            "name":              str(detail.get("common_name") or actor_name),
+            "aliases":           alt_names[:30],
+            "description":       description,
+            "malware":           [],          # populated later via cross-reference
+            "country":           country,
+            "country_iso":       country if len(country) == 2 else "??",
+            "state_sponsor":     state_sponsor,
+            "target_categories": list(target_categories)[:10],
+            "incident_types":    list(incident_types)[:10],
+            "suspected_victims": list(suspected_victims)[:20],
+            "vendor_names":      vendor_names,
+            "attribution_confidence": attribution_conf,
+            "references":        refs,
+            "updated":           now
         })
 
     log.info(f"Done. Parsed {len(actors)} threat actors.")

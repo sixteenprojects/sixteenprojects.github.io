@@ -42,10 +42,31 @@
   align-items: flex-start;
   justify-content: space-between;
   gap: var(--space-3);
-  padding: var(--space-5) var(--space-5) var(--space-4);
+  padding: var(--space-4) var(--space-4) var(--space-4);
   border-bottom: 1px solid var(--border-color);
   flex-shrink: 0;
   background: var(--bg-surface);
+}
+
+/* Prominent close button */
+#detail-panel-close {
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-color);
+  background: var(--bg-surface-2);
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background var(--transition-fast), color var(--transition-fast);
+}
+#detail-panel-close:hover {
+  background: var(--bg-danger);
+  color: var(--color-danger);
+  border-color: var(--color-danger);
 }
 
 .detail-panel-title-wrap {
