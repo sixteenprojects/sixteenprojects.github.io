@@ -59,7 +59,7 @@ def _session(api_key: str) -> requests.Session:
 
 def search_actor(session: requests.Session, query: str, limit: int, rate_sleep: float) -> dict | None:
     """Search OTX pulses for a given actor name.  Returns raw API response or None."""
-    url = f"{OTX_BASE}/pulses/search"
+    url = f"{OTX_BASE}/search/pulses"
     params = {
         "q": query,
         "sort": "-modified",
