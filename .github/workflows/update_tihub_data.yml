@@ -30,6 +30,16 @@ on:
         required: false
         default: "false"
         type: boolean
+      with_threatfox:
+        description: "Fetch ThreatFox + MalwareBazaar + URLhaus + FeodoTracker"
+        required: false
+        default: "false"
+        type: boolean
+      with_shodan:
+        description: "Shodan IP enrichment + CVE exposure (requires SHODAN_API_KEY)"
+        required: false
+        default: "false"
+        type: boolean
 
 jobs:
   update-data:
@@ -106,6 +116,38 @@ jobs:
           cd ti-hub/scripts
           python fetch_otx.py --groups
           python fetch_otx.py
+        continue-on-error: true
+
+      - name: ThreatFox + abuse.ch (manual)
+        if: github.event.inputs.with_threatfox == 'true'
+        run: |
+          cd ti-hub/scripts
+          python fetch_threatfox.py
+        continue-on-error: true
+
+      - name: ThreatFox + abuse.ch (scheduled daily)
+        if: github.event_name == 'schedule'
+        run: |
+          cd ti-hub/scripts
+          python fetch_threatfox.py --days 1
+        continue-on-error: true
+
+      - name: Shodan enrichment (manual)
+        if: github.event.inputs.with_shodan == 'true'
+        env:
+          SHODAN_API_KEY: ${{ secrets.SHODAN_API_KEY }}
+        run: |
+          cd ti-hub/scripts
+          python fetch_shodan.py
+        continue-on-error: true
+
+      - name: Shodan CVE exposure (scheduled daily — free, no credits)
+        if: github.event_name == 'schedule'
+        env:
+          SHODAN_API_KEY: ${{ secrets.SHODAN_API_KEY }}
+        run: |
+          cd ti-hub/scripts
+          python fetch_shodan.py --cve-only
         continue-on-error: true
 
       - name: Commit and push data

@@ -9,7 +9,7 @@ const OverviewView = (() => {
   'use strict';
 
   function render(container, data) {
-    const { malware = [], actors = [], ransomware = [], victims = [], meta = {}, stats = {}, recent = [] } = data;
+    const { malware = [], actors = [], ransomware = [], victims = [], meta = {}, stats = {}, recent = [], threatfox = {}, shodan = {} } = data;
     const counts = meta.counts || {
       malware: malware.length, actors: actors.length,
       ransomware_groups: ransomware.length, victims: victims.length,
@@ -36,7 +36,7 @@ const OverviewView = (() => {
     container.appendChild(hdr);
 
     // ── Stat cards ──
-    container.appendChild(_buildStats(counts, ov));
+    container.appendChild(_buildStats(counts, ov, threatfox, shodan));
 
     // ── Timeline chart (D3) ──
     if (victims.length) container.appendChild(_buildTimeline(victims));
@@ -65,8 +65,11 @@ const OverviewView = (() => {
 
   // ── Stats cards ────────────────────────────────────────────────────────
 
-  function _buildStats(counts, ov) {
+  function _buildStats(counts, ov, threatfox = {}, shodan = {}) {
     const grid = _el('div', 'stats-grid');
+    const tfMeta    = threatfox.meta    || {};
+    const tfFeodo   = (threatfox.feodo || {}).c2s || [];
+    const shodanMeta = shodan.meta || {};
     const defs = [
       { label: 'Malware Families', value: counts.malware || 0,           view: 'malware',    color: 'blue',
         sub: null,
@@ -80,6 +83,16 @@ const OverviewView = (() => {
       { label: 'Recorded Victims', value: counts.victims || 0,           view: 'victims',    color: 'cyan',
         sub: ov.victims_this_year ? `${(ov.victims_this_year||0).toLocaleString()} this year` : null,
         icon: '<path d="M8 1L2 4v5c0 3.5 2.5 6.3 6 7 3.5-.7 6-3.5 6-7V4L8 1z" stroke="currentColor" stroke-width="1.5" fill="none"/><path d="M5.5 8l1.5 1.5 3-3" stroke="currentColor" stroke-width="1.5" fill="none"/>' },
+      ...(tfFeodo.length ? [{
+        label: 'Active C2 Servers', value: tfFeodo.length, view: 'stats', color: 'orange',
+        sub: 'FeodoTracker blocklist',
+        icon: '<path d="M8 1l7 4v6l-7 4-7-4V5l7-4z" stroke="currentColor" stroke-width="1.5" fill="none"/><circle cx="8" cy="9" r="2" fill="currentColor"/>',
+      }] : []),
+      ...(shodanMeta.cves_enriched ? [{
+        label: 'CVEs Tracked', value: shodanMeta.cves_enriched, view: 'stats', color: 'purple',
+        sub: 'Shodan internet exposure',
+        icon: '<path d="M12 2H4a1 1 0 00-1 1v10a1 1 0 001 1h8a1 1 0 001-1V3a1 1 0 00-1-1z" stroke="currentColor" stroke-width="1.5" fill="none"/><path d="M6 6h4M6 9h4M6 12h2" stroke="currentColor" stroke-width="1.5"/>',
+      }] : []),
     ];
     for (const d of defs) {
       const card = _el('div', 'stat-card');

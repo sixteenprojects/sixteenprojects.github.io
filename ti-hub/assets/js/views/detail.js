@@ -117,6 +117,10 @@ const DetailView = (() => {
 
     if (item.description) _bodyEl.appendChild(_descBlock(item.description));
     if (item.references?.length) _bodyEl.appendChild(_refList(item.references));
+
+    // ThreatFox IOCs + MalwareBazaar samples (async — loads after sync render)
+    _appendThreatFoxBlock(item.id);
+
     _bodyEl.appendChild(Export.buildToolbar([item], 'malware', item.name || item.id));
   }
 
@@ -269,6 +273,86 @@ const DetailView = (() => {
       ts.style.cssText = 'font-size:10px;color:var(--text-muted);margin-top:8px;';
       ts.textContent = `OTX data updated: ${updated.slice(0, 10)}`;
       sec.appendChild(ts);
+    }
+
+    _bodyEl.appendChild(sec);
+  }
+
+  // ── ThreatFox + MalwareBazaar block ───────────────────────────────────────
+
+  function _appendThreatFoxBlock(malwareId) {
+    const tf   = Api.getAll().threatfox || {};
+    const data = (tf.malware || {})[malwareId];
+    if (!data) return;
+
+    const iocs    = data.iocs    || [];
+    const samples = data.samples || [];
+    if (!iocs.length && !samples.length) return;
+
+    const sec = _el('div', 'detail-refs');
+    sec.style.cssText = 'border-top:1px solid var(--border-color);padding-top:14px;margin-top:4px;';
+
+    // Header
+    const hRow = _el('div');
+    hRow.style.cssText = 'display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;';
+    hRow.innerHTML = `
+      <h4 style="margin:0;font-size:13px;font-weight:700;color:var(--text-primary);">
+        ThreatFox &amp; abuse.ch
+        <span class="badge badge-gray" style="font-size:10px;margin-left:6px;">${iocs.length} IOCs · ${samples.length} samples</span>
+      </h4>
+      <a href="https://threatfox.abuse.ch/browse/" target="_blank" rel="noopener noreferrer"
+         style="display:inline-flex;align-items:center;gap:5px;font-size:11px;color:#f59e0b;text-decoration:none;font-weight:600;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13">
+          <circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10"/>
+        </svg>
+        ThreatFox
+      </a>`;
+    sec.appendChild(hRow);
+
+    // IOC list (most recent, capped at 15)
+    if (iocs.length) {
+      const h4 = _el('div');
+      h4.style.cssText = 'font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px;';
+      h4.textContent = 'Recent IOCs';
+      sec.appendChild(h4);
+
+      const rows = _el('div');
+      rows.style.cssText = 'display:flex;flex-direction:column;gap:3px;margin-bottom:10px;';
+      for (const ioc of iocs.slice(0, 15)) {
+        const row = _el('div');
+        row.style.cssText = 'display:flex;align-items:center;gap:8px;padding:4px 8px;background:var(--bg-surface-2);border-radius:6px;';
+        const confColor = ioc.confidence >= 75 ? '#ef4444' : ioc.confidence >= 50 ? '#f59e0b' : '#6b7280';
+        row.innerHTML = `
+          <span style="font-size:10px;padding:1px 5px;border-radius:3px;background:var(--bg-surface-3);color:var(--text-muted);flex-shrink:0;">${Security.escapeHtml(ioc.type||'')}</span>
+          <span style="font-family:var(--font-mono);font-size:10.5px;color:var(--text-secondary);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${Security.escapeHtml(ioc.value||'')}">${Security.escapeHtml(ioc.value||'')}</span>
+          <span style="font-size:10px;color:${confColor};font-weight:600;flex-shrink:0;">${ioc.confidence||0}%</span>
+          <span style="font-size:10px;color:var(--text-muted);flex-shrink:0;">${(ioc.first_seen||'').slice(0,10)}</span>`;
+        rows.appendChild(row);
+      }
+      sec.appendChild(rows);
+    }
+
+    // MalwareBazaar samples (capped at 8)
+    if (samples.length) {
+      const h4 = _el('div');
+      h4.style.cssText = 'font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px;';
+      h4.textContent = 'MalwareBazaar Samples';
+      sec.appendChild(h4);
+
+      const rows = _el('div');
+      rows.style.cssText = 'display:flex;flex-direction:column;gap:3px;';
+      for (const s of samples.slice(0, 8)) {
+        const row = _el('div');
+        row.style.cssText = 'display:flex;align-items:center;gap:8px;padding:4px 8px;background:var(--bg-surface-2);border-radius:6px;';
+        row.innerHTML = `
+          <span style="font-size:10px;padding:1px 5px;border-radius:3px;background:var(--bg-surface-3);color:var(--text-muted);flex-shrink:0;">${Security.escapeHtml(s.file_type||'?')}</span>
+          <span style="font-family:var(--font-mono);font-size:10px;color:var(--text-secondary);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${Security.escapeHtml(s.sha256||'')}">${Security.escapeHtml(s.sha256||'').slice(0,16)}…</span>
+          <span style="font-size:10px;color:var(--text-muted);flex-shrink:0;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${Security.escapeHtml(s.file_name||'')}">${Security.escapeHtml(s.file_name||'')}</span>
+          <a href="https://bazaar.abuse.ch/sample/${Security.escapeHtml(s.sha256||'')}" target="_blank" rel="noopener noreferrer"
+             style="font-size:10px;color:#f59e0b;text-decoration:none;flex-shrink:0;">↗</a>`;
+        rows.appendChild(row);
+      }
+      sec.appendChild(rows);
     }
 
     _bodyEl.appendChild(sec);

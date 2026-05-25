@@ -27,6 +27,7 @@ const StatsView = (() => {
     const victims = data.victims || [];
     const ransomware = data.ransomware || [];
     const recent = data.recent || [];
+    const shodan = data.shodan || {};
 
     container.innerHTML = '';
 
@@ -73,6 +74,10 @@ const StatsView = (() => {
 
     // ── Year-over-year comparison ──
     container.appendChild(_buildYearlyComparison(yearly));
+
+    // ── Shodan CVE exposure ──
+    const cveExposure = shodan.cve_exposure || {};
+    if (Object.keys(cveExposure).length) container.appendChild(_buildCVEExposure(cveExposure));
 
     // ── RansomLook live stats ──
     if (rlStats && rlStats.posts_total) container.appendChild(_buildRansomLookStats(rlStats));
@@ -469,6 +474,59 @@ const StatsView = (() => {
       ax.selectAll('.tick line').remove();
       ax.selectAll('.tick text').attr('fill', muted).attr('font-size', 11).attr('font-family', 'inherit').attr('font-weight', '600');
     });
+  }
+
+  // ── Shodan CVE Exposure ───────────────────────────────────────────────────
+
+  function _buildCVEExposure(cveExposure) {
+    const wrap = _sectionCard('Internet-Exposed CVEs (Shodan)', _icoShield());
+    const body = wrap.querySelector('.section-card-body');
+
+    const sorted = Object.entries(cveExposure)
+      .filter(([, c]) => c > 0)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 20);
+
+    if (!sorted.length) {
+      body.innerHTML = '<p class="text-muted" style="padding:20px">No CVE exposure data yet.</p>';
+      return wrap;
+    }
+
+    const max = sorted[0][1] || 1;
+
+    const hdr = _el('div');
+    hdr.style.cssText = 'display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px;';
+    hdr.innerHTML = `
+      <span style="font-size:11px;color:var(--text-muted);">Systems with unpatched CVEs visible on internet (via Shodan /host/count, free query)</span>
+      <span class="badge badge-gray" style="font-size:10px;">${Object.keys(cveExposure).length.toLocaleString()} CVEs tracked</span>`;
+    body.appendChild(hdr);
+
+    const list = _el('div');
+    list.style.cssText = 'display:flex;flex-direction:column;gap:6px;';
+    sorted.forEach(([cve, count], i) => {
+      const pct = (count / max * 100).toFixed(1);
+      const severity = count > 100000 ? '#ef4444' : count > 10000 ? '#f59e0b' : count > 1000 ? '#3b82f6' : '#6b7280';
+      const row = _el('div');
+      row.style.cssText = 'display:flex;align-items:center;gap:8px;';
+      row.innerHTML = `
+        <span style="font-size:10px;color:var(--text-muted);min-width:16px;text-align:right;font-weight:700;">${i+1}</span>
+        <a href="https://nvd.nist.gov/vuln/detail/${Security.escapeHtml(cve)}" target="_blank" rel="noopener noreferrer"
+           style="font-family:var(--font-mono);font-size:11.5px;font-weight:700;min-width:130px;color:${severity};text-decoration:none;">${Security.escapeHtml(cve)}</a>
+        <div style="flex:1;height:14px;background:var(--bg-surface-3);border-radius:3px;overflow:hidden;">
+          <div style="height:100%;width:${pct}%;background:${severity};opacity:.75;border-radius:3px;transition:width .4s;"></div>
+        </div>
+        <span style="font-size:11px;font-weight:700;min-width:70px;text-align:right;color:var(--text-primary);">${Number(count).toLocaleString()}</span>
+        <span style="font-size:10px;color:var(--text-muted);min-width:40px;text-align:right;">systems</span>`;
+      list.appendChild(row);
+    });
+    body.appendChild(list);
+
+    const footer = _el('div');
+    footer.style.cssText = 'margin-top:10px;font-size:10px;color:var(--text-muted);text-align:right;';
+    footer.innerHTML = `Powered by <a href="https://www.shodan.io" target="_blank" rel="noopener noreferrer" style="color:#f59e0b;text-decoration:none;">Shodan</a>`;
+    body.appendChild(footer);
+
+    return wrap;
   }
 
   // ── RansomLook Global Stats ───────────────────────────────────────────────

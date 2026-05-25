@@ -19,6 +19,8 @@ const Api = (() => {
     recent:     `${BASE_DATA}/recent.json`,
     ioc:        `${BASE_DATA}/ioc.json`,
     meta:       `${BASE_DATA}/meta.json`,
+    threatfox:  `${BASE_DATA}/threatfox.json`,
+    shodan:     `${BASE_DATA}/shodan.json`,
   };
 
   // In-memory cache
@@ -31,6 +33,8 @@ const Api = (() => {
     recent:     null,
     ioc:        null,
     meta:       null,
+    threatfox:  null,
+    shodan:     null,
   };
 
   let _loading = false;
@@ -60,8 +64,10 @@ const Api = (() => {
       _fetchJSON(FILES.victims).then(d => { _cache.victims  = Array.isArray(d) ? d : []; }),
       _fetchJSON(FILES.stats).then(d   => { _cache.stats    = typeof d === 'object' && !Array.isArray(d) ? d : {}; }),
       _fetchJSON(FILES.recent).then(d  => { _cache.recent   = Array.isArray(d) ? d : []; }),
-      _fetchJSON(FILES.ioc).then(d     => { _cache.ioc      = typeof d === 'object' && !Array.isArray(d) ? d : {}; }).catch(() => { _cache.ioc = {}; }),
-      _fetchJSON(FILES.meta).then(d    => { _cache.meta     = typeof d === 'object' ? d : {}; }),
+      _fetchJSON(FILES.ioc).then(d      => { _cache.ioc       = typeof d === 'object' && !Array.isArray(d) ? d : {}; }).catch(() => { _cache.ioc = {}; }),
+      _fetchJSON(FILES.meta).then(d     => { _cache.meta      = typeof d === 'object' ? d : {}; }),
+      _fetchJSON(FILES.threatfox).then(d=> { _cache.threatfox = typeof d === 'object' && !Array.isArray(d) ? d : {}; }).catch(() => { _cache.threatfox = {}; }),
+      _fetchJSON(FILES.shodan).then(d   => { _cache.shodan    = typeof d === 'object' && !Array.isArray(d) ? d : {}; }).catch(() => { _cache.shodan = {}; }),
     ]);
 
     const errors = results
