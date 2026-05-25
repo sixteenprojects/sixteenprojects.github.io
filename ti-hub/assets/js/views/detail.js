@@ -164,7 +164,8 @@ const DetailView = (() => {
   // ── OTX AlienVault IOC block ───────────────────────────────────────────
 
   function _appendOTXBlock(actorId) {
-    const iocData = (Api.getAll().ioc || {})[actorId];
+    const ioc     = Api.getAll().ioc || {};
+    const iocData = (ioc.actors || ioc)[actorId]; // support old flat + new nested format
     if (!iocData) return;
 
     const { indicators = {}, pulses = [], updated = '' } = iocData;

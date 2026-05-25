@@ -3,7 +3,7 @@ name: TI-Hub Data Update
 on:
   schedule:
     - cron: "0 2 * * *"   # every day at 02:00 UTC
-  workflow_dispatch:        # manual trigger from GitHub UI or API
+  workflow_dispatch:
     inputs:
       skip_malpedia:
         description: "Skip Malpedia fetch (faster run)"
@@ -16,7 +16,17 @@ on:
         default: "false"
         type: boolean
       with_otx:
-        description: "Fetch OTX AlienVault IOCs (requires OTX_API_KEY secret)"
+        description: "Fetch OTX — incremental (last 24h pulses + full IOCs)"
+        required: false
+        default: "false"
+        type: boolean
+      with_otx_full:
+        description: "Fetch OTX — FULL actor search (slow, ~8h, run once)"
+        required: false
+        default: "false"
+        type: boolean
+      with_otx_groups:
+        description: "Fetch OTX group feeds (ransomware, malware, APT, etc.)"
         required: false
         default: "false"
         type: boolean
@@ -69,12 +79,32 @@ jobs:
           fi
           python fetch_all.py $ARGS
 
-      - name: Fetch OTX AlienVault IOCs (scheduled daily)
+      - name: OTX — Full actor search (manual, one-time)
+        if: github.event.inputs.with_otx_full == 'true'
+        env:
+          OTX_API_KEY: ${{ secrets.OTX_API_KEY }}
+        run: |
+          cd ti-hub/scripts
+          python fetch_otx.py --full --groups
+        continue-on-error: true
+        timeout-minutes: 540
+
+      - name: OTX — Group feeds (manual)
+        if: github.event.inputs.with_otx_groups == 'true' && github.event.inputs.with_otx_full != 'true'
+        env:
+          OTX_API_KEY: ${{ secrets.OTX_API_KEY }}
+        run: |
+          cd ti-hub/scripts
+          python fetch_otx.py --groups
+        continue-on-error: true
+
+      - name: OTX — Incremental daily update (scheduled)
         if: github.event_name == 'schedule'
         env:
           OTX_API_KEY: ${{ secrets.OTX_API_KEY }}
         run: |
           cd ti-hub/scripts
+          python fetch_otx.py --groups
           python fetch_otx.py
         continue-on-error: true
 
