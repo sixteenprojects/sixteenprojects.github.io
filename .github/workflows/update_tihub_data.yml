@@ -20,6 +20,11 @@ on:
         required: false
         default: "false"
         type: boolean
+      with_otx_enrich:
+        description: "OTX enrich — fetch actual IOC values for pulses from --full (run after --full completes)"
+        required: false
+        default: "false"
+        type: boolean
       with_otx_incremental:
         description: "OTX incremental — fetch last 24h pulses + indicators (manual trigger)"
         required: false
@@ -97,6 +102,16 @@ jobs:
         run: |
           cd ti-hub/scripts
           python fetch_otx.py --full
+
+      - name: OTX — Enrich indicators (fetch IOCs for pulses found by --full)
+        if: github.event.inputs.with_otx_enrich == 'true'
+        timeout-minutes: 270
+        continue-on-error: true
+        env:
+          OTX_API_KEY: ${{ secrets.OTX_API_KEY }}
+        run: |
+          cd ti-hub/scripts
+          python fetch_otx.py --enrich
 
       - name: OTX — Group feeds (manual)
         if: github.event.inputs.with_otx_groups == 'true'

@@ -382,10 +382,65 @@ def run_groups(session: requests.Session, sleep: float, ioc_data: dict) -> None:
         log.info(f"  → {len(pulses)} pulses")
 
 
+# ── Mode: enrich indicators from pulse IDs ─────────────────────────────────────
+
+def run_enrich(session: requests.Session, sleep: float, ioc_data: dict) -> None:
+    """
+    Fetch actual indicator values for pulses collected by run_full().
+    run_full() stores only pulse metadata (name, date, tags, indicators_count)
+    because the search API doesn't return indicator values.
+    This pass calls /pulses/{id}/indicators for each un-enriched pulse.
+
+    Checkpoint: each pulse gets indicators_fetched=True once processed,
+    so partial runs resume correctly across multiple workflow executions.
+    Caps at 10 pulses per actor per run to bound execution time.
+    """
+    actors_ioc = ioc_data["actors"]
+
+    needs_work = [
+        (aid, entry) for aid, entry in actors_ioc.items()
+        if any(not p.get("indicators_fetched") for p in entry.get("pulses", []))
+    ]
+
+    log.info(f"Indicator enrichment: {len(needs_work)} actors have un-enriched pulses")
+
+    updated = 0
+    for i, (aid, entry) in enumerate(needs_work):
+        pulses    = entry.get("pulses", [])
+        unfetched = [p for p in pulses if not p.get("indicators_fetched")]
+
+        log.info(f"[{i+1}/{len(needs_work)}] {aid}: {len(unfetched)}/{len(pulses)} pulses pending")
+
+        got_iocs = False
+        for pulse in unfetched[:10]:   # max 10 pulses per actor per run
+            pid = pulse.get("id", "")
+            if not pid:
+                pulse["indicators_fetched"] = True
+                continue
+            raw_inds = _fetch_pulse_indicators(session, pid, sleep)
+            if raw_inds:
+                _merge_ind(entry.setdefault("indicators", _empty_ind()), raw_inds)
+                got_iocs = True
+            pulse["indicators_fetched"] = True
+
+        if got_iocs:
+            entry["updated"] = datetime.now(timezone.utc).isoformat()
+            updated += 1
+            total = sum(len(v) for v in entry.get("indicators", {}).values())
+            log.info(f"  → {total} total indicators now")
+
+        if (i + 1) % 20 == 0:
+            _write(DATA_DIR / "ioc.json", ioc_data)
+            log.info(f"Checkpoint saved: {i+1}/{len(needs_work)} actors processed")
+
+    _write(DATA_DIR / "ioc.json", ioc_data)
+    log.info(f"Enrichment done: {updated}/{len(needs_work)} actors gained indicators")
+
+
 # ── Entry point ────────────────────────────────────────────────────────────────
 
 def run(api_key: str = "", mode_full: bool = False, mode_groups: bool = False,
-        hours: int = 26, pulse_limit: int = 20) -> None:
+        mode_enrich: bool = False, hours: int = 26, pulse_limit: int = 20) -> None:
 
     api_key = api_key or os.environ.get("OTX_API_KEY", "")
     sleep   = SLEEP_AUTH if api_key else SLEEP_NOAUTH
@@ -408,10 +463,13 @@ def run(api_key: str = "", mode_full: bool = False, mode_groups: bool = False,
     if mode_full:
         run_full(session, sleep, actors, ioc_data, pulse_limit)
 
+    if mode_enrich:
+        run_enrich(session, sleep, ioc_data)
+
     if mode_groups:
         run_groups(session, sleep, ioc_data)
 
-    if not mode_full and not mode_groups:
+    if not mode_full and not mode_enrich and not mode_groups:
         actor_index = _build_actor_index(actors)
         run_incremental(session, sleep, hours, actor_index, ioc_data)
 
@@ -420,8 +478,11 @@ def run(api_key: str = "", mode_full: bool = False, mode_groups: bool = False,
     meta = ioc_data.get("meta", {})
     ioc_data["meta"] = {
         "last_full":        now if mode_full else meta.get("last_full", ""),
-        "last_incremental": now if not mode_full else meta.get("last_incremental", ""),
+        "last_enrich":      now if mode_enrich else meta.get("last_enrich", ""),
+        "last_incremental": now if not mode_full and not mode_enrich else meta.get("last_incremental", ""),
         "actor_coverage":   sum(1 for v in ioc_data["actors"].values() if v.get("pulses")),
+        "actors_with_iocs": sum(1 for v in ioc_data["actors"].values()
+                                if any(v.get("indicators", {}).get(k) for k in ["ip","domain","url","md5","sha256"])),
         "group_count":      len(ioc_data["groups"]),
         "feed_updated":     ioc_data.get("feed", {}).get("updated", ""),
     }
@@ -444,8 +505,9 @@ if __name__ == "__main__":
             limit = int(args[i + 1])
 
     run(
-        mode_full   = "--full"   in args,
-        mode_groups = "--groups" in args,
-        hours       = hours,
-        pulse_limit = limit,
+        mode_full    = "--full"   in args,
+        mode_enrich  = "--enrich" in args,
+        mode_groups  = "--groups" in args,
+        hours        = hours,
+        pulse_limit  = limit,
     )

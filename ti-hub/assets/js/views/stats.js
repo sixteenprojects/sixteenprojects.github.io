@@ -82,6 +82,9 @@ const StatsView = (() => {
     // ── RansomLook live stats ──
     if (rlStats && rlStats.posts_total) container.appendChild(_buildRansomLookStats(rlStats));
 
+    // ── Indonesia spotlight ──
+    container.appendChild(_buildIndonesiaSpotlight(victims));
+
     // ── Recent attacks feed ──
     const recentData = stats.recent_attacks || recent;
     if (recentData.length) container.appendChild(_buildRecentFeed(recentData.slice(0, 20)));
@@ -556,6 +559,104 @@ const StatsView = (() => {
       grid.appendChild(card);
     }
     body.appendChild(grid);
+    return wrap;
+  }
+
+  // ── Indonesia Spotlight ───────────────────────────────────────────────────
+
+  function _buildIndonesiaSpotlight(victims) {
+    const wrap = _sectionCard('Indonesia Threat Spotlight', _icoGlobe(), true);
+
+    const hdr = wrap.querySelector('.section-card-header');
+    const badge = _el('span', 'badge badge-blue');
+    badge.style.fontSize = '10px';
+    badge.textContent = 'country:id';
+    hdr.appendChild(badge);
+
+    // Filter victims with country == "ID"
+    const idVictims = victims
+      .filter(v => (v.country || '').toUpperCase() === 'ID')
+      .sort((a, b) => {
+        const da = a.attack_date || a.discovered || '';
+        const db = b.attack_date || b.discovered || '';
+        return db.localeCompare(da);
+      });
+
+    if (!idVictims.length) {
+      const empty = _el('div', 'section-card-body');
+      empty.innerHTML = '<p class="text-muted" style="padding:20px">No Indonesian victims recorded yet.</p>';
+      wrap.appendChild(empty);
+      return wrap;
+    }
+
+    // ── KPI strip ──
+    const groupCount = {};
+    const sectorCount = {};
+    for (const v of idVictims) {
+      if (v.group) groupCount[v.group] = (groupCount[v.group] || 0) + 1;
+      if (v.sector && v.sector !== 'Unknown') sectorCount[v.sector] = (sectorCount[v.sector] || 0) + 1;
+    }
+    const topGroup  = Object.entries(groupCount).sort((a,b) => b[1]-a[1])[0];
+    const topSector = Object.entries(sectorCount).sort((a,b) => b[1]-a[1])[0];
+
+    const thisYear = new Date().getFullYear();
+    const thisYearId = idVictims.filter(v => (v.attack_date||v.discovered||'').startsWith(String(thisYear))).length;
+
+    const kpiRow = _el('div');
+    kpiRow.style.cssText = 'display:flex;gap:24px;flex-wrap:wrap;padding:16px 20px 12px;border-bottom:1px solid var(--border-color);';
+    [
+      { label: 'Total Victims',      value: idVictims.length.toLocaleString() },
+      { label: `Victims ${thisYear}`, value: thisYearId.toLocaleString() },
+      { label: 'Top Threat Group',   value: topGroup  ? `${_fmtGroup(topGroup[0])} (${topGroup[1]})` : '—' },
+      { label: 'Most Targeted Sector', value: topSector ? `${Security.truncate(topSector[0], 22)} (${topSector[1]})` : '—' },
+    ].forEach(d => {
+      const item = _el('div');
+      item.style.cssText = 'display:flex;flex-direction:column;gap:3px;';
+      item.innerHTML = `
+        <span style="font-size:20px;font-weight:800;color:var(--text-primary);font-variant-numeric:tabular-nums">${Security.escapeHtml(d.value)}</span>
+        <span style="font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em">${Security.escapeHtml(d.label)}</span>`;
+      kpiRow.appendChild(item);
+    });
+    wrap.appendChild(kpiRow);
+
+    // ── Top 10 table ──
+    const table = document.createElement('table');
+    table.className = 'data-table';
+    table.innerHTML = `<thead><tr>
+      <th style="width:28px">#</th>
+      <th>Victim</th>
+      <th>Group</th>
+      <th>Sector</th>
+      <th>Date</th>
+    </tr></thead>`;
+    const tbody = document.createElement('tbody');
+
+    idVictims.slice(0, 10).forEach((v, i) => {
+      const tr = document.createElement('tr');
+      const date = v.attack_date || v.discovered || '';
+      tr.innerHTML = `
+        <td style="color:var(--text-muted);font-size:11px;font-weight:700;text-align:center">${i + 1}</td>
+        <td class="cell-name" style="font-weight:600;max-width:200px">${Security.escapeHtml(Security.truncate(v.victim || '', 40))}</td>
+        <td><span class="badge badge-red">${Security.escapeHtml(Security.truncate(v.group || '—', 20))}</span></td>
+        <td><span class="badge badge-gray" style="font-size:10px">${Security.escapeHtml(Security.truncate(v.sector || 'Unknown', 22))}</span></td>
+        <td class="cell-nowrap text-muted text-sm">${Security.escapeHtml(Security.formatDate(date))}</td>`;
+      tbody.appendChild(tr);
+    });
+    table.appendChild(tbody);
+
+    const tableWrap = _el('div', 'data-table-wrap');
+    tableWrap.appendChild(table);
+
+    if (idVictims.length > 10) {
+      const footer = _el('div');
+      footer.style.cssText = 'padding:10px 20px;font-size:11px;color:var(--text-muted);border-top:1px solid var(--border-color);';
+      footer.innerHTML = `Showing top 10 of <strong>${idVictims.length}</strong> Indonesian victims — <a href="#/victims" style="color:var(--color-brand-accent);text-decoration:none">view all in Victims →</a>`;
+      wrap.appendChild(tableWrap);
+      wrap.appendChild(footer);
+    } else {
+      wrap.appendChild(tableWrap);
+    }
+
     return wrap;
   }
 

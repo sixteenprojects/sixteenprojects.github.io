@@ -7,6 +7,9 @@ Sources (all free, no API key required):
   URLhaus       https://urlhaus.abuse.ch/          Malicious URLs
   FeodoTracker  https://feodotracker.abuse.ch/     Botnet C2 servers
 
+Uses export/download URLs (CDN-hosted) instead of API endpoints to avoid
+IP-based blocking on cloud CI runners (Azure, GitHub Actions, etc.).
+
 Output: data/threatfox.json
   {
     "malware":  { malware_id: { iocs, samples, urls, updated } },
@@ -21,12 +24,16 @@ Usage:
   python fetch_threatfox.py --days 1    # only last N days for incremental
 """
 
+import csv
+import io
 import json
 import logging
 import sys
 import time
-from datetime import datetime, timezone
+import zipfile
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
+from urllib.parse import urlparse
 
 try:
     import requests
@@ -39,24 +46,24 @@ SLEEP    = 1.0   # seconds between requests (be polite)
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [ThreatFox] %(message)s")
 log = logging.getLogger("ThreatFox")
 
-THREATFOX_API  = "https://threatfox-api.abuse.ch/api/v1/"
-BAZAAR_API     = "https://mb-api.abuse.ch/api/v1/"
-URLHAUS_API    = "https://urlhaus-api.abuse.ch/v1/"
-FEODO_JSON     = "https://feodotracker.abuse.ch/downloads/ipblocklist.json"
-FEODO_CSV      = "https://feodotracker.abuse.ch/downloads/ipblocklist_aggressive.json"
+# Export / download URLs — CDN-hosted, not blocked by IP filtering
+THREATFOX_EXPORT = "https://threatfox.abuse.ch/export/json/recent/"
+BAZAAR_EXPORT    = "https://bazaar.abuse.ch/export/csv/recent/"
+URLHAUS_EXPORT   = "https://urlhaus.abuse.ch/downloads/csv_recent/"
+FEODO_JSON       = "https://feodotracker.abuse.ch/downloads/ipblocklist.json"
 
 
 # ── HTTP helpers ───────────────────────────────────────────────────────────────
 
-def _post(url: str, payload: dict) -> dict | None:
+def _get_bytes(url: str) -> bytes | None:
     try:
-        r = requests.post(url, json=payload, timeout=30,
-                          headers={"User-Agent": "TheSixteenProject-TIHub/2.0"})
+        r = requests.get(url, timeout=60,
+                         headers={"User-Agent": "TheSixteenProject-TIHub/2.0"})
         r.raise_for_status()
         time.sleep(SLEEP)
-        return r.json()
+        return r.content
     except Exception as e:
-        log.warning(f"POST {url}: {e}")
+        log.warning(f"GET {url}: {e}")
         return None
 
 
@@ -72,117 +79,170 @@ def _get(url: str) -> dict | list | None:
         return None
 
 
+def _unzip_first(data: bytes) -> bytes | None:
+    """Extract the first file from a ZIP archive."""
+    try:
+        with zipfile.ZipFile(io.BytesIO(data)) as zf:
+            names = zf.namelist()
+            if not names:
+                return None
+            log.info(f"  ZIP contains: {names}")
+            return zf.read(names[0])
+    except Exception as e:
+        log.warning(f"ZIP extract error: {e}")
+        return None
+
+
 # ── ThreatFox ─────────────────────────────────────────────────────────────────
 
 def _tf_ioc_entry(ioc: dict) -> dict:
     return {
-        "id":           ioc.get("id", ""),
-        "value":        ioc.get("ioc", ""),
-        "type":         ioc.get("ioc_type", ""),
-        "malware":      ioc.get("malware", ""),
-        "malware_alias":ioc.get("malware_alias", ""),
-        "confidence":   ioc.get("confidence_level", 0),
-        "threat_type":  ioc.get("threat_type", ""),
-        "first_seen":   (ioc.get("first_seen") or "")[:10],
-        "last_seen":    (ioc.get("last_seen") or "")[:10],
-        "tags":         ioc.get("tags") or [],
-        "reporter":     ioc.get("reporter", ""),
-        "reference":    ioc.get("reference", ""),
+        "id":            ioc.get("id", ""),
+        "value":         ioc.get("ioc", ""),
+        "type":          ioc.get("ioc_type", ""),
+        "malware":       ioc.get("malware", ""),
+        "malware_alias": ioc.get("malware_alias", ""),
+        "confidence":    ioc.get("confidence_level", 0),
+        "threat_type":   ioc.get("threat_type", ""),
+        "first_seen":    (ioc.get("first_seen") or "")[:10],
+        "last_seen":     (ioc.get("last_seen") or "")[:10],
+        "tags":          ioc.get("tags") or [],
+        "reporter":      ioc.get("reporter", ""),
+        "reference":     ioc.get("reference", ""),
     }
 
 
 def fetch_threatfox_recent(days: int = 3) -> list:
-    """Fetch recent IOCs from ThreatFox."""
-    log.info(f"ThreatFox: recent IOCs (last {days} days)")
-    data = _post(THREATFOX_API, {"query": "get_iocs", "days": days})
-    if not data or data.get("query_status") != "ok":
-        log.warning(f"ThreatFox recent: {data.get('query_status') if data else 'no response'}")
+    """Fetch recent IOCs from ThreatFox via export ZIP (CDN, not IP-blocked)."""
+    log.info("ThreatFox: recent IOCs (export download)")
+    raw = _get_bytes(THREATFOX_EXPORT)
+    if not raw:
         return []
-    iocs = [_tf_ioc_entry(i) for i in (data.get("data") or [])]
-    log.info(f"  → {len(iocs)} IOCs")
+
+    content = _unzip_first(raw) if raw[:2] == b"PK" else raw
+    if not content:
+        log.warning("ThreatFox: could not extract content")
+        return []
+
+    try:
+        export_data = json.loads(content)
+    except Exception as e:
+        log.warning(f"ThreatFox JSON parse error: {e}")
+        return []
+
+    iocs = []
+    cutoff = (datetime.now(timezone.utc) - timedelta(days=days)).strftime("%Y-%m-%d")
+
+    if isinstance(export_data, list):
+        # Plain array of IOC objects
+        iocs = [_tf_ioc_entry(item) for item in export_data]
+    elif isinstance(export_data, dict):
+        if "data" in export_data:
+            # {"data": [...]} format
+            iocs = [_tf_ioc_entry(item) for item in (export_data["data"] or [])]
+        else:
+            # Date-keyed format: {"YYYY-MM-DD": [...], ...}
+            for date_key, items in export_data.items():
+                if not isinstance(items, list) or date_key < cutoff:
+                    continue
+                iocs.extend(_tf_ioc_entry(item) for item in items)
+
+    log.info(f"  → {len(iocs)} IOCs (last {days} days)")
     return iocs
-
-
-def fetch_threatfox_by_malware(malware_name: str, limit: int = 100) -> list:
-    """Fetch IOCs for a specific malware family."""
-    data = _post(THREATFOX_API, {"query": "malware_search", "search_term": malware_name})
-    if not data or data.get("query_status") not in ("ok", "no_result"):
-        return []
-    return [_tf_ioc_entry(i) for i in (data.get("data") or [])][:limit]
-
-
-def fetch_threatfox_tags() -> list:
-    """Get list of all available malware tags."""
-    data = _post(THREATFOX_API, {"query": "get_taginfo"})
-    if not data or data.get("query_status") != "ok":
-        return []
-    return data.get("data", [])
 
 
 # ── MalwareBazaar ─────────────────────────────────────────────────────────────
 
-def _bz_sample_entry(s: dict) -> dict:
+def _bz_csv_entry(row: dict) -> dict:
+    tags_raw = row.get("tags") or ""
+    tags = [t.strip() for t in tags_raw.replace("|", ",").split(",") if t.strip()]
     return {
-        "sha256":       s.get("sha256_hash", ""),
-        "sha1":         s.get("sha1_hash", ""),
-        "md5":          s.get("md5_hash", ""),
-        "file_name":    s.get("file_name", ""),
-        "file_type":    s.get("file_type", ""),
-        "file_size":    s.get("file_size", 0),
-        "malware":      s.get("signature", ""),
-        "tags":         s.get("tags") or [],
-        "first_seen":   (s.get("first_seen") or "")[:10],
-        "imphash":      s.get("imphash", ""),
-        "reporter":     s.get("reporter", ""),
-        "origin":       s.get("origin_country", ""),
+        "sha256":     row.get("sha256_hash", ""),
+        "sha1":       row.get("sha1_hash", ""),
+        "md5":        row.get("md5_hash", ""),
+        "file_name":  row.get("file_name", ""),
+        "file_type":  row.get("file_type_guess", ""),
+        "file_size":  0,
+        "malware":    row.get("signature", ""),
+        "tags":       tags,
+        "first_seen": (row.get("first_seen_utc") or "")[:10],
+        "imphash":    row.get("imphash", ""),
+        "reporter":   row.get("reporter", ""),
+        "origin":     "",
     }
 
 
 def fetch_bazaar_recent(limit: int = 200) -> list:
-    """Fetch recent malware samples from MalwareBazaar."""
-    log.info(f"MalwareBazaar: recent {limit} samples")
-    data = _post(BAZAAR_API, {"query": "get_recent", "selector": "100"})
-    if not data or data.get("query_status") != "ok":
+    """Fetch recent malware samples from MalwareBazaar via export CSV ZIP."""
+    log.info("MalwareBazaar: recent samples (export download)")
+    raw = _get_bytes(BAZAAR_EXPORT)
+    if not raw:
         return []
-    samples = [_bz_sample_entry(s) for s in (data.get("data") or [])]
+
+    content = _unzip_first(raw) if raw[:2] == b"PK" else raw
+    if not content:
+        log.warning("MalwareBazaar: could not extract content")
+        return []
+
+    try:
+        text = content.decode("utf-8", errors="replace")
+        lines = [l for l in text.splitlines() if not l.startswith("#") and l.strip()]
+        reader = csv.DictReader(lines)
+        samples = [_bz_csv_entry(row) for row in reader
+                   if row.get("sha256_hash")][:limit]
+    except Exception as e:
+        log.warning(f"MalwareBazaar CSV parse error: {e}")
+        return []
+
     log.info(f"  → {len(samples)} samples")
     return samples
 
 
-def fetch_bazaar_by_malware(malware_name: str) -> list:
-    """Fetch samples for a specific malware family."""
-    data = _post(BAZAAR_API, {"query": "get_siginfo", "signature": malware_name, "limit": 50})
-    if not data or data.get("query_status") != "ok":
-        return []
-    return [_bz_sample_entry(s) for s in (data.get("data") or [])][:50]
-
-
 # ── URLhaus ───────────────────────────────────────────────────────────────────
 
-def _uh_url_entry(u: dict) -> dict:
+def _uh_csv_entry(row: dict) -> dict:
+    url = row.get("url", "")
+    try:
+        host = urlparse(url).hostname or ""
+    except Exception:
+        host = ""
+    tags_raw = row.get("tags") or ""
+    tags = [t.strip() for t in tags_raw.replace("|", ",").split(",") if t.strip()]
     return {
-        "id":           u.get("id", ""),
-        "url":          u.get("url", ""),
-        "url_status":   u.get("url_status", ""),
-        "host":         u.get("host", ""),
-        "date_added":   (u.get("date_added") or "")[:10],
-        "threat":       u.get("threat", ""),
-        "tags":         u.get("tags") or [],
-        "malware":      u.get("url_info", {}).get("filename", "") if isinstance(u.get("url_info"), dict) else "",
-        "reporter":     u.get("reporter", ""),
+        "id":         row.get("id", ""),
+        "url":        url,
+        "url_status": row.get("url_status", ""),
+        "host":       host,
+        "date_added": (row.get("dateadded") or "")[:10],
+        "threat":     row.get("threat", ""),
+        "tags":       tags,
+        "malware":    "",
+        "reporter":   row.get("reporter", ""),
     }
 
 
 def fetch_urlhaus_recent(limit: int = 500) -> list:
-    """Fetch recent malicious URLs from URLhaus."""
-    log.info("URLhaus: recent URLs")
-    data = _post(URLHAUS_API + "urls/recent/", {})
-    if not data or data.get("query_status") != "ok":
-        # Try GET as fallback
-        data = _get(URLHAUS_API + "urls/recent/")
-    if not data:
+    """Fetch recent malicious URLs from URLhaus via export CSV ZIP."""
+    log.info("URLhaus: recent URLs (export download)")
+    raw = _get_bytes(URLHAUS_EXPORT)
+    if not raw:
         return []
-    urls = [_uh_url_entry(u) for u in (data.get("urls") or [])][:limit]
+
+    content = _unzip_first(raw) if raw[:2] == b"PK" else raw
+    if not content:
+        log.warning("URLhaus: could not extract content")
+        return []
+
+    try:
+        text = content.decode("utf-8", errors="replace")
+        lines = [l for l in text.splitlines() if not l.startswith("#") and l.strip()]
+        reader = csv.DictReader(lines)
+        urls = [_uh_csv_entry(row) for row in reader
+                if row.get("url")][:limit]
+    except Exception as e:
+        log.warning(f"URLhaus CSV parse error: {e}")
+        return []
+
     log.info(f"  → {len(urls)} URLs")
     return urls
 
@@ -191,20 +251,20 @@ def fetch_urlhaus_recent(limit: int = 500) -> list:
 
 def _feodo_entry(c: dict) -> dict:
     return {
-        "ip":           c.get("ip_address", ""),
-        "port":         c.get("port", 0),
-        "status":       c.get("status", ""),
-        "malware":      c.get("malware", ""),
-        "first_seen":   (c.get("first_seen") or "")[:10],
-        "last_online":  (c.get("last_online") or "")[:10],
-        "country":      c.get("country", ""),
-        "asn":          c.get("as_number", ""),
-        "as_name":      c.get("as_name", ""),
+        "ip":          c.get("ip_address", ""),
+        "port":        c.get("port", 0),
+        "status":      c.get("status", ""),
+        "malware":     c.get("malware", ""),
+        "first_seen":  (c.get("first_seen") or "")[:10],
+        "last_online": (c.get("last_online") or "")[:10],
+        "country":     c.get("country", ""),
+        "asn":         c.get("as_number", ""),
+        "as_name":     c.get("as_name", ""),
     }
 
 
 def fetch_feodo() -> list:
-    """Fetch botnet C2 blocklist from FeodoTracker."""
+    """Fetch botnet C2 blocklist from FeodoTracker (direct download, not blocked)."""
     log.info("FeodoTracker: C2 blocklist")
     data = _get(FEODO_JSON)
     if not isinstance(data, list):
@@ -248,7 +308,6 @@ def _map_iocs_to_malware(iocs: list, malware_index: dict) -> dict[str, list]:
         key = _normalise_malware_name(raw)
         mid = malware_index.get(key)
         if not mid:
-            # Try partial match
             for name, m in malware_index.items():
                 if len(name) >= 4 and (name in key or key in name):
                     mid = m
@@ -292,7 +351,6 @@ def _write(path: Path, data: dict) -> None:
 def run(days: int = 3) -> None:
     now = datetime.now(timezone.utc).isoformat()
 
-    # Load Malpedia malware list for cross-referencing
     malware_path = DATA_DIR / "malware.json"
     malware_list = []
     if malware_path.exists():
@@ -307,7 +365,6 @@ def run(days: int = 3) -> None:
     recent_iocs = fetch_threatfox_recent(days=days)
     ioc_by_malware = _map_iocs_to_malware(recent_iocs, malware_index)
 
-    # Merge into per-malware store
     for mid, iocs in ioc_by_malware.items():
         entry = data["malware"].setdefault(mid, {"iocs": [], "samples": [], "updated": ""})
         existing_ids = {i["id"] for i in entry["iocs"]}
@@ -345,8 +402,8 @@ def run(days: int = 3) -> None:
     data["meta"] = {
         "updated":         now,
         "malware_covered": len(data["malware"]),
-        "total_iocs":      sum(len(v.get("iocs",[])) for v in data["malware"].values()),
-        "total_samples":   sum(len(v.get("samples",[])) for v in data["malware"].values()),
+        "total_iocs":      sum(len(v.get("iocs", [])) for v in data["malware"].values()),
+        "total_samples":   sum(len(v.get("samples", [])) for v in data["malware"].values()),
         "urlhaus_count":   len(urls),
         "feodo_count":     len(c2s),
     }

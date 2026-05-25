@@ -159,8 +159,11 @@ const DetailView = (() => {
     if (item.description) _bodyEl.appendChild(_descBlock(item.description));
     if (item.references?.length) _bodyEl.appendChild(_refList(item.references));
 
-    // OTX AlienVault IOC block (async — loads after sync render)
+    // OTX AlienVault IOC block
     _appendOTXBlock(item.id);
+
+    // ThreatFox IOCs for linked malware families
+    _appendThreatFoxForActor(item);
 
     _bodyEl.appendChild(Export.buildToolbar([item], 'actors', item.name || item.id));
   }
@@ -273,6 +276,108 @@ const DetailView = (() => {
       ts.style.cssText = 'font-size:10px;color:var(--text-muted);margin-top:8px;';
       ts.textContent = `OTX data updated: ${updated.slice(0, 10)}`;
       sec.appendChild(ts);
+    }
+
+    _bodyEl.appendChild(sec);
+  }
+
+  // ── ThreatFox IOCs for an actor's linked malware families ────────────────
+
+  function _appendThreatFoxForActor(actor) {
+    const tfMalware = (Api.getAll().threatfox || {}).malware || {};
+    const malwareIds = (actor.malware || []).slice(0, 20);
+
+    // Collect families that have actual IOC/sample data
+    const families = [];
+    for (const mId of malwareIds) {
+      const d = tfMalware[mId];
+      if (!d) continue;
+      const iocs    = d.iocs    || [];
+      const samples = d.samples || [];
+      if (!iocs.length && !samples.length) continue;
+      families.push({ id: mId, iocs, samples });
+    }
+    if (!families.length) return;
+
+    const totalIOCs    = families.reduce((s, f) => s + f.iocs.length, 0);
+    const totalSamples = families.reduce((s, f) => s + f.samples.length, 0);
+
+    const sec = _el('div', 'detail-refs');
+    sec.style.cssText = 'border-top:1px solid var(--border-color);padding-top:14px;margin-top:4px;';
+
+    // Header
+    const hRow = _el('div');
+    hRow.style.cssText = 'display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;';
+    hRow.innerHTML = `
+      <h4 style="margin:0;font-size:13px;font-weight:700;color:var(--text-primary);">
+        ThreatFox &amp; MalwareBazaar
+        <span class="badge badge-gray" style="font-size:10px;margin-left:6px;">${totalIOCs} IOCs · ${totalSamples} samples · ${families.length} families</span>
+      </h4>
+      <a href="https://threatfox.abuse.ch/browse/" target="_blank" rel="noopener noreferrer"
+         style="font-size:11px;color:#f59e0b;text-decoration:none;font-weight:600;">ThreatFox ↗</a>`;
+    sec.appendChild(hRow);
+
+    // One block per malware family (show first 6)
+    for (const fam of families.slice(0, 6)) {
+      const famBlock = _el('div');
+      famBlock.style.cssText = 'margin-bottom:12px;';
+
+      const famHdr = _el('div');
+      famHdr.style.cssText = 'display:flex;align-items:center;gap:6px;margin-bottom:5px;';
+      famHdr.innerHTML = `
+        <span class="badge badge-blue" style="font-size:10px;cursor:pointer;">${Security.escapeHtml(fam.id)}</span>
+        <span style="font-size:11px;color:var(--text-muted);">${fam.iocs.length} IOCs · ${fam.samples.length} samples</span>`;
+      // Click malware chip to open its detail panel
+      famHdr.querySelector('.badge-blue').addEventListener('click', () => {
+        const m = (Api.getAll().malware || []).find(x => x.id === fam.id);
+        if (m) open('malware', m);
+      });
+      famBlock.appendChild(famHdr);
+
+      // IOC rows (top 5)
+      if (fam.iocs.length) {
+        const iocList = _el('div');
+        iocList.style.cssText = 'display:flex;flex-direction:column;gap:2px;';
+        for (const ioc of fam.iocs.slice(0, 5)) {
+          const row = _el('div');
+          row.style.cssText = 'display:flex;align-items:center;gap:6px;padding:3px 8px;background:var(--bg-surface-2);border-radius:5px;';
+          const confColor = (ioc.confidence || 0) >= 75 ? '#ef4444' : (ioc.confidence || 0) >= 50 ? '#f59e0b' : '#6b7280';
+          row.innerHTML = `
+            <span style="font-size:10px;padding:1px 4px;border-radius:3px;background:var(--bg-surface-3);color:var(--text-muted);flex-shrink:0;">${Security.escapeHtml(ioc.type || '')}</span>
+            <span style="font-family:var(--font-mono);font-size:10.5px;color:var(--text-secondary);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${Security.escapeHtml(ioc.value || '')}">${Security.escapeHtml(ioc.value || '')}</span>
+            <span style="font-size:10px;color:${confColor};font-weight:600;flex-shrink:0;">${ioc.confidence || 0}%</span>
+            <span style="font-size:10px;color:var(--text-muted);flex-shrink:0;">${(ioc.first_seen || '').slice(0, 10)}</span>`;
+          iocList.appendChild(row);
+        }
+        famBlock.appendChild(iocList);
+      }
+
+      // Sample rows (top 3)
+      if (fam.samples.length) {
+        const sampList = _el('div');
+        sampList.style.cssText = 'display:flex;flex-direction:column;gap:2px;margin-top:3px;';
+        for (const s of fam.samples.slice(0, 3)) {
+          const row = _el('div');
+          row.style.cssText = 'display:flex;align-items:center;gap:6px;padding:3px 8px;background:var(--bg-surface-2);border-radius:5px;';
+          row.innerHTML = `
+            <span style="font-size:10px;padding:1px 4px;border-radius:3px;background:var(--bg-surface-3);color:var(--text-muted);flex-shrink:0;">${Security.escapeHtml(s.file_type || '?')}</span>
+            <span style="font-family:var(--font-mono);font-size:10px;color:var(--text-secondary);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${Security.escapeHtml(s.sha256 || '')}">${Security.escapeHtml((s.sha256 || '').slice(0, 16))}…</span>
+            <span style="font-size:10px;color:var(--text-muted);flex-shrink:0;max-width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${Security.escapeHtml(s.file_name || '')}</span>
+            <a href="https://bazaar.abuse.ch/sample/${Security.escapeHtml(s.sha256 || '')}" target="_blank" rel="noopener noreferrer"
+               style="font-size:10px;color:#f59e0b;text-decoration:none;flex-shrink:0;">↗</a>`;
+          sampList.appendChild(row);
+        }
+        famBlock.appendChild(sampList);
+      }
+
+      sec.appendChild(famBlock);
+    }
+
+    if (families.length > 6) {
+      const more = _el('div');
+      more.style.cssText = 'font-size:11px;color:var(--text-muted);padding:4px 0;';
+      more.textContent = `+${families.length - 6} more malware families with ThreatFox data`;
+      sec.appendChild(more);
     }
 
     _bodyEl.appendChild(sec);

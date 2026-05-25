@@ -189,44 +189,50 @@ def _collect_ips(data_dir: Path) -> list[str]:
     return list(ips)
 
 
-def _collect_cves(data_dir: Path) -> list[str]:
-    """Gather CVE IDs from CISA KEV data."""
-    cves = []
+CISA_KEV_URL = "https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json"
 
-    # Try actors.json (has KEV-linked CVEs)
+
+def _collect_cves(data_dir: Path) -> list[str]:
+    """Gather CVE IDs — primary source is CISA KEV (fetched directly)."""
+    seen: set[str] = set()
+    cves: list[str] = []
+
+    def _add(cve: str) -> None:
+        if cve and cve.startswith("CVE-") and cve not in seen:
+            seen.add(cve)
+            cves.append(cve)
+
+    # Primary: fetch CISA Known Exploited Vulnerabilities catalog directly
+    log.info("Fetching CISA KEV catalog...")
+    try:
+        r = requests.get(CISA_KEV_URL, timeout=30,
+                         headers={"User-Agent": "TheSixteenProject-TIHub/2.0"})
+        r.raise_for_status()
+        kev = r.json()
+        for v in kev.get("vulnerabilities", []):
+            _add(v.get("cveID", ""))
+        log.info(f"  → {len(cves)} CVEs from CISA KEV")
+    except Exception as e:
+        log.warning(f"CISA KEV fetch failed: {e}")
+
+    # Supplementary: actors.json (if Malpedia ever adds CVE fields)
     actors_path = data_dir / "actors.json"
     if actors_path.exists():
         try:
             actors = json.loads(actors_path.read_text(encoding="utf-8"))
             for a in actors:
                 for cve in (a.get("cves") or []):
-                    if cve.startswith("CVE-") and cve not in cves:
-                        cves.append(cve)
+                    _add(cve)
         except Exception:
             pass
 
-    # Try stats.json for top CVEs
+    # Supplementary: stats.json top_cves
     stats_path = data_dir / "stats.json"
     if stats_path.exists():
         try:
             stats = json.loads(stats_path.read_text(encoding="utf-8"))
             for item in (stats.get("top_cves") or []):
-                cve = item.get("cve", "")
-                if cve and cve not in cves:
-                    cves.append(cve)
-        except Exception:
-            pass
-
-    # Read from KEV data directory if it exists
-    kev_path = data_dir.parent.parent / "data" / "kev.json"
-    if kev_path.exists():
-        try:
-            kev = json.loads(kev_path.read_text(encoding="utf-8"))
-            vulns = kev if isinstance(kev, list) else kev.get("vulnerabilities", [])
-            for v in vulns:
-                cve = v.get("cveID", "") or v.get("id", "")
-                if cve and cve not in cves:
-                    cves.append(cve)
+                _add(item.get("cve", ""))
         except Exception:
             pass
 
