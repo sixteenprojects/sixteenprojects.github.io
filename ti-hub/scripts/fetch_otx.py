@@ -180,16 +180,22 @@ def _match_pulse_actors(pulse: dict, actor_index: dict) -> list:
 # ── IO ─────────────────────────────────────────────────────────────────────────
 
 def _load_ioc(path: Path) -> dict:
+    _default = {"actors": {}, "groups": {}, "feed": {}, "meta": {}}
     if path.exists():
         try:
             raw = json.loads(path.read_text(encoding="utf-8"))
-            if raw and "actors" not in raw and isinstance(raw, dict):
-                # Migrate old flat format
+            if not isinstance(raw, dict):
+                return _default
+            if "actors" not in raw:
+                # Migrate old flat format (actor_id keys at top level)
                 return {"actors": raw, "groups": {}, "feed": {}, "meta": {}}
+            # Ensure all expected top-level keys exist
+            for k, v in _default.items():
+                raw.setdefault(k, v)
             return raw
         except Exception:
             pass
-    return {"actors": {}, "groups": {}, "feed": {}, "meta": {}}
+    return _default
 
 
 def _write(path: Path, data: dict) -> None:
