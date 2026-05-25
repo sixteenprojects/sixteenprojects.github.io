@@ -15,11 +15,6 @@ on:
         required: false
         default: "false"
         type: boolean
-      with_otx:
-        description: "Fetch OTX — incremental (last 24h pulses + full IOCs)"
-        required: false
-        default: "false"
-        type: boolean
       with_otx_full:
         description: "Fetch OTX — FULL actor search (slow, ~8h, run once)"
         required: false
@@ -67,6 +62,8 @@ jobs:
           python fetch_geodata.py
 
       - name: Run fetch_all.py (malware, actors, ransomware, victims, stats)
+        timeout-minutes: 30
+        continue-on-error: true
         env:
           RANSOMLOOK_API_KEY: ${{ secrets.RANSOMLOOK_API_KEY }}
           OTX_API_KEY: ${{ secrets.OTX_API_KEY }}
@@ -83,9 +80,6 @@ jobs:
           fi
           if [ "${{ github.event.inputs.skip_ransomware }}" = "true" ]; then
             ARGS="$ARGS --skip-ransomware"
-          fi
-          if [ "${{ github.event.inputs.with_otx }}" = "true" ]; then
-            ARGS="$ARGS --with-otx"
           fi
           python fetch_all.py $ARGS
 

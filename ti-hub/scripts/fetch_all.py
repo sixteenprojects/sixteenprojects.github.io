@@ -31,11 +31,6 @@ from fetch_ransomlook import (
     fetch_stats as rl_fetch_stats, fetch_recent as rl_fetch_recent
 )
 from fetch_mitre import enrich_malware_list
-try:
-    from fetch_otx import run as run_otx
-    _HAS_OTX = True
-except ImportError:
-    _HAS_OTX = False
 
 DATA_DIR = Path(__file__).parent.parent / "data"
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [Orchestrator] %(message)s")
@@ -414,16 +409,5 @@ def run_all(skip_malpedia: bool = False, skip_ransomware: bool = False) -> dict:
 if __name__ == "__main__":
     skip_malpedia   = "--skip-malpedia"   in sys.argv
     skip_ransomware = "--skip-ransomware" in sys.argv
-    with_otx        = "--with-otx"        in sys.argv
 
     run_all(skip_malpedia=skip_malpedia, skip_ransomware=skip_ransomware)
-
-    if with_otx:
-        if _HAS_OTX:
-            log.info("=== Starting OTX AlienVault IOC fetch ===")
-            try:
-                run_otx()
-            except Exception as e:
-                log.error(f"OTX fetch failed: {e}")
-        else:
-            log.warning("fetch_otx.py not found — skipping OTX")
