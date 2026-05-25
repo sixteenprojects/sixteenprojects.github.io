@@ -204,17 +204,29 @@ def _write(path: Path, data: dict) -> None:
 
 def run_full(session: requests.Session, sleep: float, actors: list,
              ioc_data: dict, pulse_limit: int = 20) -> None:
-    """Search OTX per actor by name + top aliases. Stores pulse metadata only."""
-    log.info(f"Full actor search: {len(actors)} actors, {pulse_limit} pulses each")
-    updated = 0
+    """
+    Search OTX per actor by name + top aliases. Stores pulse metadata only.
 
+    Supports checkpoint/resume: actors already marked with 'full_searched_at'
+    are skipped, so partial runs can be continued across multiple workflow runs.
+    Save progress every 10 actors so GitHub Actions can commit partial results.
+    """
     priority = sorted(
         actors,
         key=lambda a: (bool(a.get("description")), len(a.get("malware") or [])),
         reverse=True,
     )
 
-    for i, actor in enumerate(priority):
+    # Resume: skip actors already processed in a previous run
+    remaining = [a for a in priority
+                 if not ioc_data["actors"].get(a.get("id", ""), {}).get("full_searched_at")]
+    done_count = len(priority) - len(remaining)
+
+    log.info(f"Full actor search: {len(remaining)} remaining / {len(priority)} total "
+             f"({done_count} already done from previous run)")
+
+    updated = 0
+    for i, actor in enumerate(remaining):
         aid = actor.get("id", "")
         if not aid:
             continue
@@ -223,7 +235,7 @@ def run_full(session: requests.Session, sleep: float, actors: list,
         queries = list(dict.fromkeys(q for q in queries if q))[:2]
 
         all_pulses, seen_ids = [], set()
-        log.info(f"[{i+1}/{len(priority)}] {aid}")
+        log.info(f"[{done_count+i+1}/{len(priority)}] {aid}")
 
         for q in queries:
             data = _get(session, f"{OTX_BASE}/search/pulses",
@@ -240,19 +252,28 @@ def run_full(session: requests.Session, sleep: float, actors: list,
         entry = ioc_data["actors"].setdefault(aid, {
             "pulses": [], "indicators": _empty_ind(), "updated": "",
         })
+        now = datetime.now(timezone.utc).isoformat()
         if all_pulses:
             entry["pulses"] = all_pulses[:50]
-            entry["updated"] = datetime.now(timezone.utc).isoformat()
+            entry["updated"] = now
             updated += 1
             log.info(f"  → {len(all_pulses)} pulses")
         else:
             log.info(f"  → no results")
 
+        # Mark as searched regardless of results — enables checkpoint/resume
+        entry["full_searched_at"] = now
+
         if (i + 1) % 10 == 0:
             _write(DATA_DIR / "ioc.json", ioc_data)
-            log.info(f"Progress saved ({updated}/{i+1} with results)")
+            log.info(f"Checkpoint saved: {done_count+i+1}/{len(priority)} actors processed "
+                     f"({updated} with pulses this run)")
 
-    log.info(f"Full fetch complete: {updated}/{len(priority)} actors have pulses")
+    # Final save
+    _write(DATA_DIR / "ioc.json", ioc_data)
+    total_done = done_count + len(remaining)
+    log.info(f"Full fetch run complete: {updated} actors with new pulses this run, "
+             f"{total_done}/{len(priority)} actors total searched")
 
 
 # ── Mode: incremental daily ────────────────────────────────────────────────────
