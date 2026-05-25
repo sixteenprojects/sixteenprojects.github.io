@@ -49,6 +49,7 @@ jobs:
       - name: Run fetch_all.py (malware, actors, ransomware, victims, stats)
         env:
           RANSOMLOOK_API_KEY: ${{ secrets.RANSOMLOOK_API_KEY }}
+          OTX_API_KEY: ${{ secrets.OTX_API_KEY }}
         run: |
           cd ti-hub/scripts
           ARGS=""
