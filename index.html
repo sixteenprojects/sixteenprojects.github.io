@@ -68,36 +68,99 @@
         <p>Know your enemy. Hunt with purpose.</p>
         <div class="divider mx-auto"></div>
       </div>
-      <div class="row mt-4">
+
+      <!-- TI-Hub Featured Banner -->
+      <div class="row mt-2 mb-3 wow fadeInUp">
+        <div class="col-12">
+          <div style="background:linear-gradient(135deg,#0f1c3f 0%,#162447 60%,#1a3a6e 100%); border-radius:12px; padding:36px 40px; color:#fff; position:relative; overflow:hidden; box-shadow:0 8px 32px rgba(22,36,71,0.18);">
+            <!-- Background accent circles -->
+            <div style="position:absolute;top:-40px;right:-40px;width:220px;height:220px;border-radius:50%;background:rgba(26,86,219,0.12);pointer-events:none;"></div>
+            <div style="position:absolute;bottom:-60px;right:120px;width:160px;height:160px;border-radius:50%;background:rgba(26,86,219,0.08);pointer-events:none;"></div>
+
+            <div class="row align-items-center">
+              <div class="col-lg-7">
+                <div style="margin-bottom:10px;">
+                  <span style="background:#1a56db;color:#fff;font-size:10px;font-weight:700;padding:3px 12px;border-radius:20px;letter-spacing:1.2px;text-transform:uppercase;vertical-align:middle;">LIVE · Auto-updated Daily</span>
+                </div>
+                <h3 style="color:#fff;font-weight:700;margin-bottom:10px;">TI-Hub — Threat Intelligence Dashboard</h3>
+                <p style="color:#b0bdd6;font-size:14px;line-height:1.7;margin-bottom:20px;">A comprehensive, open-source threat intelligence platform that consolidates data from Malpedia, RansomLook, OTX AlienVault, and more — refreshed every 24 hours by an automated pipeline. One place to understand who's attacking, what they're using, and where.</p>
+                <div class="row" style="margin-bottom:22px;">
+                  <div class="col-6">
+                    <ul style="list-style:none;padding:0;margin:0;font-size:13px;color:#b0bdd6;">
+                      <li style="margin-bottom:6px;"><span style="color:#4da3ff;margin-right:6px;">&#10003;</span> 500+ malware families from Malpedia</li>
+                      <li style="margin-bottom:6px;"><span style="color:#4da3ff;margin-right:6px;">&#10003;</span> Ransomware group profiles & victim feed</li>
+                      <li style="margin-bottom:6px;"><span style="color:#4da3ff;margin-right:6px;">&#10003;</span> Threat actor attribution & TTPs</li>
+                    </ul>
+                  </div>
+                  <div class="col-6">
+                    <ul style="list-style:none;padding:0;margin:0;font-size:13px;color:#b0bdd6;">
+                      <li style="margin-bottom:6px;"><span style="color:#4da3ff;margin-right:6px;">&#10003;</span> Interactive world map of attacks</li>
+                      <li style="margin-bottom:6px;"><span style="color:#4da3ff;margin-right:6px;">&#10003;</span> IOC data from OTX AlienVault</li>
+                      <li style="margin-bottom:6px;"><span style="color:#4da3ff;margin-right:6px;">&#10003;</span> Threat relationship graph</li>
+                    </ul>
+                  </div>
+                </div>
+                <a href="ti-hub/" class="btn btn-primary" style="padding:10px 28px;font-size:14px;font-weight:600;">Explore TI-Hub &rarr;</a>
+              </div>
+              <div class="col-lg-5 text-center d-none d-lg-block">
+                <div style="display:inline-flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-top:8px;">
+                  <div style="background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.1);border-radius:8px;padding:14px 18px;min-width:110px;text-align:center;">
+                    <div style="font-size:26px;font-weight:700;color:#4da3ff;" id="stat-malware">500+</div>
+                    <div style="font-size:11px;color:#7a8db0;margin-top:2px;">Malware Families</div>
+                  </div>
+                  <div style="background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.1);border-radius:8px;padding:14px 18px;min-width:110px;text-align:center;">
+                    <div style="font-size:26px;font-weight:700;color:#f59e0b;">100+</div>
+                    <div style="font-size:11px;color:#7a8db0;margin-top:2px;">Threat Actors</div>
+                  </div>
+                  <div style="background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.1);border-radius:8px;padding:14px 18px;min-width:110px;text-align:center;">
+                    <div style="font-size:26px;font-weight:700;color:#ef4444;">60+</div>
+                    <div style="font-size:11px;color:#7a8db0;margin-top:2px;">Ransomware Groups</div>
+                  </div>
+                  <div style="background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.1);border-radius:8px;padding:14px 18px;min-width:110px;text-align:center;">
+                    <div style="font-size:26px;font-weight:700;color:#10b981;">173</div>
+                    <div style="font-size:11px;color:#7a8db0;margin-top:2px;">Countries Mapped</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
-        <div class="col-lg-3 col-md-6">
+      </div>
+
+      <!-- Other feature cards -->
+      <div class="row mt-2">
+        <div class="col-lg-4 col-md-6">
           <div class="card-service wow fadeInUp">
             <div class="body">
+              <div style="font-size:28px;margin-bottom:12px;">&#128196;</div>
               <h5 style="color:#162447;">Threat Report</h5>
-              <p>In-depth investigation and analysis reports on the latest cyber threats, produced by the team.</p><br>
+              <p>In-depth investigation and analysis reports on the latest cyber threats, curated and written by the team.</p><br>
               <a href="threat-report.html" class="btn btn-primary">Read Report</a>
             </div>
           </div>
         </div>
-        <div class="col-lg-3 col-md-6">
+        <div class="col-lg-4 col-md-6">
           <div class="card-service wow fadeInUp">
             <div class="body">
+              <div style="font-size:28px;margin-bottom:12px;">&#128657;</div>
               <h5 style="color:#162447;">KEV Dashboard</h5>
-              <p>Interactive intelligence board for CISA Known Exploited Vulnerabilities — with CVSS data, filters, and charts.</p><br>
+              <p>Live intelligence board for CISA Known Exploited Vulnerabilities — with CVSS scores, vendor filters, and trend charts.</p><br>
               <a href="kev-dashboard.html" class="btn btn-primary">Open Dashboard</a>
             </div>
           </div>
         </div>
-        <div class="col-lg-3 col-md-6">
+        <div class="col-lg-4 col-md-6">
           <div class="card-service wow fadeInUp">
             <div class="body">
+              <div style="font-size:28px;margin-bottom:12px;">&#128270;</div>
               <h5 style="color:#162447;">Threat Hunting Tools</h5>
-              <p>Tools and scripts developed to support threat hunting and incident response workflows.</p><br>
+              <p>Practical tools and scripts built to support threat hunting, log analysis, and incident response workflows.</p><br>
               <a href="threat-tools.html" class="btn btn-primary">Try Tools</a>
             </div>
           </div>
         </div>
       </div>
+
     </div>
   </div>
 
