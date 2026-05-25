@@ -51,6 +51,11 @@ jobs:
           RANSOMLOOK_API_KEY: ${{ secrets.RANSOMLOOK_API_KEY }}
           OTX_API_KEY: ${{ secrets.OTX_API_KEY }}
         run: |
+          if [ -n "$OTX_API_KEY" ]; then
+            echo "OTX_API_KEY: SET (length=${#OTX_API_KEY})"
+          else
+            echo "OTX_API_KEY: NOT SET or EMPTY"
+          fi
           cd ti-hub/scripts
           ARGS=""
           if [ "${{ github.event.inputs.skip_malpedia }}" = "true" ]; then
