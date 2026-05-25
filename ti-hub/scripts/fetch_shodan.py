@@ -147,6 +147,84 @@ def fetch_cve_exposure(session: requests.Session, cve_ids: list[str],
     return existing
 
 
+# ── Indonesia & global exposure landscape (free facet queries) ────────────────
+
+def collect_landscape(session: requests.Session, existing: dict) -> dict:
+    """
+    Collect internet exposure statistics for Indonesia and globally via Shodan
+    /host/count with facets parameter — costs ZERO query credits.
+    Runs multiple targeted queries to build a comprehensive risk picture.
+    """
+    landscape = dict(existing)
+    now = datetime.now(timezone.utc).isoformat()
+
+    def _facet(query: str, facets: str, label: str) -> dict:
+        data = _get(session, "/shodan/host/count", {"query": query, "facets": facets})
+        if not data:
+            return {}
+        total = data.get("total", 0)
+        log.info(f"  {label}: {total:,} hosts")
+        return {"total": total, "facets": data.get("facets", {})}
+
+    def _count(query: str) -> int:
+        data = _get(session, "/shodan/host/count", {"query": query})
+        return data.get("total", 0) if data else 0
+
+    # ── Indonesia overview ─────────────────────────────────────────────────
+    log.info("Landscape: Indonesia internet exposure overview")
+    landscape["indonesia"] = _facet(
+        "country:id",
+        "product:20,os:15,port:15,org:15,asn:10",
+        "Indonesia total hosts"
+    )
+
+    # ── Indonesia vulnerable hosts + top CVEs ──────────────────────────────
+    log.info("Landscape: Indonesia vulnerable host CVE facets")
+    landscape["indonesia_vuln"] = _facet(
+        "vuln:* country:id",
+        "vuln:30,product:10,org:10",
+        "Indonesia hosts with vulns"
+    )
+
+    # ── Indonesia critical port exposure counts ────────────────────────────
+    log.info("Landscape: Indonesia critical port risk matrix")
+    landscape["indonesia_ports"] = {
+        "rdp":     _count("country:id port:3389"),
+        "smb":     _count("country:id port:445"),
+        "ssh":     _count("country:id port:22"),
+        "telnet":  _count("country:id port:23"),
+        "ftp":     _count("country:id port:21"),
+        "http":    _count("country:id port:80,8080,8888"),
+        "https":   _count("country:id port:443"),
+        "mysql":   _count("country:id port:3306"),
+        "mssql":   _count("country:id port:1433"),
+        "mongo":   _count("country:id port:27017"),
+        "redis":   _count("country:id port:6379"),
+        "elastic": _count("country:id port:9200"),
+        "ics":     _count("country:id port:502,102,44818,47808,20000"),
+    }
+
+    # ── Global overview for comparison ─────────────────────────────────────
+    log.info("Landscape: Global overview")
+    landscape["global"] = _facet(
+        "",
+        "product:20,os:15,country:20",
+        "Global total hosts"
+    )
+
+    # ── Global vulnerable hosts (top CVEs) ────────────────────────────────
+    log.info("Landscape: Global CVE exposure")
+    landscape["global_vuln"] = _facet(
+        "vuln:*",
+        "vuln:30",
+        "Global hosts with vulns"
+    )
+
+    landscape["updated"] = now
+    log.info("Landscape collection complete")
+    return landscape
+
+
 # ── Collect IPs from data sources ─────────────────────────────────────────────
 
 def _collect_ips(data_dir: Path) -> list[str]:
@@ -289,7 +367,12 @@ def run(api_key: str = "", cve_only: bool = False, max_ips: int = 300) -> None:
     plan = info.get("plan", "?")
     log.info(f"Shodan plan: {plan} | query credits: {credits} | scan credits: {scan_credits}")
 
-    # ── CVE exposure (free — no credits consumed) ──────────────────────────────
+    # ── Indonesia + global landscape (free facet queries, zero credits) ──────
+    log.info("Collecting internet exposure landscape via Shodan facets (free)")
+    data["landscape"] = collect_landscape(session, data.get("landscape", {}))
+    _write(out_path, data)
+
+    # ── CVE exposure via CISA KEV (free — no credits consumed) ───────────────
     cve_ids = _collect_cves(DATA_DIR)
     if cve_ids:
         data["cve_exposure"] = fetch_cve_exposure(session, cve_ids, data.get("cve_exposure", {}))

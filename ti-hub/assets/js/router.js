@@ -15,6 +15,7 @@ const Router = (() => {
     '/ransomware': 'ransomware',
     '/victims':    'victims',
     '/stats':      'stats',
+    '/shodan':     'shodan',
     '/map':        'map',
     '/graph':      'graph',
   };
@@ -52,7 +53,8 @@ const Router = (() => {
       const labels = {
         overview: 'Dashboard', malware: 'Malware Library', actors: 'Threat Actors',
         ransomware: 'Ransomware Groups', victims: 'Victims Feed',
-        stats: 'Statistics', map: 'World Map', graph: 'Threat Graph',
+        stats: 'Statistics', shodan: 'Exposure Intelligence',
+        map: 'World Map', graph: 'Threat Graph',
       };
       bc.textContent = labels[viewName] || viewName;
     }

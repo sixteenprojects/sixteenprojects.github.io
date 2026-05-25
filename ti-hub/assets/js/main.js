@@ -17,6 +17,7 @@ import ActorsView     from './views/actors.js';
 import RansomwareView from './views/ransomware.js';
 import VictimsView    from './views/victims.js';
 import StatsView      from './views/stats.js';
+import ShodanView     from './views/shodan.js';
 import DetailView     from './views/detail.js';
 import MapView        from './components/map.js';
 import GraphView      from './components/graph.js';
@@ -83,6 +84,7 @@ function _renderView(viewName) {
     case 'ransomware': RansomwareView.render(container, data, refs);    break;
     case 'victims':    VictimsView.render(container, data, refs);       break;
     case 'stats':      StatsView.render(container, data);               break;
+    case 'shodan':     ShodanView.render(container, data);             break;
     case 'map':        MapView.render(container, data);                 break;
     case 'graph':      GraphView.render(container, data, refs);         break;
     default:           OverviewView.render(container, data);
