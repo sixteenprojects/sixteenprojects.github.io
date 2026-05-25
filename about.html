@@ -59,27 +59,77 @@
       <div class="row">
         <div class="col-lg-8 offset-lg-2">
           <div class="about-section">
+
             <h3>What is The Sixteen Project?</h3>
-            <p>The Sixteen Project is an internal threat intelligence and threat hunting platform built to centralize and share knowledge about threats, techniques, and tools relevant to our security operations.</p>
+            <p>The Sixteen Project is an open-source threat intelligence and threat hunting platform built to centralize, enrich, and share knowledge about adversaries, malware, and techniques relevant to the security community. Everything here is built by practitioners — for practitioners.</p>
 
-            <h3 class="mt-4">What's inside?</h3>
-            <ul>
-              <li><strong>Threat Library</strong> — 2,300+ malware families, APT groups, and offensive tools, enriched with IOC data and MITRE ATT&amp;CK mappings.</li>
-              <li><strong>Threat Reports</strong> — in-depth investigation and analysis reports produced by the team.</li>
-              <li><strong>Threat Hunting Tools</strong> — tools and scripts developed to support threat hunting and incident response.</li>
-            </ul>
+            <h3 class="mt-5">What's inside?</h3>
 
-            <h3 class="mt-4">Data Sources</h3>
-            <p>Threat library data is sourced from open-source intelligence (OSINT) repositories:</p>
-            <ul>
-              <li><a href="https://apt.etda.or.th/" target="_blank">ETDA APT Groups & Tools</a></li>
-              <li><a href="https://malpedia.caad.fkie.fraunhofer.de/" target="_blank">Malpedia (Fraunhofer FKIE)</a></li>
-              <li><a href="https://threatfox.abuse.ch/" target="_blank">ThreatFox (abuse.ch)</a></li>
-              <li><a href="https://attack.mitre.org/" target="_blank">MITRE ATT&amp;CK</a></li>
-            </ul>
+            <!-- TI-Hub -->
+            <div style="background:#f0f4ff; border-left:4px solid #1d4ed8; border-radius:0 10px 10px 0; padding:18px 22px; margin-bottom:16px;">
+              <strong style="color:#162447; font-size:15px;">&#127760; TI-Hub — Threat Intelligence Dashboard</strong>
+              <p style="margin:8px 0 0; font-size:14px;">A comprehensive, live dashboard aggregating threat intelligence from multiple open-source feeds. Covers 500+ malware families, 100+ threat actors, 60+ ransomware groups, and a global victim feed — all updated daily by an automated pipeline. Features an interactive world map, threat relationship graph, IOC lookups, and statistical analytics.</p>
+            </div>
 
-            <h3 class="mt-4">Credits</h3>
-            <p>Threat data adapted from <a href="https://openhunting.io" target="_blank">OpenHunting.io</a> by Rizqy Rionaldy. Maintained and extended by The Sixteen Project team.</p>
+            <!-- Threat Reports -->
+            <div style="background:#f8f9fc; border-left:4px solid #162447; border-radius:0 10px 10px 0; padding:18px 22px; margin-bottom:16px;">
+              <strong style="color:#162447; font-size:15px;">&#128196; Threat Reports</strong>
+              <p style="margin:8px 0 0; font-size:14px;">In-depth investigation and analysis reports on the latest cyber threats — campaigns, malware families, threat actor operations — researched and written by the team.</p>
+            </div>
+
+            <!-- KEV Dashboard -->
+            <div style="background:#f8f9fc; border-left:4px solid #162447; border-radius:0 10px 10px 0; padding:18px 22px; margin-bottom:16px;">
+              <strong style="color:#162447; font-size:15px;">&#128657; KEV Dashboard</strong>
+              <p style="margin:8px 0 0; font-size:14px;">A live intelligence board for CISA's Known Exploited Vulnerabilities catalog. Tracks 1,600+ CVEs with CVSS scores, vendor breakdowns, timeline charts, and threat actor attribution — synced automatically with the CISA KEV feed.</p>
+            </div>
+
+            <!-- Threat Hunting Tools -->
+            <div style="background:#f8f9fc; border-left:4px solid #162447; border-radius:0 10px 10px 0; padding:18px 22px; margin-bottom:16px;">
+              <strong style="color:#162447; font-size:15px;">&#128270; Threat Hunting Tools</strong>
+              <p style="margin:8px 0 0; font-size:14px;">Practical tools and scripts developed in-house to support threat hunting, log analysis, and incident response workflows — including a MITRE ATT&amp;CK technique mapper.</p>
+            </div>
+
+            <h3 class="mt-5">Data Sources</h3>
+            <p>All intelligence data is sourced exclusively from open, publicly available repositories. The platform does not collect or store any private or proprietary data.</p>
+
+            <table style="width:100%; font-size:14px; border-collapse:collapse; margin-top:12px;">
+              <thead>
+                <tr style="background:#f0f4ff; color:#162447;">
+                  <th style="padding:10px 14px; text-align:left; border-radius:6px 0 0 0;">Source</th>
+                  <th style="padding:10px 14px; text-align:left;">Used For</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr style="border-bottom:1px solid #e5e7eb;">
+                  <td style="padding:10px 14px;"><a href="https://malpedia.caad.fkie.fraunhofer.de/" target="_blank" rel="noopener">Malpedia (Fraunhofer FKIE)</a></td>
+                  <td style="padding:10px 14px; color:#6b7280;">Malware families, descriptions, aliases</td>
+                </tr>
+                <tr style="border-bottom:1px solid #e5e7eb;">
+                  <td style="padding:10px 14px;"><a href="https://www.ransomlook.io/" target="_blank" rel="noopener">RansomLook</a></td>
+                  <td style="padding:10px 14px; color:#6b7280;">Ransomware groups, live victim feed</td>
+                </tr>
+                <tr style="border-bottom:1px solid #e5e7eb;">
+                  <td style="padding:10px 14px;"><a href="https://otx.alienvault.com/" target="_blank" rel="noopener">OTX AlienVault</a></td>
+                  <td style="padding:10px 14px; color:#6b7280;">IOCs (IPs, domains, hashes) per threat actor</td>
+                </tr>
+                <tr style="border-bottom:1px solid #e5e7eb;">
+                  <td style="padding:10px 14px;"><a href="https://www.cisa.gov/known-exploited-vulnerabilities-catalog" target="_blank" rel="noopener">CISA KEV Catalog</a></td>
+                  <td style="padding:10px 14px; color:#6b7280;">Known exploited vulnerabilities, CVSS, vendors</td>
+                </tr>
+                <tr style="border-bottom:1px solid #e5e7eb;">
+                  <td style="padding:10px 14px;"><a href="https://attack.mitre.org/" target="_blank" rel="noopener">MITRE ATT&amp;CK</a></td>
+                  <td style="padding:10px 14px; color:#6b7280;">Technique mapping, tactic classifications</td>
+                </tr>
+                <tr>
+                  <td style="padding:10px 14px;"><a href="https://www.naturalearthdata.com/" target="_blank" rel="noopener">Natural Earth / D3 Gallery</a></td>
+                  <td style="padding:10px 14px; color:#6b7280;">World geodata for the interactive map</td>
+                </tr>
+              </tbody>
+            </table>
+
+            <h3 class="mt-5">Open Source</h3>
+            <p>The Sixteen Project is built entirely with open-source libraries. UI is powered by Bootstrap, Leaflet.js (interactive map), D3.js (threat graph and charts), and vanilla JavaScript — no tracking, no third-party analytics, no dependencies on proprietary platforms. The data pipeline runs on GitHub Actions with daily automated updates.</p>
+
           </div>
         </div>
       </div>
